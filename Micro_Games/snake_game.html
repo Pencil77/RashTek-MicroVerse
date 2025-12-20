@@ -5,9 +5,20 @@
     <title>Termux Snake</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <style>
+        :root {
+            --bg: #2c3e50;
+            --panel: #1f2d3a;
+            --accent: #2ecc71;
+            --danger: #e74c3c;
+            --muted: #34495e;
+            --text: #ecf0f1;
+        }
+        html,body {
+            height: 100%;
+        }
         body {
-            background-color: #2c3e50;
-            color: white;
+            background-color: var(--bg);
+            color: var(--text);
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -16,155 +27,482 @@
             margin: 0;
             font-family: 'Courier New', Courier, monospace;
             touch-action: none; /* Prevents zooming/scrolling on tap */
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
         }
-        h2 { margin: 10px 0; }
+        .topbar {
+            width: 320px;
+            max-width: 90vw;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            gap: 8px;
+        }
+        h2 {
+            margin: 0;
+            font-size: 16px;
+            font-weight: 600;
+        }
+        .scorebox {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+            font-size: 14px;
+        }
+        #pauseBtn {
+            background: transparent;
+            border: 1px solid var(--text);
+            color: var(--text);
+            padding: 6px 10px;
+            border-radius: 6px;
+            cursor: pointer;
+        }
         canvas {
             background-color: #000;
-            border: 2px solid #ecf0f1;
+            border: 2px solid var(--text);
             box-shadow: 0px 0px 15px rgba(0,0,0,0.5);
+            touch-action: none;
         }
         .controls {
-            margin-top: 20px;
+            margin-top: 14px;
             display: grid;
-            grid-template-columns: repeat(3, 60px);
-            gap: 10px;
+            grid-template-columns: repeat(3, 68px);
+            gap: 12px;
         }
-        button {
-            width: 60px;
-            height: 60px;
-            background-color: #e74c3c;
+        .controls button {
+            width: 68px;
+            height: 68px;
+            background-color: var(--danger);
             border: none;
             border-radius: 50%;
             color: white;
-            font-size: 24px;
+            font-size: 26px;
             font-weight: bold;
             cursor: pointer;
-            box-shadow: 0 4px #c0392b;
+            box-shadow: 0 6px #c0392b;
+            user-select: none;
+            -webkit-user-select: none;
         }
-        button:active {
-            box-shadow: 0 2px #c0392b;
-            transform: translateY(2px);
+        .controls button:active {
+            box-shadow: 0 3px #c0392b;
+            transform: translateY(3px);
         }
         /* Grid layout for D-Pad */
         .up { grid-column: 2; }
         .left { grid-column: 1; grid-row: 2; }
         .down { grid-column: 2; grid-row: 2; }
         .right { grid-column: 3; grid-row: 2; }
+
+        /* Overlay for pause / game over */
+        .overlay {
+            position: fixed;
+            inset: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(0,0,0,0.45);
+            z-index: 50;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 160ms ease;
+        }
+        .overlay.visible {
+            pointer-events: auto;
+            opacity: 1;
+        }
+        .overlay-content {
+            background: var(--panel);
+            border: 2px solid var(--text);
+            padding: 18px 22px;
+            border-radius: 10px;
+            text-align: center;
+            color: var(--text);
+            box-shadow: 0 12px 40px rgba(0,0,0,0.6);
+            min-width: 200px;
+        }
+        .overlay-content h2 { margin: 0 0 8px 0; font-size: 20px; }
+        .overlay-content p { margin: 0 0 14px 0; font-size: 16px; }
+        .overlay-actions {
+            display:flex;
+            gap:10px;
+            justify-content:center;
+        }
+        .btn {
+            background: var(--accent);
+            color: #04260f;
+            padding: 8px 14px;
+            border-radius: 6px;
+            border: none;
+            cursor: pointer;
+            font-weight: 600;
+        }
+        .btn.secondary {
+            background: transparent;
+            border: 1px solid var(--text);
+            color: var(--text);
+        }
+
+        /* Responsive: make controls larger on small screens */
+        @media (max-width: 420px) {
+            .controls { grid-template-columns: repeat(3, 80px); gap: 14px; }
+            .controls button { width: 80px; height: 80px; font-size: 30px; }
+            canvas { width: calc(90vw); height: calc(90vw); max-width: 360px; max-height: 360px; }
+        }
     </style>
 </head>
 <body>
 
-    <h2>Score: <span id="score">0</span></h2>
-    <canvas id="gameCanvas" width="300" height="300"></canvas>
+    <div class="topbar">
+        <div class="scorebox">
+            <h2>Score: <span id="score">0</span></h2>
+            <div style="opacity:0.9">High: <span id="highScore">0</span></div>
+        </div>
+        <div>
+            <button id="pauseBtn" aria-pressed="false">Pause</button>
+        </div>
+    </div>
 
-    <div class="controls">
-        <button class="up" ontouchstart="setDir('UP')" onclick="setDir('UP')">W</button>
-        <button class="left" ontouchstart="setDir('LEFT')" onclick="setDir('LEFT')">A</button>
-        <button class="down" ontouchstart="setDir('DOWN')" onclick="setDir('DOWN')">S</button>
-        <button class="right" ontouchstart="setDir('RIGHT')" onclick="setDir('RIGHT')">D</button>
+    <canvas id="gameCanvas" width="300" height="300" aria-label="Snake game"></canvas>
+
+    <div class="controls" aria-hidden="false">
+        <button class="up" data-dir="UP" title="Up">▲</button>
+        <button class="left" data-dir="LEFT" title="Left">◄</button>
+        <button class="down" data-dir="DOWN" title="Down">▼</button>
+        <button class="right" data-dir="RIGHT" title="Right">►</button>
+    </div>
+
+    <!-- Overlay used both for pause and game over -->
+    <div id="overlay" class="overlay" aria-hidden="true">
+        <div class="overlay-content" role="dialog" aria-labelledby="overlayTitle">
+            <h2 id="overlayTitle">Paused</h2>
+            <p id="overlayMessage">Game is paused</p>
+            <div class="overlay-actions">
+                <button id="overlayPrimary" class="btn">Resume</button>
+                <button id="overlaySecondary" class="btn secondary" style="display:none;">Restart</button>
+            </div>
+        </div>
     </div>
 
     <script>
+        // -- Core variables
         const canvas = document.getElementById("gameCanvas");
         const ctx = canvas.getContext("2d");
-        const box = 15; // Size of one square
-        
-        let snake = [];
-        snake[0] = { x: 10 * box, y: 10 * box }; // Starting position
+        const box = 15; // size of one square in px (board grid)
 
-        let food = {
-            x: Math.floor(Math.random() * (canvas.width / box)) * box,
-            y: Math.floor(Math.random() * (canvas.height / box)) * box
-        };
+        // Game state
+        let snake, food, score, dir;
+        let isPaused = false;
+        let isGameOver = false;
+        let highScore = Number(localStorage.getItem('snakeHighScore') || 0);
 
-        let score = 0;
-        let d; // Direction
+        // Timing (requestAnimationFrame based movement)
+        let lastTime = 0;
+        let accumulator = 0;
+        let rafId = null;
 
-        // Listen for Keyboard (for testing on PC)
-        document.addEventListener("keydown", direction);
+        const scoreEl = document.getElementById('score');
+        const highScoreEl = document.getElementById('highScore');
+        highScoreEl.innerText = highScore;
 
-        function direction(event) {
-            let key = event.keyCode;
-            if (key == 37 && d != "RIGHT") d = "LEFT";
-            else if (key == 38 && d != "DOWN") d = "UP";
-            else if (key == 39 && d != "LEFT") d = "RIGHT";
-            else if (key == 40 && d != "UP") d = "DOWN";
+        // Movement interval calculation (ms)
+        function currentMoveInterval() {
+            // base 120ms, speed up by 2ms per point, min 50ms
+            return Math.max(50, 120 - score * 2);
         }
 
-        // Handle Touch Controls
-        function setDir(dir) {
-            if (dir == "LEFT" && d != "RIGHT") d = "LEFT";
-            else if (dir == "UP" && d != "DOWN") d = "UP";
-            else if (dir == "RIGHT" && d != "LEFT") d = "RIGHT";
-            else if (dir == "DOWN" && d != "UP") d = "DOWN";
+        // Initialize or reset game state
+        function initState() {
+            snake = [];
+            snake[0] = { x: 10 * box, y: 10 * box };
+            score = 0;
+            dir = "RIGHT"; // start moving automatically right
+            isPaused = false;
+            isGameOver = false;
+            lastTime = 0;
+            accumulator = 0;
+            scoreEl.innerText = score;
+            placeFood();
+            hideOverlay();
         }
 
-        function collision(head, array) {
-            for (let i = 0; i < array.length; i++) {
-                if (head.x == array[i].x && head.y == array[i].y) {
-                    return true;
+        // Ensure food is not placed on the snake
+        function placeFood() {
+            const cols = Math.floor(canvas.width / box);
+            const rows = Math.floor(canvas.height / box);
+            let candidate;
+            do {
+                candidate = {
+                    x: Math.floor(Math.random() * cols) * box,
+                    y: Math.floor(Math.random() * rows) * box
+                };
+            } while (snake.some(seg => seg.x === candidate.x && seg.y === candidate.y));
+            food = candidate;
+        }
+
+        // Keyboard controls
+        document.addEventListener("keydown", (ev) => {
+            const key = ev.keyCode;
+            // arrows or WASD
+            if ((key === 37 || key === 65) && dir !== "RIGHT") dir = "LEFT";
+            else if ((key === 38 || key === 87) && dir !== "DOWN") dir = "UP";
+            else if ((key === 39 || key === 68) && dir !== "LEFT") dir = "RIGHT";
+            else if ((key === 40 || key === 83) && dir !== "UP") dir = "DOWN";
+            // space to toggle pause
+            else if (key === 32) togglePause();
+        });
+
+        // Pointer controls for buttons (prevent duplicate click/touch)
+        document.querySelectorAll('.controls button').forEach(btn => {
+            btn.addEventListener('pointerdown', (e) => {
+                e.preventDefault();
+                const wanted = btn.getAttribute('data-dir');
+                setDir(wanted);
+            }, { passive: false });
+        });
+
+        // Set direction with protection against immediate reverse
+        function setDir(wanted) {
+            if (!wanted) return;
+            if (wanted === "LEFT" && dir !== "RIGHT") dir = "LEFT";
+            else if (wanted === "UP" && dir !== "DOWN") dir = "UP";
+            else if (wanted === "RIGHT" && dir !== "LEFT") dir = "RIGHT";
+            else if (wanted === "DOWN" && dir !== "UP") dir = "DOWN";
+        }
+
+        // Swipe detection on canvas
+        (function attachSwipe() {
+            let start = null;
+            const threshold = 18; // px - minimum distance to count as swipe
+
+            canvas.addEventListener('pointerdown', (e) => {
+                canvas.setPointerCapture(e.pointerId);
+                start = { x: e.clientX, y: e.clientY };
+            });
+
+            canvas.addEventListener('pointermove', (e) => {
+                // nothing here, we wait for pointerup to evaluate direction
+            });
+
+            canvas.addEventListener('pointerup', (e) => {
+                if (!start) return;
+                const dx = e.clientX - start.x;
+                const dy = e.clientY - start.y;
+                if (Math.abs(dx) > Math.abs(dy) && Math.abs(dx) > threshold) {
+                    // horizontal swipe
+                    if (dx > 0 && dir !== "LEFT") dir = "RIGHT";
+                    else if (dx < 0 && dir !== "RIGHT") dir = "LEFT";
+                } else if (Math.abs(dy) > threshold) {
+                    if (dy > 0 && dir !== "UP") dir = "DOWN";
+                    else if (dy < 0 && dir !== "DOWN") dir = "UP";
                 }
+                try { canvas.releasePointerCapture(e.pointerId); } catch (err) { /* ignore */ }
+                start = null;
+            });
+
+            canvas.addEventListener('pointercancel', (e) => {
+                start = null;
+            });
+        })();
+
+        // Collision detection with snake body (skip index 0 to avoid comparing to current head)
+        function collision(head, array) {
+            for (let i = 1; i < array.length; i++) {
+                if (head.x === array[i].x && head.y === array[i].y) return true;
             }
             return false;
         }
 
-        function draw() {
-            // Draw Background
-            ctx.fillStyle = "#34495e";
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
+        // Run a single movement tick
+        function update() {
+            if (!dir) return;
 
-            // Draw Snake
-            for (let i = 0; i < snake.length; i++) {
-                ctx.fillStyle = (i == 0) ? "#2ecc71" : "#27ae60"; // Head is brighter
-                ctx.fillRect(snake[i].x, snake[i].y, box, box);
-                ctx.strokeStyle = "#34495e";
-                ctx.strokeRect(snake[i].x, snake[i].y, box, box);
-            }
-
-            // Draw Food
-            ctx.fillStyle = "#e74c3c";
-            ctx.fillRect(food.x, food.y, box, box);
-
-            // Old Head position
+            // old head
             let snakeX = snake[0].x;
             let snakeY = snake[0].y;
 
-            // Move Direction
-            if (d == "LEFT") snakeX -= box;
-            if (d == "UP") snakeY -= box;
-            if (d == "RIGHT") snakeX += box;
-            if (d == "DOWN") snakeY += box;
+            if (dir === "LEFT") snakeX -= box;
+            if (dir === "UP") snakeY -= box;
+            if (dir === "RIGHT") snakeX += box;
+            if (dir === "DOWN") snakeY += box;
 
-            // If Snake eats the food
-            if (snakeX == food.x && snakeY == food.y) {
+            // Eat food?
+            let ate = false;
+            if (snakeX === food.x && snakeY === food.y) {
                 score++;
-                document.getElementById("score").innerText = score;
-                food = {
-                    x: Math.floor(Math.random() * (canvas.width / box)) * box,
-                    y: Math.floor(Math.random() * (canvas.height / box)) * box
-                };
-            } else {
-                // Remove tail
-                snake.pop();
+                scoreEl.innerText = score;
+                placeFood();
+                ate = true;
             }
 
-            let newHead = { x: snakeX, y: snakeY };
+            if (!ate) snake.pop();
 
-            // Game Over Rules
-            if (snakeX < 0 || snakeX >= canvas.width || 
-                snakeY < 0 || snakeY >= canvas.height || 
-                collision(newHead, snake)) {
-                
-                clearInterval(game);
-                alert("Game Over! Score: " + score);
-                location.reload(); // Restart game
+            const newHead = { x: snakeX, y: snakeY };
+
+            // Check boundaries and self collision
+            if (snakeX < 0 || snakeX >= canvas.width || snakeY < 0 || snakeY >= canvas.height || collision(newHead, snake)) {
+                endGame();
+                return;
             }
 
             snake.unshift(newHead);
         }
 
-        // Run the game every 100ms
-        let game = setInterval(draw, 100);
+        // Draw everything
+        function draw() {
+            // Background
+            ctx.fillStyle = "#000";
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            // Draw grid background subtle
+            ctx.fillStyle = "#34495e";
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            // Draw snake
+            for (let i = 0; i < snake.length; i++) {
+                ctx.fillStyle = (i === 0) ? "#2ecc71" : "#27ae60";
+                ctx.fillRect(snake[i].x, snake[i].y, box, box);
+                ctx.strokeStyle = "#34495e";
+                ctx.strokeRect(snake[i].x, snake[i].y, box, box);
+            }
+
+            // Draw food
+            ctx.fillStyle = "#e74c3c";
+            ctx.fillRect(food.x, food.y, box, box);
+        }
+
+        // Main loop (always requested while page visible) — updates only when needed
+        function loop(timestamp) {
+            if (!lastTime) lastTime = timestamp;
+            const delta = timestamp - lastTime;
+            lastTime = timestamp;
+            accumulator += delta;
+
+            const interval = currentMoveInterval();
+
+            // Only step game when not paused and not over
+            while (accumulator >= interval) {
+                accumulator -= interval;
+                if (!isPaused && !isGameOver) {
+                    update();
+                }
+                // if game ended during update, break early
+                if (isGameOver) break;
+            }
+
+            // draw current state each frame (keeps overlays consistent)
+            draw();
+
+            rafId = requestAnimationFrame(loop);
+        }
+
+        // End the game (game over)
+        function endGame() {
+            isGameOver = true;
+            // update & persist high score
+            if (score > highScore) {
+                highScore = score;
+                localStorage.setItem('snakeHighScore', String(highScore));
+                highScoreEl.innerText = highScore;
+            }
+            showOverlay('gameover');
+        }
+
+        // Pause/Resume logic and overlay UI
+        const overlay = document.getElementById('overlay');
+        const overlayTitle = document.getElementById('overlayTitle');
+        const overlayMessage = document.getElementById('overlayMessage');
+        const overlayPrimary = document.getElementById('overlayPrimary');
+        const overlaySecondary = document.getElementById('overlaySecondary');
+        const pauseBtn = document.getElementById('pauseBtn');
+
+        let overlayMode = 'none'; // 'none' | 'paused' | 'gameover'
+
+        function showOverlay(mode) {
+            overlayMode = mode;
+            overlay.classList.add('visible');
+            overlay.setAttribute('aria-hidden', 'false');
+
+            if (mode === 'paused') {
+                overlayTitle.innerText = 'Paused';
+                overlayMessage.innerText = 'Game is paused';
+                overlayPrimary.innerText = 'Resume';
+                overlayPrimary.classList.remove('danger');
+                overlaySecondary.style.display = 'inline-block';
+                overlaySecondary.innerText = 'Restart';
+                pauseBtn.innerText = 'Resume';
+                pauseBtn.setAttribute('aria-pressed', 'true');
+            } else if (mode === 'gameover') {
+                overlayTitle.innerText = 'Game Over';
+                overlayMessage.innerText = 'Score: ' + score;
+                overlayPrimary.innerText = 'Restart';
+                overlaySecondary.style.display = 'none';
+                pauseBtn.innerText = 'Pause';
+                pauseBtn.setAttribute('aria-pressed', 'false');
+            }
+        }
+
+        function hideOverlay() {
+            overlayMode = 'none';
+            overlay.classList.remove('visible');
+            overlay.setAttribute('aria-hidden', 'true');
+            overlaySecondary.style.display = 'none';
+            pauseBtn.innerText = 'Pause';
+            pauseBtn.setAttribute('aria-pressed', 'false');
+        }
+
+        // Overlay button actions: primary and secondary (secondary used for restart when paused)
+        overlayPrimary.addEventListener('click', () => {
+            if (overlayMode === 'paused') {
+                // Resume
+                isPaused = false;
+                hideOverlay();
+            } else if (overlayMode === 'gameover') {
+                // Restart
+                initState();
+            }
+        });
+
+        overlaySecondary.addEventListener('click', () => {
+            // Restart when paused (secondary Restart)
+            initState();
+        });
+
+        // Pause button toggle
+        function togglePause() {
+            if (isGameOver) return; // cannot pause after game over
+            isPaused = !isPaused;
+            if (isPaused) {
+                showOverlay('paused');
+            } else {
+                hideOverlay();
+            }
+        }
+
+        pauseBtn.addEventListener('click', togglePause);
+
+        // Visibility handling — pause when page hidden to avoid running in background
+        document.addEventListener('visibilitychange', () => {
+            if (document.hidden && !isGameOver) {
+                // auto-pause
+                if (!isPaused) {
+                    isPaused = true;
+                    showOverlay('paused');
+                }
+            }
+        });
+
+        // Start everything
+        initState();
+        rafId = requestAnimationFrame(loop);
+
+        // Ensure canvas scales correctly if CSS scaled (optional)
+        function adjustCanvasForDisplay() {
+            // keep internal canvas size as defined in attributes to preserve grid
+            // allow CSS to scale the visual size
+            // no action needed here; left for future improvements if needed
+        }
+        window.addEventListener('resize', adjustCanvasForDisplay);
     </script>
 </body>
 </html>
