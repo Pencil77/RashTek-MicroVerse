@@ -1,62 +1,48 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Microverse by RashTek</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1">
     <style>
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #222; color: #fff; text-align: center; padding: 40px 20px; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #1a1a1a; color: #fff; text-align: center; padding: 40px 20px; }
+        .brand { margin-bottom: 40px; }
+        h1 { font-size: 3rem; margin: 0; color: #fff; letter-spacing: 2px; }
+        h3 { font-size: 1.2rem; margin-top: 5px; color: #f1c40f; font-weight: 300; text-transform: uppercase; letter-spacing: 4px; }
         
-        /* Branding Styles */
-        h1 { color: #f1c40f; margin-bottom: 5px; font-size: 3em; letter-spacing: 2px; }
-        .subtitle { color: #777; font-size: 1.2em; margin-bottom: 50px; text-transform: uppercase; letter-spacing: 1px; }
+        .container { display: flex; flex-wrap: wrap; justify-content: center; gap: 30px; max-width: 800px; margin: 0 auto; }
         
-        /* Container for the two main choices */
-        .hub-container { display: flex; flex-wrap: wrap; justify-content: center; gap: 20px; max-width: 800px; margin: 0 auto; }
-        
-        /* Big Card Links */
-        .hub-card { 
-            flex: 1 1 300px; /* Grow to fill space, but min 300px width */
-            background: #333; padding: 40px; 
-            text-decoration: none; color: white; border-radius: 15px; 
-            border: 2px solid transparent; transition: 0.3s;
-            display: flex; flex-direction: column; align-items: center;
+        .card {
+            background: #2a2a2a; width: 300px; padding: 40px; border-radius: 15px;
+            text-decoration: none; color: white; transition: 0.3s;
+            border: 2px solid #333; display: flex; flex-direction: column; align-items: center;
         }
-        
-        /* Specific Colors for Cards */
-        .hub-card.games { border-bottom: 5px solid #e74c3c; } /* Red for Games */
-        .hub-card.apps { border-bottom: 5px solid #3498db; }  /* Blue for Apps */
-
-        .hub-card:hover { transform: translateY(-5px); background: #444; }
-        
+        .card:hover { transform: translateY(-10px); border-color: #f1c40f; box-shadow: 0 10px 20px rgba(0,0,0,0.5); }
         .icon { font-size: 50px; margin-bottom: 20px; }
         .card-title { font-size: 24px; font-weight: bold; }
-        .card-desc { color: #aaa; margin-top: 10px; font-size: 14px; }
-
-        footer { margin-top: 60px; color: #555; font-size: 12px; }
+        .card-desc { color: #888; margin-top: 10px; font-size: 14px; }
     </style>
 </head>
 <body>
 
-    <h1>MICROVERSE</h1>
-    <div class="subtitle">by RashTek</div>
+    <div class="brand">
+        <h1>MICROVERSE</h1>
+        <h3>by RashTek</h3>
+    </div>
 
-    <div class="hub-container">
-        
-        <a href="Micro_Apps/Micro_Apps_index.html" class="hub-card apps">
-            <div class="icon">🛠️</div>
+    <div class="container">
+        <a href="Micro_Apps/index.html" class="card">
+            <div class="icon">🚀</div>
             <div class="card-title">Micro Apps</div>
-            <div class="card-desc">Calculators, Converters & Utilities</div>
+            <div class="card-desc">Utilities, Calculators & Tools</div>
         </a>
 
-        <a href="Micro_Games/Micro_Games_index.html" class="hub-card games">
+        <a href="Micro_Games/index.html" class="card">
             <div class="icon">🎮</div>
             <div class="card-title">Micro Games</div>
             <div class="card-desc">Arcade, Logic & Fun</div>
         </a>
-
     </div>
-
-    <footer>&copy; 2025 RashTek Microverse</footer>
 
 </body>
 </html>
