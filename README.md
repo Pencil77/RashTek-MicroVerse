@@ -1,2 +1,2 @@
-# Easy_Games
-Set of simple games
+# MicroVerse by RashTek
+Collection of my simple Apps and Games
