@@ -8,7 +8,7 @@ GAME_TEMPLATE = """
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Musical Chairs Pro</title>
+    <title>Musical Chairs</title>
     <style>
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -51,7 +51,6 @@ GAME_TEMPLATE = """
         .row { display: flex; gap: 10px; flex-wrap: wrap;}
         .col { flex: 1; min-width: 100px; }
 
-        /* Time Input Style */
         .time-input-wrapper {
             position: relative;
             background: #34495e;
@@ -105,12 +104,12 @@ GAME_TEMPLATE = """
 </head>
 <body>
 
-    <h1>🎵 Musical Chairs Pro</h1>
+    <h1>🎵 Musical Chairs</h1>
 
     <div class="container">
         <div class="input-group">
             <label>YouTube Link (Video or Playlist):</label>
-            <input type="text" id="yt-link" placeholder="Paste YouTube link here...">
+            <input type="text" id="yt-link" value="https://youtube.com/playlist?list=PL9bw4S5ePsEF-J_tIORZ6xE_OXkGuKjjY&si=Edxn98n3lSnAFFsi">
         </div>
 
         <div class="row">
@@ -132,7 +131,7 @@ GAME_TEMPLATE = """
             <div class="col input-group">
                 <label>Max Duration (MM:SS):</label>
                 <div class="time-input-wrapper">
-                    <input type="text" class="time-input" id="max-time" placeholder="0:30" value="0:30">
+                    <input type="text" class="time-input" id="max-time" placeholder="0:30" value="0:15">
                 </div>
             </div>
         </div>
@@ -158,11 +157,11 @@ GAME_TEMPLATE = """
         firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
 
         var player;
-        var targetStopTimestamp = 0; // The exact second on the video timeline to stop
+        var targetTimestamp = 0; // The absolute video time to stop at
         var timerInterval = null;
         var isApiReady = false;
         var isPlaylist = false;
-        var shouldSkipIntro = false; 
+        var shouldSeek = false; 
 
         function onYouTubeIframeAPIReady() { isApiReady = true; }
 
@@ -205,13 +204,21 @@ GAME_TEMPLATE = """
             document.getElementById('play-btn').disabled = true;
             document.getElementById('status').innerText = "Loading...";
 
-            // CALCULATE TARGET TIMESTAMP IMMEDIATELY
-            calculateStopTarget();
+            // CALCULATE TARGET STOP TIME
+            // Logic: Stop Timestamp = User Start Time + Random Duration
+            var randomDuration = Math.floor(Math.random() * (maxSec - minSec + 1)) + minSec;
+            targetTimestamp = startSec + randomDuration;
+            
+            console.log("Start: " + startSec + " | Duration: " + randomDuration + " | Stop At: " + targetTimestamp);
 
             var playerConfig = {
                 height: '360',
                 width: '640',
-                playerVars: { 'start': startSec, 'autoplay': 1 },
+                playerVars: { 
+                    'start': startSec, 
+                    'autoplay': 1,
+                    'controls': 1
+                },
                 events: {
                     'onReady': onPlayerReady,
                     'onStateChange': onPlayerStateChange
@@ -236,20 +243,12 @@ GAME_TEMPLATE = """
             }
         }
 
-        function calculateStopTarget() {
-            var startSec = parseTime(document.getElementById('start-time').value);
-            var minSec = parseTime(document.getElementById('min-time').value);
-            var maxSec = parseTime(document.getElementById('max-time').value);
-            
-            // Random duration
-            var duration = Math.floor(Math.random() * (maxSec - minSec + 1)) + minSec;
-            
-            // THE FIX: Anchor the target strictly to the Start Setting
-            targetStopTimestamp = startSec + duration;
-            console.log("Planned Stop at: " + targetStopTimestamp);
-        }
-
         function onPlayerReady(event) {
+            // SHUFFLE if it's a playlist
+            if(isPlaylist) {
+                event.target.setShuffle(true);
+            }
+            
             var startSec = parseTime(document.getElementById('start-time').value);
             event.target.seekTo(startSec);
             event.target.playVideo();
@@ -257,14 +256,13 @@ GAME_TEMPLATE = """
         }
 
         function onPlayerStateChange(event) {
+            // When video actually starts playing (Buffer -> Play)
             if (event.data === YT.PlayerState.PLAYING) {
-                if (shouldSkipIntro) {
+                if (shouldSeek) {
                     var startSec = parseTime(document.getElementById('start-time').value);
                     player.seekTo(startSec);
-                    shouldSkipIntro = false; 
-                    
-                    // Recalculate target for new song
-                    calculateStopTarget();
+                    shouldSeek = false;
+                    recalculateTimer();
                     startTracking();
                 }
             }
@@ -275,15 +273,26 @@ GAME_TEMPLATE = """
             }
         }
 
+        function recalculateTimer() {
+            var startSec = parseTime(document.getElementById('start-time').value);
+            var minSec = parseTime(document.getElementById('min-time').value);
+            var maxSec = parseTime(document.getElementById('max-time').value);
+            var randomDuration = Math.floor(Math.random() * (maxSec - minSec + 1)) + minSec;
+            
+            // Strictly calculate from User Start Time
+            targetTimestamp = startSec + randomDuration;
+            console.log("New Song | Start: " + startSec + " | Stop At: " + targetTimestamp);
+        }
+
         function startTracking() {
             if (timerInterval) clearInterval(timerInterval);
 
             var startSec = parseTime(document.getElementById('start-time').value);
-            var hasStarted = false;
 
             document.getElementById('status').innerText = "Buffering...";
             document.getElementById('status').className = "";
 
+            // Check every 50ms for better precision
             timerInterval = setInterval(function() {
                 if (!player || !player.getCurrentTime) return;
 
@@ -291,36 +300,27 @@ GAME_TEMPLATE = """
                 var playerState = player.getPlayerState();
 
                 if (playerState === 1) { // Playing
-                    if (!hasStarted) {
-                        // Wait until video is roughly near the start point
-                        if(Math.abs(currentTime - startSec) < 5 || currentTime > startSec) {
-                            hasStarted = true;
-                        }
-                    }
+                    document.getElementById('status').innerText = "Playing... 🎵";
+                    document.getElementById('status').style.color = "#2ecc71";
 
-                    if (hasStarted) {
-                        document.getElementById('status').innerText = "Playing... 🎵";
-                        document.getElementById('status').style.color = "#2ecc71";
-
-                        // EXACT CHECK: Compare current time against the FIXED target
-                        if (currentTime >= targetStopTimestamp) {
-                            player.pauseVideo();
-                            clearInterval(timerInterval);
-                            
-                            var finalTime = currentTime.toFixed(1);
-                            document.getElementById('status').innerText = "🛑 STOPPED at " + finalTime + "s";
-                            document.getElementById('status').className = "stop-info";
-                            document.getElementById('play-btn').disabled = false;
-                        }
+                    // STRICT STOP CHECK
+                    if (currentTime >= targetTimestamp) {
+                        player.pauseVideo();
+                        clearInterval(timerInterval);
+                        
+                        // Force display to look precise (e.g. 20.0s) even if it overshot by 0.1s
+                        var displayTime = targetTimestamp.toFixed(1);
+                        document.getElementById('status').innerText = "🛑 STOPPED at " + currentTime.toFixed(1) + "s (Target: " + displayTime + "s)";
+                        document.getElementById('status').className = "stop-info";
+                        document.getElementById('play-btn').disabled = false;
                     }
                 }
-            }, 50); // Increased check frequency for better precision
+            }, 50); // High precision check
         }
 
-        // --- Playlist Controls ---
         function nextVideo() {
             if(player && isPlaylist) {
-                shouldSkipIntro = true; 
+                shouldSeek = true;
                 player.nextVideo();
                 updateUIForSkip();
             }
@@ -328,7 +328,7 @@ GAME_TEMPLATE = """
 
         function prevVideo() {
             if(player && isPlaylist) {
-                shouldSkipIntro = true;
+                shouldSeek = true;
                 player.previousVideo();
                 updateUIForSkip();
             }
@@ -337,7 +337,7 @@ GAME_TEMPLATE = """
         function updateUIForSkip() {
             document.getElementById('play-btn').disabled = true;
             document.getElementById('status').className = "";
-            document.getElementById('status').innerText = "Skipping track...";
+            document.getElementById('status').innerText = "Skipping track & Shuffling...";
         }
 
     </script>
