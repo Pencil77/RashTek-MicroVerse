@@ -8,7 +8,7 @@ GAME_TEMPLATE = """
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Musical Chairs / Random Pause</title>
+    <title>Musical Chairs Pro</title>
     <style>
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -37,7 +37,7 @@ GAME_TEMPLATE = """
         .input-group { margin-bottom: 15px; text-align: left; }
         label { display: block; margin-bottom: 5px; font-size: 14px; color: #bdc3c7; }
         
-        input {
+        input[type="text"] {
             width: 100%;
             padding: 12px;
             background: #34495e;
@@ -48,8 +48,22 @@ GAME_TEMPLATE = """
             box-sizing: border-box; 
         }
 
-        .row { display: flex; gap: 10px; }
-        .col { flex: 1; }
+        .row { display: flex; gap: 10px; flex-wrap: wrap;}
+        .col { flex: 1; min-width: 100px; }
+
+        /* Time Input Style */
+        .time-input-wrapper {
+            position: relative;
+            background: #34495e;
+            border: 1px solid #7f8c8d;
+            border-radius: 5px;
+            display: flex;
+            align-items: center;
+        }
+        .time-input {
+            background: transparent; border: none; color: white;
+            width: 100%; padding: 12px; font-size: 16px; text-align: center;
+        }
 
         button {
             background: #e74c3c;
@@ -67,6 +81,11 @@ GAME_TEMPLATE = """
         button:active { transform: scale(0.98); }
         button:disabled { background: #7f8c8d; cursor: not-allowed; }
 
+        .playlist-controls {
+            display: flex; gap: 10px; margin-top: 10px; display: none;
+        }
+        .btn-nav { background: #2980b9; font-size: 16px; padding: 10px; }
+
         #status {
             margin-top: 20px;
             font-size: 18px;
@@ -74,54 +93,58 @@ GAME_TEMPLATE = """
             color: #2ecc71;
             min-height: 24px;
         }
-        
         .stop-info { color: #e74c3c !important; font-size: 22px !important; }
 
-        /* Responsive Video Container */
         .video-wrapper {
-            position: relative;
-            padding-bottom: 56.25%; /* 16:9 */
-            height: 0;
-            margin-top: 20px;
-            border-radius: 10px;
-            overflow: hidden;
-            border: 2px solid #555;
-            display: none; /* Hidden until loaded */
+            position: relative; padding-bottom: 56.25%; height: 0;
+            margin-top: 20px; border-radius: 10px; overflow: hidden;
+            border: 2px solid #555; display: none;
         }
-        
-        .video-wrapper iframe {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-        }
+        .video-wrapper iframe { position: absolute; top: 0; left: 0; width: 100%; height: 100%; }
     </style>
 </head>
 <body>
 
-    <h1>🎵 Musical Chairs Bot</h1>
+    <h1>🎵 Musical Chairs Pro</h1>
 
     <div class="container">
         <div class="input-group">
-            <label>YouTube Link:</label>
-            <input type="text" id="yt-link" placeholder="Paste link here..." value="https://www.youtube.com/watch?v=5qap5aO4i9A">
+            <label>YouTube Link (Video or Playlist):</label>
+            <input type="text" id="yt-link" placeholder="Paste YouTube link here...">
         </div>
 
         <div class="row">
             <div class="col input-group">
-                <label>Min Duration (Sec):</label>
-                <input type="number" id="min-time" value="10">
+                <label>Start From (MM:SS):</label>
+                <div class="time-input-wrapper">
+                    <input type="text" class="time-input" id="start-time" placeholder="0:05" value="0:05">
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col input-group">
+                <label>Min Duration (MM:SS):</label>
+                <div class="time-input-wrapper">
+                    <input type="text" class="time-input" id="min-time" placeholder="0:10" value="0:10">
+                </div>
             </div>
             <div class="col input-group">
-                <label>Max Duration (Sec):</label>
-                <input type="number" id="max-time" value="30">
+                <label>Max Duration (MM:SS):</label>
+                <div class="time-input-wrapper">
+                    <input type="text" class="time-input" id="max-time" placeholder="0:30" value="0:30">
+                </div>
             </div>
         </div>
 
         <button id="play-btn" onclick="startRandomPlay()">▶ LOAD & PLAY</button>
+        
+        <div class="playlist-controls" id="playlist-nav">
+            <button class="btn-nav" onclick="prevVideo()">⏮ Prev Song</button>
+            <button class="btn-nav" onclick="nextVideo()">Next Song ⏭</button>
+        </div>
 
-        <div id="status">Ready (Starts at 5s)</div>
+        <div id="status">Ready</div>
 
         <div class="video-wrapper" id="video-box">
             <div id="player"></div>
@@ -138,91 +161,121 @@ GAME_TEMPLATE = """
         var stopTime = 0;
         var timerInterval = null;
         var isApiReady = false;
+        var isPlaylist = false;
 
-        function onYouTubeIframeAPIReady() {
-            isApiReady = true;
+        function onYouTubeIframeAPIReady() { isApiReady = true; }
+
+        // --- HELPER: Parse MM:SS to Seconds ---
+        function parseTime(input) {
+            if (!input) return 0;
+            // Allow raw numbers (e.g., "90")
+            if (!input.includes(':')) return parseInt(input) || 0;
+            
+            var parts = input.split(':');
+            var m = parseInt(parts[0]) || 0;
+            var s = parseInt(parts[1]) || 0;
+            return (m * 60) + s;
         }
 
-        function extractVideoID(url) {
+        // --- HELPER: Extract ID or Playlist ---
+        function parseYouTubeUrl(url) {
             var regExp = /^.*((youtu.be\/)|(v\/)|(\/u\/\w\/)|(embed\/)|(watch\?))\??v?=?([^#&?]*).*/;
             var match = url.match(regExp);
-            return (match && match[7].length == 11) ? match[7] : false;
+            var videoId = (match && match[7].length == 11) ? match[7] : false;
+            
+            // Check for list= parameter
+            var listMatch = url.match(/[?&]list=([^#&?]+)/);
+            var listId = listMatch ? listMatch[1] : false;
+
+            return { videoId: videoId, listId: listId };
         }
 
         function startRandomPlay() {
-            if (!isApiReady) {
-                alert("YouTube API not loaded yet. Check internet.");
-                return;
-            }
+            if (!isApiReady) { alert("YouTube API loading..."); return; }
 
             var url = document.getElementById('yt-link').value;
-            var min = parseInt(document.getElementById('min-time').value);
-            var max = parseInt(document.getElementById('max-time').value);
-            var videoId = extractVideoID(url);
+            if (!url) { alert("Please paste a link first!"); return; }
 
-            if (!videoId) {
-                alert("Invalid YouTube URL!");
-                return;
-            }
+            // Parse Times
+            var startSec = parseTime(document.getElementById('start-time').value);
+            var minSec = parseTime(document.getElementById('min-time').value);
+            var maxSec = parseTime(document.getElementById('max-time').value);
 
-            if (min >= max) {
-                alert("Min time must be less than Max time!");
-                return;
-            }
+            if (minSec >= maxSec) { alert("Min duration must be less than Max!"); return; }
 
-            // Calculate Random Stop Time (Duration)
-            var randomDuration = Math.floor(Math.random() * (max - min + 1)) + min;
-            stopTime = randomDuration; // We will add current time to this later
+            // Parse URL
+            var ids = parseYouTubeUrl(url);
+            if (!ids.videoId && !ids.listId) { alert("Invalid YouTube URL"); return; }
 
-            document.getElementById('status').innerText = "Loading Video at 5s...";
-            document.getElementById('status').className = "";
-            document.getElementById('play-btn').disabled = true;
+            // Setup UI
+            isPlaylist = !!ids.listId;
+            document.getElementById('playlist-nav').style.display = isPlaylist ? 'flex' : 'none';
             document.getElementById('video-box').style.display = 'block';
+            document.getElementById('play-btn').disabled = true;
+            document.getElementById('status').innerText = "Loading...";
 
-            // UPDATED: Start at 5 seconds
+            // Calculate Random Duration
+            var randomDuration = Math.floor(Math.random() * (maxSec - minSec + 1)) + minSec;
+            stopTime = randomDuration;
+
             var playerConfig = {
-                'videoId': videoId,
-                'startSeconds': 5 
+                height: '360',
+                width: '640',
+                playerVars: { 
+                    'start': startSec,
+                    'autoplay': 1
+                },
+                events: {
+                    'onReady': onPlayerReady,
+                    'onStateChange': onPlayerStateChange
+                }
             };
 
+            // Load Logic
             if (player && typeof player.loadVideoById === 'function') {
-                player.loadVideoById(playerConfig);
-                startTracking();
+                if (isPlaylist) {
+                    // If switching to playlist mode or already in it
+                    player.loadPlaylist({list: ids.listId, listType: 'playlist', index: 0, startSeconds: startSec});
+                } else {
+                    player.loadVideoById({videoId: ids.videoId, startSeconds: startSec});
+                }
+                startTracking(startSec);
             } else {
-                player = new YT.Player('player', {
-                    height: '360',
-                    width: '640',
-                    videoId: videoId,
-                    playerVars: { 'start': 5 }, // Start new player at 5s
-                    events: {
-                        'onReady': onPlayerReady,
-                        'onStateChange': onPlayerStateChange
-                    }
-                });
+                // Initial Create
+                if (isPlaylist) {
+                    playerConfig.playerVars.listType = 'playlist';
+                    playerConfig.playerVars.list = ids.listId;
+                } else {
+                    playerConfig.videoId = ids.videoId;
+                }
+                player = new YT.Player('player', playerConfig);
             }
         }
 
         function onPlayerReady(event) {
+            // Force start time if needed
+            var startSec = parseTime(document.getElementById('start-time').value);
+            event.target.seekTo(startSec);
             event.target.playVideo();
-            startTracking();
+            startTracking(startSec);
         }
 
         function onPlayerStateChange(event) {
             if (event.data === YT.PlayerState.ENDED) {
                 clearInterval(timerInterval);
-                document.getElementById('status').innerText = "Video Ended naturally.";
+                document.getElementById('status').innerText = "Finished.";
                 document.getElementById('play-btn').disabled = false;
             }
         }
 
-        function startTracking() {
+        function startTracking(startSec) {
             if (timerInterval) clearInterval(timerInterval);
 
-            var startTime = 0; 
             var hasStarted = false;
             var targetTimestamp = 0;
 
             document.getElementById('status').innerText = "Buffering...";
+            document.getElementById('status').className = "";
 
             timerInterval = setInterval(function() {
                 if (!player || !player.getCurrentTime) return;
@@ -230,36 +283,71 @@ GAME_TEMPLATE = """
                 var currentTime = player.getCurrentTime();
                 var playerState = player.getPlayerState();
 
-                // Check if actually playing (State 1)
-                if (playerState === 1) {
+                if (playerState === 1) { // Playing
                     if (!hasStarted) {
-                        startTime = currentTime;
-                        hasStarted = true;
-                        
-                        // UPDATED LOGIC: 
-                        // Target Timestamp = Current Time + Random Duration selected earlier
-                        targetTimestamp = startTime + stopTime;
-                        
-                        console.log("Started at: " + startTime + " | Will stop at: " + targetTimestamp);
+                        // Sometimes YT starts at 0 then jumps to seek time
+                        // We wait until we are roughly near requested start time
+                        if(Math.abs(currentTime - startSec) < 2 || currentTime > startSec) {
+                            hasStarted = true;
+                            // Target = Start Time + Random Duration
+                            targetTimestamp = currentTime + stopTime;
+                            console.log("Target Stop: " + targetTimestamp);
+                        }
                     }
 
-                    document.getElementById('status').innerText = "Playing... 🎵";
-                    document.getElementById('status').style.color = "#2ecc71";
+                    if (hasStarted) {
+                        document.getElementById('status').innerText = "Playing... 🎵";
+                        document.getElementById('status').style.color = "#2ecc71";
 
-                    // CHECK STOP CONDITION
-                    if (currentTime >= targetTimestamp) {
-                        player.pauseVideo();
-                        clearInterval(timerInterval);
-                        
-                        // UPDATED: Show exactly where it stopped
-                        var finalTime = currentTime.toFixed(1);
-                        document.getElementById('status').innerText = "🛑 STOPPED at " + finalTime + "s";
-                        document.getElementById('status').className = "stop-info";
-                        document.getElementById('play-btn').disabled = false;
+                        if (currentTime >= targetTimestamp) {
+                            player.pauseVideo();
+                            clearInterval(timerInterval);
+                            
+                            var finalTime = currentTime.toFixed(1);
+                            document.getElementById('status').innerText = "🛑 STOPPED at " + finalTime + "s";
+                            document.getElementById('status').className = "stop-info";
+                            document.getElementById('play-btn').disabled = false;
+                        }
                     }
                 }
             }, 100);
         }
+
+        // --- Playlist Controls ---
+        function nextVideo() {
+            if(player && isPlaylist) {
+                player.nextVideo();
+                resetPlayCycle();
+            }
+        }
+
+        function prevVideo() {
+            if(player && isPlaylist) {
+                player.previousVideo();
+                resetPlayCycle();
+            }
+        }
+
+        function resetPlayCycle() {
+            // When skipping songs, we want to restart the random timer logic
+            var startSec = parseTime(document.getElementById('start-time').value);
+            var minSec = parseTime(document.getElementById('min-time').value);
+            var maxSec = parseTime(document.getElementById('max-time').value);
+            
+            // Recalculate random time
+            stopTime = Math.floor(Math.random() * (maxSec - minSec + 1)) + minSec;
+            
+            // Reset UI and Tracker
+            document.getElementById('play-btn').disabled = true;
+            document.getElementById('status').className = "";
+            document.getElementById('status').innerText = "Loading next track...";
+            
+            // Ensure we seek to custom start time for the new song
+            player.seekTo(startSec);
+            player.playVideo();
+            startTracking(startSec);
+        }
+
     </script>
 </body>
 </html>
