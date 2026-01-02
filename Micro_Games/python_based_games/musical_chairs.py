@@ -74,6 +74,8 @@ GAME_TEMPLATE = """
             color: #2ecc71;
             min-height: 24px;
         }
+        
+        .stop-info { color: #e74c3c !important; font-size: 22px !important; }
 
         /* Responsive Video Container */
         .video-wrapper {
@@ -103,23 +105,23 @@ GAME_TEMPLATE = """
     <div class="container">
         <div class="input-group">
             <label>YouTube Link:</label>
-            <input type="text" id="yt-link" placeholder="Paste link here (e.g. https://youtu.be/...)" value="https://www.youtube.com/watch?v=5qap5aO4i9A">
+            <input type="text" id="yt-link" placeholder="Paste link here..." value="https://www.youtube.com/watch?v=5qap5aO4i9A">
         </div>
 
         <div class="row">
             <div class="col input-group">
-                <label>Min Seconds:</label>
+                <label>Min Duration (Sec):</label>
                 <input type="number" id="min-time" value="10">
             </div>
             <div class="col input-group">
-                <label>Max Seconds:</label>
+                <label>Max Duration (Sec):</label>
                 <input type="number" id="max-time" value="30">
             </div>
         </div>
 
         <button id="play-btn" onclick="startRandomPlay()">▶ LOAD & PLAY</button>
 
-        <div id="status">Ready</div>
+        <div id="status">Ready (Starts at 5s)</div>
 
         <div class="video-wrapper" id="video-box">
             <div id="player"></div>
@@ -127,7 +129,6 @@ GAME_TEMPLATE = """
     </div>
 
     <script>
-        // 1. Load YouTube IFrame Player API code asynchronously.
         var tag = document.createElement('script');
         tag.src = "https://www.youtube.com/iframe_api";
         var firstScriptTag = document.getElementsByTagName('script')[0];
@@ -169,23 +170,30 @@ GAME_TEMPLATE = """
                 return;
             }
 
-            // Calculate Random Stop Time
+            // Calculate Random Stop Time (Duration)
             var randomDuration = Math.floor(Math.random() * (max - min + 1)) + min;
-            stopTime = randomDuration;
+            stopTime = randomDuration; // We will add current time to this later
 
-            document.getElementById('status').innerText = "Loading Video...";
+            document.getElementById('status').innerText = "Loading Video at 5s...";
+            document.getElementById('status').className = "";
             document.getElementById('play-btn').disabled = true;
             document.getElementById('video-box').style.display = 'block';
 
-            // If player exists, load new video, else create it
+            // UPDATED: Start at 5 seconds
+            var playerConfig = {
+                'videoId': videoId,
+                'startSeconds': 5 
+            };
+
             if (player && typeof player.loadVideoById === 'function') {
-                player.loadVideoById(videoId);
+                player.loadVideoById(playerConfig);
                 startTracking();
             } else {
                 player = new YT.Player('player', {
                     height: '360',
                     width: '640',
                     videoId: videoId,
+                    playerVars: { 'start': 5 }, // Start new player at 5s
                     events: {
                         'onReady': onPlayerReady,
                         'onStateChange': onPlayerStateChange
@@ -200,7 +208,6 @@ GAME_TEMPLATE = """
         }
 
         function onPlayerStateChange(event) {
-            // If video ends naturally before our timer
             if (event.data === YT.PlayerState.ENDED) {
                 clearInterval(timerInterval);
                 document.getElementById('status').innerText = "Video Ended naturally.";
@@ -209,11 +216,11 @@ GAME_TEMPLATE = """
         }
 
         function startTracking() {
-            // Reset Interval
             if (timerInterval) clearInterval(timerInterval);
 
             var startTime = 0; 
             var hasStarted = false;
+            var targetTimestamp = 0;
 
             document.getElementById('status').innerText = "Buffering...";
 
@@ -228,28 +235,30 @@ GAME_TEMPLATE = """
                     if (!hasStarted) {
                         startTime = currentTime;
                         hasStarted = true;
-                        // Determine the exact timestamp to stop at
-                        // Target Timestamp = Current (Start) Time + Random Duration
-                        stopTime = startTime + (Math.floor(Math.random() * (parseInt(document.getElementById('max-time').value) - parseInt(document.getElementById('min-time').value) + 1)) + parseInt(document.getElementById('min-time').value));
                         
-                        console.log("Started at: " + startTime + " | Will stop at: " + stopTime);
+                        // UPDATED LOGIC: 
+                        // Target Timestamp = Current Time + Random Duration selected earlier
+                        targetTimestamp = startTime + stopTime;
+                        
+                        console.log("Started at: " + startTime + " | Will stop at: " + targetTimestamp);
                     }
 
                     document.getElementById('status').innerText = "Playing... 🎵";
                     document.getElementById('status').style.color = "#2ecc71";
 
                     // CHECK STOP CONDITION
-                    if (currentTime >= stopTime) {
+                    if (currentTime >= targetTimestamp) {
                         player.pauseVideo();
                         clearInterval(timerInterval);
-                        document.getElementById('status').innerText = "🛑 STOP! (Music Paused)";
-                        document.getElementById('status').style.color = "#e74c3c";
-                        document.getElementById('play-btn').disabled = false;
                         
-                        // Optional: Play a buzzer sound or alert here
+                        // UPDATED: Show exactly where it stopped
+                        var finalTime = currentTime.toFixed(1);
+                        document.getElementById('status').innerText = "🛑 STOPPED at " + finalTime + "s";
+                        document.getElementById('status').className = "stop-info";
+                        document.getElementById('play-btn').disabled = false;
                     }
                 }
-            }, 100); // Check every 100ms
+            }, 100);
         }
     </script>
 </body>
