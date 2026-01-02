@@ -2,72 +2,36 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>🎮 Micro Games - Microverse</title>
+    <title>My Termux Games</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <style>
-        body { font-family: 'Segoe UI', sans-serif; background: #222; color: #fff; text-align: center; padding: 20px; }
-        h1 { color: #f1c40f; margin-bottom: 10px; }
-        h3 { color: #888; font-weight: 300; margin-bottom: 40px; }
-        .container { max-width: 600px; margin: 0 auto; }
-        
-        .link-item { 
-            display: flex; justify-content: space-between; align-items: center;
-            background: #333; margin: 15px 0; padding: 20px; 
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #222; color: #fff; text-align: center; padding: 20px; }
+        h1 { color: #f1c40f; margin-bottom: 30px; }
+        .game-container { max-width: 600px; margin: 0 auto; }
+        .game-link { 
+            display: block; background: #333; margin: 15px 0; padding: 20px; 
             text-decoration: none; color: white; border-radius: 10px; 
             border-left: 5px solid #2ecc71; transition: 0.3s;
-            font-size: 18px; font-weight: bold;
+            text-align: left; font-size: 18px; font-weight: bold;
+            display: flex; justify-content: space-between; align-items: center;
         }
-        .link-item:hover { background: #444; border-left-color: #f1c40f; transform: translateX(5px); }
-        .back-btn { display: inline-block; margin-bottom: 20px; color: #888; text-decoration: none; font-size: 14px; }
-        .back-btn:hover { color: #fff; }
+        .game-link:hover { background: #444; border-left-color: #f1c40f; transform: translateX(5px); }
+        .arrow { color: #777; }
+        .note { font-size: 12px; color: #777; margin-top: 50px; }
     </style>
 </head>
 <body>
-    <a href="../index.html" class="back-btn">← Back to RashTek Microverse</a>
-    <h1>🎮 Micro Games</h1>
-    <h3>Directory Listing</h3>
-    <div class="container">
-        
-            <a href="2048_game.html" class="link-item">
-                <span>2048 Game</span> 
-                <span style="color:#777">▶</span>
-            </a>
-            
-            <a href="chess_p2p.html" class="link-item">
-                <span>Chess P2P</span> 
-                <span style="color:#777">▶</span>
-            </a>
-            
-            <a href="craft_game.html" class="link-item">
-                <span>Craft Game</span> 
-                <span style="color:#777">▶</span>
-            </a>
-            
-            <a href="mario_game.html" class="link-item">
-                <span>Mario Game</span> 
-                <span style="color:#777">▶</span>
-            </a>
-            
-            <a href="shooting_game.html" class="link-item">
-                <span>Shooting Game</span> 
-                <span style="color:#777">▶</span>
-            </a>
-            
-            <a href="snake_game.html" class="link-item">
-                <span>Snake Game</span> 
-                <span style="color:#777">▶</span>
-            </a>
-            
-            <a href="vice_city_game.html" class="link-item">
-                <span>Vice City Game</span> 
-                <span style="color:#777">▶</span>
-            </a>
-            
-            <a href="save_the_dog.html" class="link-item">
-                <span>Save The Dog</span> 
-                <span style="color:#777">▶</span>
-            </a>
-            
+    <h1>🎮 My Game Collection</h1>
+    <div class="game-container">
+<a href="2048_game.html" class="game-link"><span>2048</span> <span class="arrow">▶</span></a>
+<a href="chess_game.html" class="game-link"><span>Chess</span> <span class="arrow">▶</span></a>
+<a href="craft_game.html" class="game-link"><span>Craft</span> <span class="arrow">▶</span></a>
+<a href="mario_game.html" class="game-link"><span>Mario</span> <span class="arrow">▶</span></a>
+<a href="musical_chairs.html" class="game-link"><span>Musical Chairs</span> <span class="arrow">▶</span></a>
+<a href="shooting_game.html" class="game-link"><span>Shooting</span> <span class="arrow">▶</span></a>
+<a href="snake_game.html" class="game-link"><span>Snake</span> <span class="arrow">▶</span></a>
+<a href="vice_city_game.html" class="game-link"><span>Vice City</span> <span class="arrow">▶</span></a>
+
     </div>
-</body>
-</html>
+    <p class="note">Hosted on GitHub Pages • Auto-Generated</p>
+</body></html>

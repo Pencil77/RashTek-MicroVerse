@@ -1,6 +1,10 @@
 import os
 import re
 
+# --- CONFIGURATION ---
+# We use '..' to point to the parent directory (the folder containing 'python_based_games')
+PARENT_DIR = ".." 
+
 # 1. SETUP THE INDEX HTML HEADER
 index_content = """
 <!DOCTYPE html>
@@ -29,16 +33,15 @@ index_content = """
     <div class="game-container">
 """
 
-print("--- 🔄 Auto-Detecting and Converting Games ---")
+print(f"--- 🔄 Converting Games to Parent Directory ({os.path.abspath(PARENT_DIR)}) ---")
 
-# 2. SCAN FOLDER FOR ALL PYTHON FILES
+# 2. SCAN CURRENT FOLDER (.) FOR ALL PYTHON FILES
 files = [f for f in os.listdir('.') if f.endswith('.py')]
-files.sort() # Sort alphabetically
+files.sort()
 
 count = 0
 
 for py_file in files:
-    # Skip this script itself
     if py_file == "convert_games.py":
         continue
 
@@ -46,39 +49,35 @@ for py_file in files:
         content = f.read()
 
     # 3. LOOK FOR THE HTML TEMPLATE
-    # We allow GAME_TEMPLATE, HTML_TEMPLATE, or just TEMPLATE
     match = re.search(r'(?:GAME|HTML)?_?TEMPLATE\s*=\s*"""(.*?)"""', content, re.DOTALL)
     
     if match:
         html_content = match.group(1)
         
-        # Determine new filename (e.g., snake_game.py -> snake_game.html)
+        # Determine new filename (e.g., snake.html)
         html_filename = py_file.replace('.py', '.html')
         
-        # Generate a nice display name
-        # 1. Remove .py
-        # 2. Replace underscores with spaces
-        # 3. Capitalize every word
-        display_name = py_file.replace('.py', '').replace('_', ' ').title()
+        # Path to save in PARENT directory
+        target_path = os.path.join(PARENT_DIR, html_filename)
         
-        # Special fix for specific names if you want them prettier
-        display_name = display_name.replace("Game", "").strip() # Remove redundant "Game"
+        # Display Name generation
+        display_name = py_file.replace('.py', '').replace('_', ' ').title()
+        display_name = display_name.replace("Game", "").strip()
         if display_name == "Game 2048": display_name = "2048 Puzzle"
 
-        # Write the HTML file
-        with open(html_filename, 'w', encoding='utf-8') as f:
+        # Write the HTML file to the PARENT directory
+        with open(target_path, 'w', encoding='utf-8') as f:
             f.write(html_content)
             
-        print(f"✅ Found & Converted: {display_name} ({html_filename})")
+        print(f"✅ Generated: {target_path} ({display_name})")
         
-        # Add to index
+        # Add to index (Link refers to file in same directory as index, so no ../ needed in href)
         index_content += f'<a href="{html_filename}" class="game-link"><span>{display_name}</span> <span class="arrow">▶</span></a>\n'
         count += 1
     else:
-        # File exists but has no HTML template (likely a utility script or chess_game.py)
         print(f"⚠️  Skipped {py_file} (No HTML template found)")
 
-# 4. FINISH INDEX HTML
+# 4. FINISH INDEX HTML AND SAVE TO PARENT
 index_content += """
     </div>
     <p class="note">Hosted on GitHub Pages • Auto-Generated</p>
@@ -86,9 +85,10 @@ index_content += """
 """
 
 if count > 0:
-    with open('index.html', 'w', encoding='utf-8') as f:
+    index_path = os.path.join(PARENT_DIR, 'index.html')
+    with open(index_path, 'w', encoding='utf-8') as f:
         f.write(index_content)
-    print(f"\n🎉 Success! {count} games added to index.html.")
+    print(f"\n🎉 Success! 'index.html' and {count} games saved to parent folder.")
 else:
     print("\n❌ No compatible game files found.")
 
