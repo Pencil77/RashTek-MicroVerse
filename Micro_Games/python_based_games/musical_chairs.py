@@ -105,7 +105,7 @@ GAME_TEMPLATE = """
 </head>
 <body>
 
-    <h1>🎵 Musical Chairs Pro</h1>
+    <h1>🎵 Musical Chairs</h1>
 
     <div class="container">
         <div class="input-group">
