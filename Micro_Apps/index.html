@@ -4,8 +4,9 @@
 <head>
     <title>🚀 Micro Apps - Microverse</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="Explore Micro Apps in RashTek Microverse.">
     <style>
-        body { font-family: 'Segoe UI', sans-serif; background: #222; color: #fff; text-align: center; padding: 20px; }
+        body { font-family: 'Segoe UI', sans-serif; background: #222; color: #fff; text-align: center; padding: 20px; margin: 0; }
         h1 { color: #f1c40f; margin-bottom: 10px; }
         h3 { color: #888; font-weight: 300; margin-bottom: 40px; }
         .container { max-width: 600px; margin: 0 auto; }
@@ -18,8 +19,15 @@
             font-size: 18px; font-weight: bold;
         }
         .link-item:hover { background: #444; border-left-color: #f1c40f; transform: translateX(5px); }
+        .link-item:focus-visible,
+        .back-btn:focus-visible { outline: 3px solid #f1c40f; outline-offset: 2px; }
         .back-btn { display: inline-block; margin-bottom: 20px; color: #888; text-decoration: none; font-size: 14px; }
         .back-btn:hover { color: #fff; }
+
+        @media (prefers-reduced-motion: reduce) {
+            .link-item { transition: none; }
+            .link-item:hover { transform: none; }
+        }
     </style>
 </head>
 <body>
