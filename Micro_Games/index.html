@@ -1,83 +1,94 @@
-
 <!DOCTYPE html>
 <html>
 <head>
     <title>🎮 Micro Games - Microverse</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="Play all RashTek Microverse games in one place.">
     <style>
-        body { font-family: 'Segoe UI', sans-serif; background: #222; color: #fff; text-align: center; padding: 20px; }
-        h1 { color: #f1c40f; margin-bottom: 10px; }
-        h3 { color: #888; font-weight: 300; margin-bottom: 40px; }
-        .container { max-width: 600px; margin: 0 auto; }
-        
-        .link-item { 
-            display: flex; justify-content: space-between; align-items: center;
-            background: #333; margin: 15px 0; padding: 20px; 
-            text-decoration: none; color: white; border-radius: 10px; 
-            border-left: 5px solid #2ecc71; transition: 0.3s;
-            font-size: 18px; font-weight: bold;
+        :root {
+            --bg: #0f172a;
+            --bg-alt: #1e293b;
+            --card: #1f2937;
+            --text: #f8fafc;
+            --muted: #94a3b8;
+            --accent: #fbbf24;
+            --accent-2: #22c55e;
         }
-        .link-item:hover { background: #444; border-left-color: #f1c40f; transform: translateX(5px); }
-        .back-btn { display: inline-block; margin-bottom: 20px; color: #888; text-decoration: none; font-size: 14px; }
+
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background: radial-gradient(circle at top, var(--bg-alt), var(--bg));
+            color: var(--text);
+            text-align: center;
+            padding: 20px;
+            margin: 0;
+            min-height: 100vh;
+            box-sizing: border-box;
+        }
+
+        h1 { color: var(--accent); margin-bottom: 10px; }
+        h3 { color: var(--muted); font-weight: 400; margin-bottom: 30px; }
+        .container { max-width: 760px; margin: 0 auto; display: grid; gap: 14px; }
+
+        .link-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: linear-gradient(90deg, rgba(31, 41, 55, 0.95), rgba(30, 41, 59, 0.95));
+            padding: 18px 20px;
+            text-decoration: none;
+            color: var(--text);
+            border-radius: 12px;
+            border-left: 5px solid var(--accent-2);
+            transition: transform 0.2s, border-color 0.2s, box-shadow 0.2s;
+            font-size: 17px;
+            font-weight: 700;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.25);
+        }
+
+        .link-item:hover {
+            border-left-color: var(--accent);
+            transform: translateX(4px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.35);
+        }
+
+        .link-item:focus-visible,
+        .back-btn:focus-visible {
+            outline: 3px solid var(--accent);
+            outline-offset: 2px;
+        }
+
+        .back-btn {
+            display: inline-block;
+            margin-bottom: 20px;
+            color: var(--muted);
+            text-decoration: none;
+            font-size: 14px;
+        }
+
         .back-btn:hover { color: #fff; }
+
+        @media (prefers-reduced-motion: reduce) {
+            .link-item { transition: none; }
+            .link-item:hover { transform: none; }
+        }
     </style>
 </head>
 <body>
     <a href="../index.html" class="back-btn">← Back to RashTek Microverse</a>
     <h1>🎮 Micro Games</h1>
-    <h3>Directory Listing</h3>
+    <h3>Choose any game and play instantly on GitHub Pages</h3>
     <div class="container">
-        
-            <a href="2048_game.html" class="link-item">
-                <span>2048 Game</span> 
-                <span style="color:#777">▶</span>
-            </a>
-            
-            <a href="chess_p2p.html" class="link-item">
-                <span>Chess P2P</span> 
-                <span style="color:#777">▶</span>
-            </a>
-            
-            <a href="craft_game.html" class="link-item">
-                <span>Craft Game</span> 
-                <span style="color:#777">▶</span>
-            </a>
-            
-            <a href="mario_game.html" class="link-item">
-                <span>Mario Game</span> 
-                <span style="color:#777">▶</span>
-            </a>
-            
-            <a href="shooting_game.html" class="link-item">
-                <span>Shooting Game</span> 
-                <span style="color:#777">▶</span>
-            </a>
-            
-            <a href="snake_game.html" class="link-item">
-                <span>Snake Game</span> 
-                <span style="color:#777">▶</span>
-            </a>
-            
-            <a href="vice_city_game.html" class="link-item">
-                <span>Vice City Game</span> 
-                <span style="color:#777">▶</span>
-            </a>
-            
-            <a href="save_the_dog.html" class="link-item">
-                <span>Save The Dog</span> 
-                <span style="color:#777">▶</span>
-            </a>
-            
-            <a href="chess_game.html" class="link-item">
-                <span>Chess Game</span> 
-                <span style="color:#777">▶</span>
-            </a>
-            
-            <a href="musical_chairs.html" class="link-item">
-                <span>Musical Chairs</span> 
-                <span style="color:#777">▶</span>
-            </a>
-            
+        <a href="2048_game.html" class="link-item"><span>2048 Game</span><span style="color:#94a3b8">▶</span></a>
+        <a href="chess_p2p.html" class="link-item"><span>Chess P2P</span><span style="color:#94a3b8">▶</span></a>
+        <a href="craft_game.html" class="link-item"><span>Craft Game</span><span style="color:#94a3b8">▶</span></a>
+        <a href="mario_game.html" class="link-item"><span>Mario Game</span><span style="color:#94a3b8">▶</span></a>
+        <a href="shooting_game.html" class="link-item"><span>Shooting Game</span><span style="color:#94a3b8">▶</span></a>
+        <a href="snake_game.html" class="link-item"><span>Snake Game</span><span style="color:#94a3b8">▶</span></a>
+        <a href="vice_city_game.html" class="link-item"><span>Vice City Game</span><span style="color:#94a3b8">▶</span></a>
+        <a href="save_the_dog.html" class="link-item"><span>Save The Dog</span><span style="color:#94a3b8">▶</span></a>
+        <a href="chess_game.html" class="link-item"><span>Chess Game</span><span style="color:#94a3b8">▶</span></a>
+        <a href="musical_chairs.html" class="link-item"><span>Musical Chairs</span><span style="color:#94a3b8">▶</span></a>
     </div>
 </body>
 </html>
