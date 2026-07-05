@@ -1,0 +1,872 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#241b14">
+<title>Temple Runner</title>
+<style>
+  :root{
+    --gold:#e8b64a;
+    --gold-bright:#ffd873;
+  }
+  *{box-sizing:border-box; -webkit-touch-callout:none;}
+  html,body{
+    margin:0; padding:0;
+    width:100%; height:100%;
+    position:fixed; inset:0;
+    overflow:hidden;
+    background:#000;
+    font-family:'Trebuchet MS','Segoe UI',sans-serif;
+    -webkit-tap-highlight-color:transparent;
+    user-select:none;
+    touch-action:none;
+    overscroll-behavior:none;
+  }
+  #game-wrap{
+    position:relative; width:100%; height:100%;
+    display:flex; align-items:center; justify-content:center;
+    background:#000;
+    padding-top:env(safe-area-inset-top);
+    padding-bottom:env(safe-area-inset-bottom);
+  }
+  canvas{ display:block; width:100%; height:100%; touch-action:none; }
+  #rotate-screen{
+    position:absolute; inset:0; z-index:50;
+    display:none;
+    flex-direction:column; align-items:center; justify-content:center;
+    background:#0a0603; color:#f4e6cf; text-align:center; padding:20px;
+  }
+  #rotate-screen.show{ display:flex; }
+  #rotate-icon{ font-size:48px; margin-bottom:14px; animation:rot 1.6s ease-in-out infinite; }
+  @keyframes rot{ 0%,100%{transform:rotate(0deg);} 50%{transform:rotate(90deg);} }
+
+  #hud{
+    position:absolute; top:0; left:0; right:0;
+    padding:16px 20px;
+    display:flex; justify-content:space-between; align-items:flex-start;
+    pointer-events:none;
+    font-weight:bold;
+    text-shadow:0 2px 4px rgba(0,0,0,0.7);
+  }
+  #score-box{ color:var(--gold-bright); font-size:22px; letter-spacing:1px; }
+  #best-box{ color:#e6d5c3; font-size:12px; margin-top:4px; font-weight:normal; }
+  #coin-box{ color:var(--gold-bright); font-size:18px; display:flex; align-items:center; gap:6px; }
+  #combo-box{ color:#ff8a5c; font-size:13px; margin-top:4px; height:16px; }
+
+  #pause-btn{
+    position:absolute; top:16px; right:20px;
+    pointer-events:auto;
+  }
+
+  .overlay{
+    position:absolute; inset:0;
+    display:flex; flex-direction:column; align-items:center; justify-content:center;
+    background:radial-gradient(ellipse at center, rgba(20,10,5,0.55), rgba(5,2,1,0.94));
+    color:#f4e6cf; text-align:center; padding:20px;
+  }
+  .hidden{ display:none !important; }
+  .title{
+    font-size:clamp(30px,7vw,54px); letter-spacing:4px; color:var(--gold-bright);
+    text-shadow:0 0 18px rgba(255,200,90,0.5), 0 4px 0 #5a3a12;
+    margin:0 0 6px 0; font-family:Georgia,'Times New Roman',serif;
+  }
+  .subtitle{ font-size:13px; color:#c9b190; margin-bottom:24px; letter-spacing:2px; text-transform:uppercase; }
+  .btn{
+    background:linear-gradient(180deg, var(--gold-bright), var(--gold));
+    border:none; color:#3a2308; font-weight:bold; font-size:18px;
+    padding:14px 40px; border-radius:30px; cursor:pointer;
+    box-shadow:0 6px 0 #7a5416, 0 8px 16px rgba(0,0,0,0.5);
+    letter-spacing:1px; margin-top:8px; transition:transform .08s;
+  }
+  .btn:active{ transform:translateY(4px); box-shadow:0 2px 0 #7a5416; }
+  .btn.ghost{
+    background:transparent; box-shadow:none; color:#f4e6cf;
+    border:2px solid #6a5636; margin-top:14px; font-size:14px; padding:10px 26px;
+  }
+  .instructions{ margin-top:24px; font-size:13px; color:#b39c7d; line-height:1.8; max-width:320px; }
+  .instructions b{ color:var(--gold-bright); }
+  .final-score{ font-size:18px; margin:6px 0; color:#f4e6cf; }
+  .final-score span{ color:var(--gold-bright); font-size:24px; }
+  .new-best{ color:#ff8a5c; font-size:13px; letter-spacing:1px; margin-top:2px; height:16px; }
+
+  #controls-mobile{ position:absolute; bottom:0; left:0; right:0; display:none; }
+  #controls-mobile.show{ display:flex; }
+  .ctrl-row{ display:flex; justify-content:space-between; align-items:flex-end; width:100%; padding:0 18px 18px 18px; gap:12px; }
+  .ctrl-btn{
+    pointer-events:auto;
+    width:64px; height:64px;
+    border-radius:50%;
+    background:linear-gradient(180deg, rgba(232,182,74,0.25), rgba(74,56,38,0.55));
+    border:2px solid rgba(255,216,115,0.55);
+    color:#ffd873;
+    font-size:26px;
+    display:flex; align-items:center; justify-content:center;
+    backdrop-filter:blur(2px);
+    -webkit-user-select:none; user-select:none;
+    transition:transform .08s, background .08s;
+  }
+  .ctrl-btn.active, .ctrl-btn:active{
+    transform:scale(0.88);
+    background:linear-gradient(180deg, rgba(255,216,115,0.55), rgba(74,56,38,0.7));
+  }
+  .ctrl-side{ display:flex; flex-direction:column; gap:12px; }
+  .ctrl-center{ display:flex; flex-direction:column; gap:12px; align-items:center; margin-bottom:0; }
+  .ctrl-btn.wide{ width:64px; }
+</style>
+</head>
+<body>
+<div id="game-wrap">
+  <div id="rotate-screen">
+    <div id="rotate-icon">📱</div>
+    <div style="font-size:16px;font-weight:bold;">Turn your phone upright</div>
+    <div style="font-size:13px;color:#b39c7d;margin-top:6px;">Temple Runner plays best in portrait mode</div>
+  </div>
+  <canvas id="game"></canvas>
+
+  <div id="hud">
+    <div>
+      <div id="score-box">0 m</div>
+      <div id="best-box">Best: 0 m</div>
+      <div id="combo-box"></div>
+    </div>
+    <div>
+      <div id="coin-box">🪙 <span id="coin-count">0</span></div>
+    </div>
+  </div>
+  <button id="pause-btn" class="btn ghost hidden" style="padding:6px 16px;font-size:13px;">⏸</button>
+  <button id="debug-btn" class="btn ghost" style="padding:6px 12px;font-size:12px; position:absolute; top:64px; right:20px; pointer-events:auto;">🐞 Test</button>
+  <div id="debug-panel" class="hidden" style="position:absolute; left:10px; bottom:170px; max-width:270px; background:rgba(5,3,1,0.85); color:#9be89b; font:11px/1.6 'Consolas',monospace; padding:10px 12px; border-radius:8px; pointer-events:none; z-index:40; border:1px solid #4a3826;">
+    <div style="color:#ffd873; font-weight:bold; margin-bottom:4px;">LIVE STATS</div>
+    <div id="debug-stats">—</div>
+    <div style="color:#ffd873; font-weight:bold; margin:8px 0 4px 0; border-top:1px solid #4a3826; padding-top:6px;">SELF-TESTS</div>
+    <div id="debug-tests">—</div>
+  </div>
+
+  <div id="start-screen" class="overlay">
+    <h1 class="title">TEMPLE RUNNER</h1>
+    <div class="subtitle">an endless jungle escape</div>
+    <button class="btn" id="start-btn">START RUN</button>
+    <div class="instructions">
+      <b>← / →</b> or swipe — switch lanes<br>
+      <b>↑ / Space</b> or swipe up — jump over rocks<br>
+      <b>↓</b> or swipe down — slide under beams<br>
+      Some ruins block a whole lane — dodge sideways instead.
+    </div>
+  </div>
+
+  <div id="pause-screen" class="overlay hidden">
+    <h1 class="title" style="font-size:clamp(26px,6vw,40px)">PAUSED</h1>
+    <button class="btn" id="resume-btn">RESUME</button>
+    <button class="btn ghost" id="quit-btn">QUIT TO MENU</button>
+  </div>
+
+  <div id="gameover-screen" class="overlay hidden">
+    <h1 class="title" style="font-size:clamp(26px,6vw,40px)">CAUGHT!</h1>
+    <div class="final-score">Distance: <span id="final-distance">0</span> m</div>
+    <div class="final-score">Gold collected: <span id="final-coins">0</span></div>
+    <div class="new-best" id="new-best-tag"></div>
+    <button class="btn" id="restart-btn">RUN AGAIN</button>
+  </div>
+
+  <div id="controls-mobile">
+    <div class="ctrl-row">
+      <button class="ctrl-btn" id="btn-left" aria-label="Move left">◀</button>
+      <div class="ctrl-center">
+        <button class="ctrl-btn" id="btn-jump" aria-label="Jump">▲</button>
+        <button class="ctrl-btn" id="btn-slide" aria-label="Slide">▼</button>
+      </div>
+      <button class="ctrl-btn" id="btn-right" aria-label="Move right">▶</button>
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+  const canvas = document.getElementById('game');
+  const ctx = canvas.getContext('2d');
+
+  // ---------- Sizing ----------
+  let W, H, groundY, topY;
+  const NEAR_WIDTH_RATIO = 0.68;   // fraction of W the path spans at player's depth
+  const FAR_WIDTH_RATIO  = 0.24;   // fraction of W the path spans at the horizon (kept wide so lanes stay readable at spawn distance)
+  const MAX_Z = 2200;              // max spawn distance in "world units" — pushed further out so obstacles appear well before they're dangerous
+  const Z_SPEED_MULT = 1.5;        // world-units obstacles close per unit of "speed" per frame — lower = more reaction time
+
+  function viewportSize(){
+    // visualViewport tracks the real usable area on mobile browsers as the
+    // address bar/keyboard show or hide, which plain window.innerHeight can lag behind.
+    if(window.visualViewport){
+      return {w: window.visualViewport.width, h: window.visualViewport.height};
+    }
+    return {w: window.innerWidth, h: window.innerHeight};
+  }
+  function resize(){
+    const vp = viewportSize();
+    const dpr = Math.min(window.devicePixelRatio||1, 2.5);
+    W = vp.w; H = vp.h;
+    canvas.style.width = W+'px';
+    canvas.style.height = H+'px';
+    canvas.width = Math.round(W*dpr);
+    canvas.height = Math.round(H*dpr);
+    ctx.setTransform(dpr,0,0,dpr,0,0);
+    // recompute in CSS-pixel space from here on
+    W = vp.w; H = vp.h;
+    groundY = H * 0.80;
+    topY = H * 0.30;
+    checkOrientation();
+  }
+  function checkOrientation(){
+    const rotateScreen = document.getElementById('rotate-screen');
+    if(window.innerWidth > window.innerHeight && window.innerWidth < 1000){
+      rotateScreen.classList.add('show');
+    } else {
+      rotateScreen.classList.remove('show');
+    }
+  }
+  document.addEventListener('touchmove', (e)=> e.preventDefault(), {passive:false});
+  document.addEventListener('gesturestart', (e)=> e.preventDefault());
+  window.addEventListener('resize', resize);
+  window.addEventListener('orientationchange', ()=> setTimeout(resize,100));
+  if(window.visualViewport) window.visualViewport.addEventListener('resize', resize);
+  resize();
+
+  // ---------- Perspective projection ----------
+  // z = 0 at player's plane (near), z = MAX_Z at horizon (far)
+  //
+  // NOTE: an earlier version mapped depth to screen position with an ease-in curve
+  // (t*t), which has the perspective backwards — it compresses rows together as
+  // they approach the player (small dy per unit z near the camera) and spreads
+  // them apart near the horizon (large dy per unit z when far away). That's why
+  // obstacles that were still far away appeared to "catch up" and bunch against
+  // the ones already close. Real camera perspective is the opposite: a fixed
+  // world-space gap should look BIGGER on screen the closer it is to the camera.
+  // A simple inverse-distance (camera-focal-length) model gets this right.
+  const CAMERA_FOCAL = 750; // smaller = more dramatic/exaggerated perspective
+  function project(lane, z){
+    const clampedZ = Math.max(0, Math.min(MAX_Z, z));
+    const t = CAMERA_FOCAL / (CAMERA_FOCAL + clampedZ); // 1 at z=0 (near) → small as z grows (far)
+    const nearW = W * NEAR_WIDTH_RATIO;
+    const farW  = W * FAR_WIDTH_RATIO;
+    const y = topY + (groundY - topY) * t;
+    const width = farW + (nearW - farW) * t;
+    const x = W/2 + lane * (width/2);
+    const scale = 0.12 + (1 - 0.12) * t;
+    return {x, y, scale, width};
+  }
+  function lerp(a,b,t){ return a + (b-a)*t; }
+
+  // ---------- Audio (simple synth beeps, no assets) ----------
+  let actx;
+  function sfx(freq, dur, type, vol){
+    try{
+      if(!actx) actx = new (window.AudioContext||window.webkitAudioContext)();
+      const o = actx.createOscillator();
+      const g = actx.createGain();
+      o.type = type||'sine';
+      o.frequency.value = freq;
+      g.gain.value = vol||0.08;
+      o.connect(g); g.connect(actx.destination);
+      o.start();
+      g.gain.exponentialRampToValueAtTime(0.001, actx.currentTime + (dur||0.15));
+      o.stop(actx.currentTime + (dur||0.15) + 0.02);
+    }catch(e){}
+  }
+
+  // ---------- State ----------
+  const LANES = [-1,0,1];
+  let state = 'menu'; // menu, playing, paused, gameover
+  let distance=0, coins=0, combo=0, comboTimer=0;
+  let best = parseInt(localStorage.getItem('temple_runner_best')||'0',10);
+  document.getElementById('best-box').textContent = 'Best: '+best+' m';
+
+  const baseSpeed = 7.2;
+  let speed = baseSpeed;
+  let elapsedFrames = 0;
+  let shake = 0;
+
+  const player = {
+    lane:0, visualLane:0, z:0, vz:0, sliding:false, slideTimer:0, runFrame:0,
+    invuln:0
+  };
+  let debugMode = false;
+  let lastInputLabel = '—';
+  let currentFps = 60, lastFrameTime = performance.now();
+  const GRAVITY = 0.95;
+  const JUMP_VZ = -16.5;
+
+  let obstacles = [];
+  let coinsList = [];
+  let particles = [];
+  let distanceSinceSpawn = 0;
+  let nextSpawnGap = 820;
+  let lastBlockedSet = null;
+
+  // ---------- Input ----------
+  function vibrate(ms){ try{ if(navigator.vibrate) navigator.vibrate(ms); }catch(e){} }
+
+  function moveLane(dir){
+    if(state!=='playing') return;
+    let idx = LANES.indexOf(player.lane);
+    idx = Math.max(0, Math.min(2, idx+dir));
+    player.lane = LANES[idx];
+    sfx(320,0.06,'square',0.04);
+    vibrate(8);
+    lastInputLabel = (dir<0?'← lane switch':'→ lane switch') + ' @f'+elapsedFrames;
+  }
+  function doJump(){
+    if(state!=='playing') return;
+    if(player.z===0 && !player.sliding){
+      player.vz = JUMP_VZ;
+      sfx(500,0.12,'triangle',0.06);
+      vibrate(8);
+      lastInputLabel = '↑ jump @f'+elapsedFrames;
+    }
+  }
+  function doSlide(){
+    if(state!=='playing') return;
+    if(player.z===0){
+      player.sliding = true;
+      player.slideTimer = 34;
+      sfx(180,0.1,'sawtooth',0.05);
+      vibrate(8);
+      lastInputLabel = '↓ slide @f'+elapsedFrames;
+    }
+  }
+
+  window.addEventListener('keydown',(e)=>{
+    if(['ArrowLeft','ArrowRight','ArrowUp','ArrowDown',' '].includes(e.key)) e.preventDefault();
+    if(e.key==='ArrowLeft') moveLane(-1);
+    else if(e.key==='ArrowRight') moveLane(1);
+    else if(e.key==='ArrowUp'||e.key===' ') doJump();
+    else if(e.key==='ArrowDown') doSlide();
+    else if(e.key==='Escape') togglePause();
+    else if(e.key==='d'||e.key==='D') toggleDebug();
+  }, {passive:false});
+
+  function toggleDebug(){
+    debugMode = !debugMode;
+    document.getElementById('debug-panel').classList.toggle('hidden', !debugMode);
+  }
+  document.getElementById('debug-btn').addEventListener('click', toggleDebug);
+
+  let tsx=0, tsy=0, tActive=false, tHandled=false;
+  canvas.addEventListener('touchstart',(e)=>{
+    const t=e.changedTouches[0]; tsx=t.clientX; tsy=t.clientY; tActive=true; tHandled=false;
+  },{passive:true});
+  canvas.addEventListener('touchmove',(e)=>{
+    if(!tActive || tHandled) return;
+    const t=e.changedTouches[0];
+    const dx=t.clientX-tsx, dy=t.clientY-tsy;
+    const THRESH = 16; // small threshold so a swipe registers almost the instant you move your finger
+    if(dy > THRESH && dy > Math.abs(dx)*0.6){
+      doSlide(); tHandled=true;
+    } else if(dy < -THRESH && Math.abs(dy) > Math.abs(dx)*0.6){
+      doJump(); tHandled=true;
+    } else if(Math.abs(dx) > THRESH && Math.abs(dx) > Math.abs(dy)){
+      moveLane(dx>0?1:-1); tHandled=true;
+    }
+  },{passive:true});
+  canvas.addEventListener('touchend',(e)=>{
+    if(!tActive) return; tActive=false;
+    if(!tHandled && state==='playing') doJump(); // a plain tap with no drag = jump
+  },{passive:true});
+
+  function bindBtn(el, action){
+    const press = (e)=>{ e.preventDefault(); el.classList.add('active'); action(); };
+    const release = (e)=>{ e.preventDefault(); el.classList.remove('active'); };
+    el.addEventListener('touchstart', press, {passive:false});
+    el.addEventListener('touchend', release, {passive:false});
+    el.addEventListener('touchcancel', release, {passive:false});
+    el.addEventListener('mousedown', press); // desktop fallback for testing
+    el.addEventListener('mouseup', release);
+    el.addEventListener('contextmenu', e=>e.preventDefault());
+  }
+  bindBtn(document.getElementById('btn-left'), ()=>moveLane(-1));
+  bindBtn(document.getElementById('btn-right'), ()=>moveLane(1));
+  bindBtn(document.getElementById('btn-jump'), doJump);
+  bindBtn(document.getElementById('btn-slide'), doSlide);
+
+  // ---------- Spawning ----------
+  function spawnRow(){
+    const roll = Math.random();
+    let blockedLanes = [];
+    if(roll < 0.12){
+      // full-width danger: block two lanes with a "full" obstacle, one lane free (must dodge)
+      let free = Math.floor(Math.random()*3);
+      LANES.forEach((l,i)=>{ if(i!==free) blockedLanes.push({lane:l, type:'full'}); });
+    } else {
+      const count = Math.random() < 0.4 ? 2 : 1;
+      const idxs = [0,1,2]; shuffle(idxs);
+      const chosen = idxs.slice(0,count);
+      const type = Math.random() < 0.5 ? 'low' : 'high';
+      chosen.forEach(i=> blockedLanes.push({lane:LANES[i], type}));
+    }
+    const blockedSet = new Set(blockedLanes.map(b=>b.lane));
+    const signature = LANES.map(l=> blockedSet.has(l)?'1':'0').join('');
+    // avoid spawning the exact same blocked-lane pattern twice back-to-back
+    if(signature === lastBlockedSet && LANES.length > 1){
+      // shift pattern by rotating which lane is blocked/free
+      blockedLanes = blockedLanes.map(b=>{
+        const idx = LANES.indexOf(b.lane);
+        return {lane: LANES[(idx+1)%3], type:b.type};
+      });
+      blockedSet.clear();
+      blockedLanes.forEach(b=>blockedSet.add(b.lane));
+    }
+    lastBlockedSet = LANES.map(l=> blockedSet.has(l)?'1':'0').join('');
+
+    blockedLanes.forEach(b=> obstacles.push({lane:b.lane, z:MAX_Z, type:b.type, resolved:false}));
+
+    LANES.forEach(l=>{
+      if(!blockedSet.has(l) && Math.random()<0.75){
+        for(let k=0;k<3;k++){
+          coinsList.push({lane:l, z:MAX_Z + k*46, collected:false});
+        }
+      }
+    });
+  }
+  function shuffle(a){ for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } }
+
+  // ---------- Lifecycle ----------
+  function resetGame(){
+    distance=0; coins=0; combo=0; comboTimer=0;
+    speed=baseSpeed; elapsedFrames=0; shake=0;
+    obstacles=[]; coinsList=[]; particles=[]; distanceSinceSpawn=0; nextSpawnGap=820; lastBlockedSet=null;
+    player.lane=0; player.visualLane=0; player.z=0; player.vz=0; player.sliding=false; player.slideTimer=0; player.invuln=0;
+    document.getElementById('coin-count').textContent='0';
+    document.getElementById('score-box').textContent='0 m';
+    document.getElementById('combo-box').textContent='';
+  }
+  function startGame(){
+    resetGame(); state='playing';
+    document.getElementById('start-screen').classList.add('hidden');
+    document.getElementById('gameover-screen').classList.add('hidden');
+    document.getElementById('pause-screen').classList.add('hidden');
+    document.getElementById('pause-btn').classList.remove('hidden');
+    document.getElementById('controls-mobile').classList.add('show');
+  }
+  function endGame(){
+    state='gameover';
+    shake = 18;
+    sfx(120,0.4,'sawtooth',0.12);
+    vibrate([0,40,40,80]);
+    const dist = Math.floor(distance);
+    let isBest = false;
+    if(dist>best){ best=dist; localStorage.setItem('temple_runner_best', String(best)); isBest=true; }
+    document.getElementById('final-distance').textContent = dist;
+    document.getElementById('final-coins').textContent = coins;
+    document.getElementById('best-box').textContent = 'Best: '+best+' m';
+    document.getElementById('new-best-tag').textContent = isBest ? '★ NEW BEST ★' : '';
+    document.getElementById('gameover-screen').classList.remove('hidden');
+    document.getElementById('pause-btn').classList.add('hidden');
+    document.getElementById('controls-mobile').classList.remove('show');
+  }
+  function togglePause(){
+    if(state==='playing'){
+      state='paused';
+      document.getElementById('pause-screen').classList.remove('hidden');
+    } else if(state==='paused'){
+      state='playing';
+      document.getElementById('pause-screen').classList.add('hidden');
+    }
+  }
+
+  document.getElementById('start-btn').addEventListener('click', startGame);
+  document.getElementById('restart-btn').addEventListener('click', startGame);
+  document.getElementById('pause-btn').addEventListener('click', togglePause);
+  document.getElementById('resume-btn').addEventListener('click', togglePause);
+  document.getElementById('quit-btn').addEventListener('click', ()=>{
+    state='menu';
+    document.getElementById('pause-screen').classList.add('hidden');
+    document.getElementById('start-screen').classList.remove('hidden');
+    document.getElementById('pause-btn').classList.add('hidden');
+    document.getElementById('controls-mobile').classList.remove('show');
+  });
+  document.addEventListener('visibilitychange', ()=>{ if(document.hidden && state==='playing') togglePause(); });
+
+  // ---------- Update ----------
+  const COLLIDE_NEAR = 60, COLLIDE_FAR = -30, JUMP_CLEARANCE_Z = -32;
+
+  // Pure function: given an obstacle and the player's physical state, returns whether it's a hit.
+  // No side effects, no globals besides the constants above — this is the single source of truth
+  // for collision rules, called by both the live game loop and the self-tests below.
+  function resolveCollision(obstacleType, playerZ, playerSliding){
+    const jumped = playerZ < JUMP_CLEARANCE_Z;
+    if(obstacleType==='low')  return !jumped;
+    if(obstacleType==='high') return !playerSliding;
+    if(obstacleType==='full') return true; // full blockers can never be cleared, must dodge lanes instead
+    return false;
+  }
+
+  // Pure function: minimum world-distance gap enforced between spawned obstacle rows.
+  // Same formula used by the live spawner and by the self-test that checks it never collapses.
+  function computeSpawnGapFloor(frames){
+    return Math.max(640, 900 - frames/22);
+  }
+
+  function update(){
+    elapsedFrames++;
+    speed = baseSpeed + Math.min(7, elapsedFrames/850);
+    distance += speed/12;
+    document.getElementById('score-box').textContent = Math.floor(distance)+' m';
+
+    if(player.z!==0 || player.vz!==0){
+      player.vz += GRAVITY;
+      player.z += player.vz;
+      if(player.z>=0){ player.z=0; player.vz=0; }
+    }
+    if(player.sliding){
+      player.slideTimer--;
+      if(player.slideTimer<=0) player.sliding=false;
+    }
+    if(player.invuln>0) player.invuln--;
+    player.visualLane += (player.lane - player.visualLane) * 0.28;
+    player.runFrame += 0.35 + speed*0.01;
+
+    if(comboTimer>0){ comboTimer--; if(comboTimer===0){ combo=0; document.getElementById('combo-box').textContent=''; } }
+
+    const moveAmount = speed*Z_SPEED_MULT;
+    distanceSinceSpawn += moveAmount;
+    if(distanceSinceSpawn >= nextSpawnGap){
+      spawnRow();
+      distanceSinceSpawn = 0;
+      nextSpawnGap = computeSpawnGapFloor(elapsedFrames) + Math.random()*300;
+    }
+
+    obstacles.forEach(o=> o.z -= moveAmount);
+    coinsList.forEach(c=> c.z -= moveAmount);
+
+    obstacles.forEach(o=>{
+      if(o.resolved) return;
+      if(o.z < COLLIDE_NEAR && o.z > COLLIDE_FAR && o.lane===player.lane){
+        o.resolved = true;
+        const hit = resolveCollision(o.type, player.z, player.sliding);
+        if(hit && player.invuln===0) endGame();
+      }
+    });
+
+    coinsList.forEach(c=>{
+      if(!c.collected && c.z<55 && c.z>-40 && c.lane===player.lane){
+        c.collected = true;
+        coins++; combo++; comboTimer=90;
+        document.getElementById('coin-count').textContent = coins;
+        if(combo>=3) document.getElementById('combo-box').textContent = combo+'x combo!';
+        sfx(700+combo*20, 0.1, 'sine', 0.06);
+        particles.push({lane:c.lane, z:0, life:22, txt:'+1'});
+      }
+    });
+
+    obstacles = obstacles.filter(o=> o.z > -350);
+    coinsList = coinsList.filter(c=> !c.collected && c.z > -350);
+    particles.forEach(p=>{ p.life--; p.z += 3; });
+    particles = particles.filter(p=>p.life>0);
+
+    if(shake>0) shake *= 0.9;
+  }
+
+  // ---------- Drawing ----------
+  function drawBackground(){
+    const g = ctx.createLinearGradient(0,0,0,H);
+    g.addColorStop(0,'#2b1b3d'); g.addColorStop(1,'#7a4a3a');
+    ctx.fillStyle=g; ctx.fillRect(0,0,W,H);
+
+    const sunX=W*0.78, sunY=H*0.20;
+    const glow = ctx.createRadialGradient(sunX,sunY,10,sunX,sunY,150);
+    glow.addColorStop(0,'rgba(255,220,150,0.9)'); glow.addColorStop(1,'rgba(255,220,150,0)');
+    ctx.fillStyle=glow; ctx.beginPath(); ctx.arc(sunX,sunY,150,0,Math.PI*2); ctx.fill();
+    ctx.fillStyle='#ffe6b0'; ctx.beginPath(); ctx.arc(sunX,sunY,36,0,Math.PI*2); ctx.fill();
+
+    ctx.fillStyle='#3a2a4a';
+    ctx.beginPath(); ctx.moveTo(0, topY+40);
+    for(let x=0;x<=W;x+=50){
+      const h = 30 + Math.sin((x+elapsedFrames*0.2)*0.015)*16;
+      ctx.lineTo(x, topY+40-h);
+    }
+    ctx.lineTo(W, topY+40); ctx.lineTo(W,topY+80); ctx.lineTo(0,topY+80); ctx.closePath(); ctx.fill();
+
+    ctx.fillStyle='#16321f';
+    const offset = (elapsedFrames*speed*0.7) % 90;
+    for(let x=-90;x<W+90;x+=90){
+      const tx = x - offset;
+      ctx.beginPath(); ctx.ellipse(tx, topY+70, 50, 60, 0, 0, Math.PI*2); ctx.fill();
+    }
+  }
+
+  function drawGround(){
+    const nearW = W*NEAR_WIDTH_RATIO, farW = W*FAR_WIDTH_RATIO;
+    ctx.fillStyle = '#0d2818';
+    ctx.fillRect(0, topY, W, H-topY);
+
+    const grad = ctx.createLinearGradient(0,topY,0,H);
+    grad.addColorStop(0,'#5a4632'); grad.addColorStop(1,'#241b14');
+    ctx.fillStyle = grad;
+    ctx.beginPath();
+    ctx.moveTo(W/2-farW/2, topY);
+    ctx.lineTo(W/2+farW/2, topY);
+    ctx.lineTo(W/2+nearW/2, H);
+    ctx.lineTo(W/2-nearW/2, H);
+    ctx.closePath(); ctx.fill();
+
+    // scrolling tile lines using same z-space as obstacles for perfect sync
+    ctx.strokeStyle='rgba(0,0,0,0.35)'; ctx.lineWidth=2;
+    const scroll = (elapsedFrames*speed*Z_SPEED_MULT) % 200;
+    for(let i=0;i<12;i++){
+      const z = i*200 - scroll;
+      if(z<0 || z>MAX_Z) continue;
+      const p = project(0, z);
+      ctx.beginPath();
+      ctx.moveTo(p.x - p.width/2, p.y);
+      ctx.lineTo(p.x + p.width/2, p.y);
+      ctx.stroke();
+    }
+    // lane dividers
+    [-0.5,0.5].forEach(f=>{
+      ctx.beginPath();
+      const near = project(0,0), far = project(0,MAX_Z);
+      ctx.moveTo(near.x + f*near.width, near.y);
+      ctx.lineTo(far.x + f*far.width, far.y);
+      ctx.strokeStyle='rgba(255,215,120,0.15)'; ctx.lineWidth=3; ctx.stroke();
+    });
+  }
+
+  function drawPlayer(){
+    const p = project(player.visualLane, 0);
+    const bodyH = (player.sliding ? 40 : 74) * 2.4;
+    const jumpOffset = player.z * 1.6;
+    const cx = p.x, cy = p.y + jumpOffset;
+
+    const shadowScale = 1 - Math.min(0.65, -player.z/220);
+    ctx.fillStyle='rgba(0,0,0,0.4)';
+    ctx.beginPath(); ctx.ellipse(cx, p.y+6, 30*shadowScale, 9*shadowScale, 0,0,Math.PI*2); ctx.fill();
+
+    ctx.save();
+    ctx.translate(cx, cy - bodyH/2);
+    if(player.invuln>0 && Math.floor(elapsedFrames/4)%2===0) ctx.globalAlpha = 0.4;
+
+    const legSwing = Math.sin(player.runFrame)*14;
+    ctx.strokeStyle='#2c1c10'; ctx.lineWidth=10; ctx.lineCap='round';
+    ctx.beginPath();
+    ctx.moveTo(-8, bodyH*0.55-4); ctx.lineTo(-8+legSwing*0.4, bodyH*0.55+22);
+    ctx.moveTo(8, bodyH*0.55-4); ctx.lineTo(8-legSwing*0.4, bodyH*0.55+22);
+    ctx.stroke();
+
+    ctx.fillStyle='#c0392b';
+    ctx.beginPath();
+    ctx.roundRect(-16, bodyH*0.02, 32, bodyH*0.6, 10);
+    ctx.fill();
+
+    ctx.strokeStyle='#8a4a2c'; ctx.lineWidth=8;
+    ctx.beginPath();
+    ctx.moveTo(-14, bodyH*0.1); ctx.lineTo(-14-legSwing*0.5, bodyH*0.35);
+    ctx.moveTo(14, bodyH*0.1); ctx.lineTo(14+legSwing*0.5, bodyH*0.35);
+    ctx.stroke();
+
+    ctx.fillStyle='#e0a878';
+    ctx.beginPath(); ctx.arc(0,-14,15,0,Math.PI*2); ctx.fill();
+    ctx.fillStyle='#e8b64a';
+    ctx.fillRect(-15,-18,30,6);
+
+    ctx.restore();
+  }
+
+  function drawObstacle(o){
+    if(o.z<-60 || o.z>MAX_Z+50) return;
+    const p = project(o.lane, Math.max(0,o.z));
+    ctx.save();
+    ctx.translate(p.x, p.y);
+    ctx.scale(p.scale, p.scale);
+    if(o.type==='low'){
+      const grad = ctx.createLinearGradient(0,-42,0,10);
+      grad.addColorStop(0,'#8a7355'); grad.addColorStop(1,'#4a3826');
+      ctx.fillStyle=grad; ctx.fillRect(-42,-42,84,52);
+      ctx.strokeStyle='rgba(0,0,0,0.4)'; ctx.lineWidth=3; ctx.strokeRect(-42,-42,84,52);
+      ctx.strokeStyle='rgba(0,0,0,0.3)'; ctx.beginPath(); ctx.moveTo(-8,-42); ctx.lineTo(-2,-8); ctx.stroke();
+    } else if(o.type==='high'){
+      const grad = ctx.createLinearGradient(0,-118,0,-78);
+      grad.addColorStop(0,'#6b4a2c'); grad.addColorStop(1,'#3a2818');
+      ctx.fillStyle=grad; ctx.fillRect(-48,-118,96,40);
+      ctx.fillStyle='#2c1c10';
+      ctx.fillRect(-48,-118,10,124); ctx.fillRect(38,-118,10,124);
+    } else {
+      // full block: tall stone pillar spanning ground to head height
+      const grad = ctx.createLinearGradient(0,-150,0,10);
+      grad.addColorStop(0,'#5a4a3a'); grad.addColorStop(1,'#241b14');
+      ctx.fillStyle=grad; ctx.fillRect(-46,-150,92,164);
+      ctx.strokeStyle='rgba(0,0,0,0.45)'; ctx.lineWidth=3; ctx.strokeRect(-46,-150,92,164);
+      ctx.fillStyle='rgba(255,120,80,0.15)';
+      ctx.fillRect(-46,-150,92,10);
+    }
+    ctx.restore();
+  }
+
+  function drawCoin(c){
+    if(c.collected || c.z<-60 || c.z>MAX_Z+80) return;
+    const p = project(c.lane, Math.max(0,c.z));
+    const bob = Math.sin((elapsedFrames+c.lane*10)*0.15)*4;
+    ctx.save();
+    ctx.translate(p.x, p.y - 58*p.scale + bob*p.scale);
+    ctx.scale(p.scale, p.scale);
+    const spin = Math.max(0.15, Math.abs(Math.cos(elapsedFrames*0.1 + c.z*0.01)));
+    const grad = ctx.createRadialGradient(-4,-4,2,0,0,16);
+    grad.addColorStop(0,'#fff6d0'); grad.addColorStop(0.5,'#ffd873'); grad.addColorStop(1,'#c9941f');
+    ctx.fillStyle=grad;
+    ctx.beginPath(); ctx.ellipse(0,0,15*spin,15,0,0,Math.PI*2); ctx.fill();
+    ctx.strokeStyle='#a86f1a'; ctx.lineWidth=2; ctx.stroke();
+    ctx.restore();
+  }
+
+  function drawParticles(){
+    particles.forEach(p=>{
+      const proj = project(p.lane, Math.max(0,p.z));
+      ctx.save();
+      ctx.globalAlpha = Math.max(0,p.life/22);
+      ctx.fillStyle='#ffd873';
+      ctx.font = 'bold '+Math.max(10,16*proj.scale)+'px sans-serif';
+      ctx.fillText(p.txt, proj.x-8, proj.y-60*proj.scale-(22-p.life)*1.5);
+      ctx.restore();
+    });
+  }
+
+  function draw(){
+    ctx.save();
+    if(shake>0.3){
+      ctx.translate((Math.random()-0.5)*shake, (Math.random()-0.5)*shake);
+    }
+    drawBackground();
+    drawGround();
+
+    const drawables = [];
+    obstacles.forEach(o=> drawables.push({t:'o', r:o, z:o.z}));
+    coinsList.forEach(c=> drawables.push({t:'c', r:c, z:c.z}));
+    drawables.sort((a,b)=> b.z-a.z);
+    drawables.forEach(d=> d.t==='o' ? drawObstacle(d.r) : drawCoin(d.r));
+
+    drawPlayer();
+    drawParticles();
+    ctx.restore();
+    if(debugMode) drawDebugOverlay();
+  }
+
+  function drawDebugOverlay(){
+    ctx.save();
+    // collision line at player's plane
+    ctx.strokeStyle = 'rgba(255,60,60,0.7)'; ctx.lineWidth = 2;
+    const near = project(0,0);
+    ctx.beginPath(); ctx.moveTo(0, near.y); ctx.lineTo(W, near.y); ctx.stroke();
+
+    // lane center markers
+    LANES.forEach(l=>{
+      const p = project(l,0);
+      ctx.fillStyle = 'rgba(0,255,255,0.6)';
+      ctx.beginPath(); ctx.arc(p.x, p.y, 6, 0, Math.PI*2); ctx.fill();
+    });
+
+    // live obstacle hitboxes
+    ctx.strokeStyle = 'rgba(255,120,0,0.9)'; ctx.lineWidth = 2;
+    obstacles.forEach(o=>{
+      if(o.resolved) return;
+      const p = project(o.lane, Math.max(0,o.z));
+      const s = 22*p.scale;
+      ctx.strokeRect(p.x-s, p.y-s, s*2, s*2);
+    });
+    // coin hitboxes
+    ctx.strokeStyle = 'rgba(255,255,0,0.7)';
+    coinsList.forEach(c=>{
+      if(c.collected) return;
+      const p = project(c.lane, Math.max(0,c.z));
+      const s = 16*p.scale;
+      ctx.strokeRect(p.x-s, p.y-58*p.scale-s, s*2, s*2);
+    });
+    ctx.restore();
+
+    document.getElementById('debug-stats').innerHTML =
+      'fps: '+currentFps.toFixed(0)+'<br>'+
+      'state: '+state+'<br>'+
+      'speed: '+speed.toFixed(2)+' (base '+baseSpeed+')<br>'+
+      'lane: '+player.lane+' (visual '+player.visualLane.toFixed(2)+')<br>'+
+      'spawn gap: '+Math.round(distanceSinceSpawn)+' / '+Math.round(nextSpawnGap)+'<br>'+
+      'active obstacles: '+obstacles.length+', coins: '+coinsList.length+'<br>'+
+      'last input: '+lastInputLabel;
+  }
+
+  // ---------- Self-tests ----------
+  // Automated sanity checks for the exact issues found during playtesting:
+  // obstacles bunching into a line (lane separation) and rows spawning too close together.
+  function runSelfTests(){
+    const results = [];
+
+    // --- Geometry / visual regression checks ---
+    const farL = project(-1, MAX_Z), farR = project(1, MAX_Z);
+    const farSep = Math.abs(farR.x - farL.x);
+    results.push({name:'Lanes distinguishable at spawn distance', pass: farSep >= 30, detail: farSep.toFixed(0)+'px (need ≥30px)'});
+
+    const nearL = project(-1,0), nearR = project(1,0);
+    const nearSep = Math.abs(nearR.x - nearL.x);
+    results.push({name:'Lanes clearly separated near player', pass: nearSep >= 120, detail: nearSep.toFixed(0)+'px (need ≥120px)'});
+
+    // --- Behavioral checks: calling the REAL resolveCollision() with synthetic inputs ---
+    // (grounded, not sliding, not jumped)
+    const standing = {z:0, sliding:false};
+    results.push({name:'Low obstacle hits you if you don\'t jump', pass: resolveCollision('low', standing.z, standing.sliding)===true, detail:'resolveCollision(low, z=0, sliding=false)'});
+    results.push({name:'Low obstacle is cleared if you jump', pass: resolveCollision('low', -50, false)===false, detail:'resolveCollision(low, z=-50, sliding=false)'});
+    results.push({name:'High beam hits you if you don\'t slide', pass: resolveCollision('high', standing.z, standing.sliding)===true, detail:'resolveCollision(high, z=0, sliding=false)'});
+    results.push({name:'High beam is cleared if you slide', pass: resolveCollision('high', 0, true)===false, detail:'resolveCollision(high, z=0, sliding=true)'});
+    results.push({name:'Full blocker always hits (must dodge lanes)', pass: resolveCollision('full', -50, true)===true, detail:'resolveCollision(full, z=-50, sliding=true)'});
+
+    // --- Behavioral check: calling the REAL computeSpawnGapFloor() across a simulated run ---
+    let minFloor = Infinity;
+    for(let f=0; f<20000; f+=200){ minFloor = Math.min(minFloor, computeSpawnGapFloor(f)); }
+    results.push({name:'Spawn gap floor never collapses over time', pass: minFloor >= 640, detail: minFloor.toFixed(0)+' units (floor 640), via computeSpawnGapFloor()'});
+
+    const maxSpeed = baseSpeed + 7;
+    const framesToCross = MAX_Z/(maxSpeed*Z_SPEED_MULT);
+    results.push({name:'Reaction time at max speed', pass: framesToCross >= 60, detail: framesToCross.toFixed(0)+' frames (~'+(framesToCross/60).toFixed(1)+'s, need ≥1s)'});
+
+    document.getElementById('debug-tests').innerHTML = results.map(r=>
+      (r.pass?'✅ ':'❌ ')+r.name+' <span style="color:#c9b190">('+r.detail+')</span>'
+    ).join('<br>');
+    return results;
+  }
+
+  if(!CanvasRenderingContext2D.prototype.roundRect){
+    CanvasRenderingContext2D.prototype.roundRect = function(x,y,w,h,r){
+      this.beginPath();
+      this.moveTo(x+r,y);
+      this.arcTo(x+w,y,x+w,y+h,r);
+      this.arcTo(x+w,y+h,x,y+h,r);
+      this.arcTo(x,y+h,x,y,r);
+      this.arcTo(x,y,x+w,y,r);
+      this.closePath();
+      return this;
+    };
+  }
+
+  function loop(now){
+    const dt = now - lastFrameTime; lastFrameTime = now;
+    if(dt > 0) currentFps = 1000/dt;
+    if(state==='playing') update();
+    draw();
+    requestAnimationFrame(loop);
+  }
+  // Exposes the pure, side-effect-free game-logic functions for automated testing tools
+  // (e.g. a Node + jsdom test harness) to call directly against the shipped file —
+  // no separate logic file to keep in sync, no duplicated formulas.
+  if(typeof window !== 'undefined'){
+    window.__testHooks = { resolveCollision, computeSpawnGapFloor, project, MAX_Z, CAMERA_FOCAL };
+  }
+
+  try{
+    runSelfTests();
+  }catch(e){
+    // diagnostics are best-effort only — never let them affect the actual game
+  }
+  requestAnimationFrame(loop);
+})();
+</script>
+</body>
+</html>
+
