@@ -1,292 +1,88 @@
 
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Micro Games | RashTek Microverse</title>
-    <meta name="description" content="Play all RashTek Microverse games in one place.">
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <title>🎮 Micro Games - Microverse</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     <style>
-        :root {
-            --bg-dark: #050505;
-            --primary: #ff007f;
-            --secondary: #7928ca;
-            --glass: rgba(255, 255, 255, 0.05);
-            --glass-border: rgba(255, 255, 255, 0.1);
-            --text-main: #ffffff;
-            --text-muted: #a0a0a0;
+        body { font-family: 'Segoe UI', sans-serif; background: #222; color: #fff; text-align: center; padding: 20px; }
+        h1 { color: #f1c40f; margin-bottom: 10px; }
+        h3 { color: #888; font-weight: 300; margin-bottom: 40px; }
+        .container { max-width: 600px; margin: 0 auto; }
+        
+        .link-item { 
+            display: flex; justify-content: space-between; align-items: center;
+            background: #333; margin: 15px 0; padding: 20px; 
+            text-decoration: none; color: white; border-radius: 10px; 
+            border-left: 5px solid #2ecc71; transition: 0.3s;
+            font-size: 18px; font-weight: bold;
         }
-
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-        }
-
-        body {
-            font-family: 'Poppins', sans-serif;
-            background-color: var(--bg-dark);
-            color: var(--text-main);
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            overflow-x: hidden;
-            position: relative;
-        }
-
-        /* Animated Background Gradients */
-        .bg-glow {
-            position: fixed;
-            width: 600px;
-            height: 600px;
-            background: radial-gradient(circle, var(--primary) 0%, transparent 70%);
-            top: -200px;
-            left: -200px;
-            opacity: 0.15;
-            filter: blur(100px);
-            animation: float 10s infinite alternate;
-            z-index: -1;
-        }
-
-        .bg-glow-2 {
-            position: fixed;
-            width: 600px;
-            height: 600px;
-            background: radial-gradient(circle, var(--secondary) 0%, transparent 70%);
-            bottom: -200px;
-            right: -200px;
-            opacity: 0.15;
-            filter: blur(100px);
-            animation: float 12s infinite alternate-reverse;
-            z-index: -1;
-        }
-
-        @keyframes float {
-            0% { transform: translate(0, 0); }
-            100% { transform: translate(50px, 50px); }
-        }
-
-        header {
-            text-align: center;
-            margin-top: 60px;
-            margin-bottom: 40px;
-            padding: 0 20px;
-            animation: fadeInDown 1s ease-out;
-        }
-
-        .back-btn {
-            position: absolute;
-            top: 20px;
-            left: 20px;
-            color: var(--text-muted);
-            text-decoration: none;
-            font-size: 14px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            transition: color 0.3s;
-            z-index: 10;
-            background: var(--glass);
-            padding: 8px 16px;
-            border-radius: 20px;
-            border: 1px solid var(--glass-border);
-            backdrop-filter: blur(10px);
-        }
-
-        .back-btn:hover {
-            color: var(--text-main);
-            background: rgba(255, 255, 255, 0.1);
-        }
-
-        h1 {
-            font-size: 3rem;
-            font-weight: 800;
-            background: linear-gradient(to right, var(--primary), #ff8a00);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            margin-bottom: 10px;
-            letter-spacing: -1px;
-        }
-
-        h3 {
-            font-weight: 300;
-            color: var(--text-muted);
-            font-size: 1.1rem;
-        }
-
-        .container {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            gap: 20px;
-            width: 100%;
-            max-width: 1000px;
-            padding: 0 20px 60px;
-        }
-
-        .link-item {
-            position: relative;
-            background: var(--glass);
-            border: 1px solid var(--glass-border);
-            border-radius: 16px;
-            padding: 24px;
-            text-decoration: none;
-            color: var(--text-main);
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            backdrop-filter: blur(12px);
-            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            overflow: hidden;
-            animation: fadeInUp 0.6s ease-out forwards;
-            opacity: 0;
-            transform: translateY(20px);
-        }
-
-        /* Staggered animations */
-        .link-item:nth-child(1) { animation-delay: 0.1s; }
-        .link-item:nth-child(2) { animation-delay: 0.15s; }
-        .link-item:nth-child(3) { animation-delay: 0.2s; }
-        .link-item:nth-child(4) { animation-delay: 0.25s; }
-        .link-item:nth-child(5) { animation-delay: 0.3s; }
-        .link-item:nth-child(6) { animation-delay: 0.35s; }
-        .link-item:nth-child(7) { animation-delay: 0.4s; }
-        .link-item:nth-child(8) { animation-delay: 0.45s; }
-        .link-item:nth-child(9) { animation-delay: 0.5s; }
-        .link-item:nth-child(10) { animation-delay: 0.55s; }
-        .link-item:nth-child(11) { animation-delay: 0.6s; }
-
-        .link-item::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(135deg, rgba(255,0,127,0.2) 0%, rgba(121,40,202,0.2) 100%);
-            opacity: 0;
-            transition: opacity 0.4s;
-            z-index: -1;
-        }
-
-        .link-item:hover {
-            transform: translateY(-8px) scale(1.02);
-            border-color: rgba(255, 255, 255, 0.3);
-            box-shadow: 0 15px 30px rgba(0,0,0,0.4), 0 0 20px rgba(255,0,127,0.2);
-        }
-
-        .link-item:hover::before {
-            opacity: 1;
-        }
-
-        .game-title {
-            font-size: 1.2rem;
-            font-weight: 600;
-            margin-bottom: 8px;
-            text-align: center;
-        }
-
-        .play-icon {
-            margin-top: 10px;
-            width: 40px;
-            height: 40px;
-            background: linear-gradient(135deg, var(--primary), var(--secondary));
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            box-shadow: 0 4px 15px rgba(255,0,127,0.4);
-            transition: transform 0.3s;
-        }
-
-        .link-item:hover .play-icon {
-            transform: scale(1.1) rotate(5deg);
-        }
-
-        .play-icon svg {
-            width: 18px;
-            height: 18px;
-            fill: white;
-            margin-left: 3px;
-        }
-
-        @keyframes fadeInDown {
-            from { opacity: 0; transform: translateY(-30px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        @keyframes fadeInUp {
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        @media (max-width: 600px) {
-            h1 { font-size: 2.2rem; }
-            .container { grid-template-columns: 1fr; }
-        }
+        .link-item:hover { background: #444; border-left-color: #f1c40f; transform: translateX(5px); }
+        .back-btn { display: inline-block; margin-bottom: 20px; color: #888; text-decoration: none; font-size: 14px; }
+        .back-btn:hover { color: #fff; }
     </style>
 </head>
 <body>
-    <div class="bg-glow"></div>
-    <div class="bg-glow-2"></div>
-
-    <a href="../index.html" class="back-btn">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
-        Back
-    </a>
-
-    <header>
-        <h1>Microverse Games</h1>
-        <h3>Select a game and jump right into the action</h3>
-    </header>
-
+    <a href="../index.html" class="back-btn">← Back to RashTek Microverse</a>
+    <h1>🎮 Micro Games</h1>
+    <h3>Directory Listing</h3>
     <div class="container">
-        <!-- Game Cards -->
-        <a href="Temple_Run.html" class="link-item">
-            <span class="game-title">Temple Run</span>
-            <div class="play-icon"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></div>
-        </a>
-        <a href="2048_game.html" class="link-item">
-            <span class="game-title">2048 Game</span>
-            <div class="play-icon"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></div>
-        </a>
-        <a href="chess_p2p.html" class="link-item">
-            <span class="game-title">Chess P2P</span>
-            <div class="play-icon"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></div>
-        </a>
-        <a href="craft_game.html" class="link-item">
-            <span class="game-title">Craft Game</span>
-            <div class="play-icon"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></div>
-        </a>
-        <a href="mario_game.html" class="link-item">
-            <span class="game-title">Mario Game</span>
-            <div class="play-icon"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></div>
-        </a>
-        <a href="shooting_game.html" class="link-item">
-            <span class="game-title">Shooting Game</span>
-            <div class="play-icon"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></div>
-        </a>
-        <a href="snake_game.html" class="link-item">
-            <span class="game-title">Snake Game</span>
-            <div class="play-icon"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></div>
-        </a>
-        <a href="vice_city_game.html" class="link-item">
-            <span class="game-title">Vice City Game</span>
-            <div class="play-icon"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></div>
-        </a>
-        <a href="save_the_dog.html" class="link-item">
-            <span class="game-title">Save The Dog</span>
-            <div class="play-icon"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></div>
-        </a>
-        <a href="chess_game.html" class="link-item">
-            <span class="game-title">Chess Game</span>
-            <div class="play-icon"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></div>
-        </a>
-        <a href="musical_chairs.html" class="link-item">
-            <span class="game-title">Musical Chairs</span>
-            <div class="play-icon"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></div>
-        </a>
+        
+            <a href="shooting_game.html" class="link-item">
+                <span>Shooting Game</span> 
+                <span style="color:#777">▶</span>
+            </a>
+            
+            <a href="chess_game.html" class="link-item">
+                <span>Chess Game</span> 
+                <span style="color:#777">▶</span>
+            </a>
+            
+            <a href="Temple_Run.html" class="link-item">
+                <span>Temple Run</span> 
+                <span style="color:#777">▶</span>
+            </a>
+            
+            <a href="snake_game.html" class="link-item">
+                <span>Snake Game</span> 
+                <span style="color:#777">▶</span>
+            </a>
+            
+            <a href="2048_game.html" class="link-item">
+                <span>2048 Game</span> 
+                <span style="color:#777">▶</span>
+            </a>
+            
+            <a href="vice_city_game.html" class="link-item">
+                <span>Vice City Game</span> 
+                <span style="color:#777">▶</span>
+            </a>
+            
+            <a href="mario_game.html" class="link-item">
+                <span>Mario Game</span> 
+                <span style="color:#777">▶</span>
+            </a>
+            
+            <a href="musical_chairs.html" class="link-item">
+                <span>Musical Chairs</span> 
+                <span style="color:#777">▶</span>
+            </a>
+            
+            <a href="craft_game.html" class="link-item">
+                <span>Craft Game</span> 
+                <span style="color:#777">▶</span>
+            </a>
+            
+            <a href="chess_p2p.html" class="link-item">
+                <span>Chess P2P</span> 
+                <span style="color:#777">▶</span>
+            </a>
+            
+            <a href="save_the_dog.html" class="link-item">
+                <span>Save The Dog</span> 
+                <span style="color:#777">▶</span>
+            </a>
+            
     </div>
 </body>
 </html>
