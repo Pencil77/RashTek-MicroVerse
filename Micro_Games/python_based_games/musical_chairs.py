@@ -108,9 +108,13 @@ GAME_TEMPLATE = """
     <h1>🎵 Musical Chairs</h1>
 
     <div class="container">
+        <div class="preset-options" style="display: flex; gap: 10px; margin-bottom: 15px; justify-content: center; flex-wrap: wrap;">
+            <button type="button" class="btn-nav" style="margin: 0; width: auto; font-size: 14px; border-radius: 5px;" onclick="document.getElementById('yt-link').value='https://youtube.com/playlist?list=PLnGRV05XmAq2xzqAI9kr-9o11J7uLS19w'">Hindi Party Songs</button>
+            <button type="button" class="btn-nav" style="margin: 0; width: auto; font-size: 14px; border-radius: 5px;" onclick="document.getElementById('yt-link').value='https://youtube.com/playlist?list=PLQ56vaftymdoZBDiHxspRgGbx6tSup0FE'">Telugu Party Songs</button>
+        </div>
         <div class="input-group">
             <label>YouTube Link (Video or Playlist):</label>
-            <input type="text" id="yt-link" placeholder="Paste YouTube link here..." value="https://youtube.com/playlist?list=PL9bw4S5ePsEF-J_tIORZ6xE_OXkGuKjjY&si=Edxn98n3lSnAFFsi">
+            <input type="text" id="yt-link" placeholder="Paste YouTube link here..." value="https://youtube.com/playlist?list=PLnGRV05XmAq2xzqAI9kr-9o11J7uLS19w">
         </div>
 
         <div class="row">
