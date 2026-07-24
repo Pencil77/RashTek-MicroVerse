@@ -1,81 +1,154 @@
-
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+    <meta charset="UTF-8">
     <title>Termux-Craft</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@400;700&family=Poppins:wght@600&display=swap" rel="stylesheet">
     <style>
-        body { margin: 0; overflow: hidden; background: #000; font-family: 'Courier New', monospace; touch-action: none; user-select: none; }
+        :root {
+            --glass-bg: rgba(20, 20, 20, 0.6);
+            --glass-border: rgba(255, 255, 255, 0.15);
+            --accent: #2ecc71;
+            --danger: #e74c3c;
+        }
+        body { 
+            margin: 0; 
+            overflow: hidden; 
+            background: #000; 
+            font-family: 'Roboto Mono', monospace; 
+            touch-action: none; 
+            user-select: none;
+            -webkit-user-select: none;
+        }
         canvas { display: block; }
         
-        /* UI Overlay */
         #ui-layer { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; }
         
+        /* Glassmorphism utility */
+        .glass {
+            background: var(--glass-bg);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid var(--glass-border);
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+        }
+
         #inventory-bar {
-            position: absolute; top: 10px; left: 10px;
-            display: flex; gap: 5px; pointer-events: auto;
+            position: absolute; top: 15px; left: 50%; transform: translateX(-50%);
+            display: flex; gap: 8px; pointer-events: auto;
+            padding: 8px;
         }
         .slot {
-            width: 40px; height: 40px; background: rgba(0,0,0,0.5); border: 2px solid #555;
+            width: 45px; height: 45px; 
+            background: rgba(0,0,0,0.5); 
+            border: 2px solid #555;
+            border-radius: 8px;
             color: white; display: flex; justify-content: center; align-items: center;
-            font-size: 10px; font-weight: bold; position: relative; cursor: pointer;
+            font-size: 14px; font-weight: bold; position: relative; cursor: pointer;
+            transition: all 0.2s ease;
+            box-shadow: inset 0 0 10px rgba(0,0,0,0.5);
         }
-        .slot.active { border-color: yellow; }
-        .slot span { position: absolute; bottom: 2px; right: 2px; }
+        .slot:hover { transform: translateY(-2px); }
+        .slot.active { 
+            border-color: #f1c40f; 
+            box-shadow: 0 0 10px rgba(241, 196, 15, 0.5), inset 0 0 10px rgba(0,0,0,0.5); 
+            transform: scale(1.1);
+        }
+        .slot span { 
+            position: absolute; bottom: 2px; right: 4px; 
+            font-size: 11px; text-shadow: 1px 1px 0 #000;
+        }
         
         #controls {
-            position: absolute; bottom: 20px; left: 20px;
-            display: grid; grid-template-columns: 60px 60px 60px; grid-template-rows: 60px 60px;
-            gap: 10px; pointer-events: auto;
+            position: absolute; bottom: 25px; left: 25px;
+            display: grid; grid-template-columns: 65px 65px 65px; grid-template-rows: 65px 65px;
+            gap: 12px; pointer-events: auto;
         }
         .btn {
-            width: 60px; height: 60px; background: rgba(255, 255, 255, 0.2);
-            border-radius: 50%; border: 2px solid rgba(255,255,255,0.5);
+            width: 65px; height: 65px; 
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(5px);
+            border-radius: 50%; 
+            border: 2px solid rgba(255,255,255,0.3);
             display: flex; justify-content: center; align-items: center;
-            color: white; font-size: 20px; touch-action: manipulation;
+            color: white; font-size: 24px; touch-action: manipulation;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+            transition: all 0.1s;
         }
-        .btn:active { background: rgba(255, 255, 255, 0.5); }
+        .btn:active { background: rgba(255, 255, 255, 0.4); transform: scale(0.95); }
         
         #action-buttons {
-            position: absolute; bottom: 20px; right: 20px;
+            position: absolute; bottom: 35px; right: 35px;
             display: flex; gap: 15px; pointer-events: auto;
         }
         .action-btn {
-            width: 70px; height: 70px; background: #e74c3c;
-            border-radius: 50%; border: 2px solid #c0392b;
-            color: white; font-weight: bold; display: flex; justify-content: center; align-items: center;
+            width: 80px; height: 80px; 
+            background: var(--danger);
+            border-radius: 50%; 
+            border: 3px solid rgba(255,255,255,0.3);
+            color: white; font-family: 'Poppins', sans-serif; font-weight: 700; font-size: 16px;
+            display: flex; justify-content: center; align-items: center;
+            box-shadow: 0 5px 15px rgba(231, 76, 60, 0.5);
+            transition: all 0.2s;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
         }
+        .action-btn:active { transform: scale(0.9); box-shadow: 0 2px 5px rgba(231, 76, 60, 0.5); }
         
-        #debug { position: absolute; top: 5px; right: 5px; color: lime; font-size: 10px; }
+        #debug { 
+            position: absolute; top: 15px; right: 15px; 
+            color: #00f2fe; font-size: 12px; font-weight: bold;
+            text-shadow: 1px 1px 2px #000;
+            background: rgba(0,0,0,0.4);
+            padding: 5px 10px;
+            border-radius: 5px;
+        }
     
         .game-nav {
             position: fixed;
-            top: 10px;
-            left: 10px;
+            top: 15px;
+            left: 15px;
             z-index: 9999;
             text-decoration: none;
             color: #fff;
-            background: rgba(0,0,0,0.45);
-            border: 1px solid rgba(255,255,255,0.25);
-            padding: 7px 11px;
-            border-radius: 999px;
+            background: rgba(0,0,0,0.5);
+            border: 1px solid rgba(255,255,255,0.2);
+            padding: 8px 14px;
+            border-radius: 30px;
             font-size: 13px;
-            backdrop-filter: blur(4px);
+            font-family: 'Poppins', sans-serif;
+            backdrop-filter: blur(5px);
+            transition: background 0.3s;
+            pointer-events: auto;
         }
-        .game-nav:hover { background: rgba(0,0,0,0.6); }
+        .game-nav:hover { background: rgba(0,0,0,0.8); }
+
+        #crosshair {
+            position: absolute; top: 50%; left: 50%;
+            width: 20px; height: 20px;
+            transform: translate(-50%, -50%);
+            pointer-events: none;
+            opacity: 0.5;
+        }
+        #crosshair::before, #crosshair::after {
+            content: ''; position: absolute; background: white;
+        }
+        #crosshair::before { top: 9px; left: 0; width: 20px; height: 2px; }
+        #crosshair::after { left: 9px; top: 0; width: 2px; height: 20px; }
     </style>
 </head>
 <body>
-    <a href="index.html" class="game-nav">← Games</a>
-
+    <a href="index.html" class="game-nav">← Exit</a>
 
     <canvas id="gameCanvas"></canvas>
 
     <div id="ui-layer">
+        <div id="crosshair"></div>
         <div id="debug">FPS: 60 | Time: Day</div>
         
-        <div id="inventory-bar">
-            </div>
+        <div id="inventory-bar" class="glass">
+        </div>
 
         <div id="controls">
             <div class="btn" style="grid-column: 2; grid-row: 1;" id="btn-up">▲</div>
@@ -89,12 +162,9 @@
     </div>
 
 <script>
-    /** * ENGINE CONSTANTS & SETUP
-     */
     const canvas = document.getElementById('gameCanvas');
-    const ctx = canvas.getContext('2d');
+    const ctx = canvas.getContext('2d', { alpha: false });
     
-    // Disable smoothing for pixel art look
     ctx.imageSmoothingEnabled = false;
 
     let width, height;
@@ -107,72 +177,52 @@
     window.addEventListener('resize', resize);
     resize();
 
-    // Game Constants
-    const TILE_SIZE = 32;
-    const WORLD_W = 100; // Tiles wide
-    const WORLD_H = 60;  // Tiles high
-    const GRAVITY = 0.5;
-    const TERMINAL_VELOCITY = 12;
-    const SPEED = 4;
-    const JUMP_POWER = 10;
+    const TILE_SIZE = 40;
+    const WORLD_W = 120; 
+    const WORLD_H = 80;  
+    const GRAVITY = 0.6;
+    const TERMINAL_VELOCITY = 15;
+    const SPEED = 5;
+    const JUMP_POWER = 11;
 
-    // Block IDs
-    const BLOCKS = {
-        AIR: 0, DIRT: 1, GRASS: 2, STONE: 3, COAL: 4, WOOD: 5, LEAVES: 6, BEDROCK: 7
-    };
+    const BLOCKS = { AIR: 0, DIRT: 1, GRASS: 2, STONE: 3, COAL: 4, WOOD: 5, LEAVES: 6, BEDROCK: 7 };
     
-    // Block Colors
     const COLORS = {
         0: null, 
-        1: '#5d4037', // Dirt
-        2: '#388e3c', // Grass
-        3: '#757575', // Stone
-        4: '#212121', // Coal
-        5: '#795548', // Wood
-        6: '#4caf50', // Leaves
-        7: '#000000'  // Bedrock
+        1: '#795548', // Dirt
+        2: '#4CAF50', // Grass
+        3: '#9E9E9E', // Stone
+        4: '#424242', // Coal
+        5: '#5D4037', // Wood
+        6: '#81C784', // Leaves
+        7: '#212121'  // Bedrock
     };
 
-    /**
-     * STATE MANAGEMENT
-     */
     let world = [];
     let particles = [];
-    
     let camera = { x: 0, y: 0 };
     
     let player = {
-        x: 50 * TILE_SIZE,
-        y: 0,
-        w: 20,
-        h: 28,
-        vx: 0,
-        vy: 0,
-        grounded: false,
-        facingRight: true
+        x: 60 * TILE_SIZE, y: 0, w: 24, h: 36,
+        vx: 0, vy: 0, grounded: false, facingRight: true
     };
 
     let keys = { left: false, right: false, up: false, action: false };
     
-    // Inventory: { blockId: count }
-    let inventory = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 };
-    let selectedBlock = 0; // 0 means pickaxe mode (mining), >0 means placing
-
-    // Day Cycle
+    let inventory = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0 };
+    let selectedBlock = 0; 
     let time = 0;
-    const DAY_LENGTH = 2000;
+    const DAY_LENGTH = 3000;
     
-    /**
-     * WORLD GENERATION (Procedural)
-     */
+    let lastTime = performance.now();
+    let fps = 0;
+
     function initWorld() {
         world = new Array(WORLD_W * WORLD_H).fill(BLOCKS.AIR);
 
-        // Simple terrain height generation using Math.sin
         let heights = [];
         for (let x = 0; x < WORLD_W; x++) {
-            // Combine two sine waves for "hills"
-            let h = Math.floor(WORLD_H / 3 + Math.sin(x / 10) * 5 + Math.sin(x / 4) * 2);
+            let h = Math.floor(WORLD_H / 2.5 + Math.sin(x / 8) * 6 + Math.sin(x / 3) * 2 + Math.cos(x/15)*4);
             heights[x] = h;
             
             for (let y = 0; y < WORLD_H; y++) {
@@ -181,34 +231,24 @@
                 if (y == WORLD_H - 1) {
                     world[idx] = BLOCKS.BEDROCK;
                 } else if (y > h) {
-                    // Underground
-                    if (y > h + 5 && Math.random() > 0.95) world[idx] = BLOCKS.COAL;
-                    else if (y > h + 8) world[idx] = BLOCKS.STONE;
+                    if (y > h + 8 && Math.random() > 0.92) world[idx] = BLOCKS.COAL;
+                    else if (y > h + 5) world[idx] = BLOCKS.STONE;
                     else world[idx] = BLOCKS.DIRT;
                 } else if (y == h) {
                     world[idx] = BLOCKS.GRASS;
-                    
-                    // Generate Trees randomly
-                    if (x > 5 && x < WORLD_W - 5 && Math.random() < 0.05) {
-                        createTree(x, y);
-                    }
+                    if (x > 5 && x < WORLD_W - 5 && Math.random() < 0.08) createTree(x, y);
                 }
             }
         }
-        // Spawn player above highest point in middle
-        player.y = (heights[50] - 5) * TILE_SIZE;
+        player.y = (heights[60] - 5) * TILE_SIZE;
         updateInventoryUI();
     }
 
     function createTree(x, y) {
-        let height = 3 + Math.floor(Math.random() * 3);
-        // Trunk
-        for (let i = 1; i <= height; i++) {
-            setBlock(x, y - i, BLOCKS.WOOD);
-        }
-        // Leaves
+        let height = 4 + Math.floor(Math.random() * 3);
+        for (let i = 1; i <= height; i++) setBlock(x, y - i, BLOCKS.WOOD);
         for (let lx = x - 2; lx <= x + 2; lx++) {
-            for (let ly = y - height - 2; ly <= y - height; ly++) {
+            for (let ly = y - height - 2; ly <= y - height + 1; ly++) {
                 if (Math.abs(lx - x) + Math.abs(ly - (y - height)) < 3) {
                     if (getBlock(lx, ly) == BLOCKS.AIR) setBlock(lx, ly, BLOCKS.LEAVES);
                 }
@@ -216,7 +256,6 @@
         }
     }
 
-    // Helper to access 1D array as 2D
     function getBlock(x, y) {
         if (x < 0 || x >= WORLD_W || y < 0 || y >= WORLD_H) return BLOCKS.BEDROCK;
         return world[y * WORLD_W + x];
@@ -227,64 +266,55 @@
         world[y * WORLD_W + x] = id;
     }
 
-    /**
-     * PHYSICS & UPDATE
-     */
     function update() {
-        // --- Player Physics ---
-        if (keys.left) player.vx = -SPEED;
-        else if (keys.right) player.vx = SPEED;
-        else player.vx *= 0.8; // Friction
+        if (keys.left) { player.vx = -SPEED; player.facingRight = false; }
+        else if (keys.right) { player.vx = SPEED; player.facingRight = true; }
+        else player.vx *= 0.7; 
 
         player.vy += GRAVITY;
         if (player.vy > TERMINAL_VELOCITY) player.vy = TERMINAL_VELOCITY;
 
-        // X Collision
         player.x += player.vx;
         handleCollisions(true);
 
-        // Y Collision
         player.y += player.vy;
         player.grounded = false;
         handleCollisions(false);
 
-        // Jump
         if (keys.up && player.grounded) {
             player.vy = -JUMP_POWER;
+            spawnParticles(player.x + player.w/2, player.y + player.h, '#fff', 3);
         }
 
-        // Camera Follow
-        camera.x = player.x - width / 2;
-        camera.y = player.y - height / 2;
+        // Smooth camera
+        let targetCamX = player.x - width / 2;
+        let targetCamY = player.y - height / 2;
+        camera.x += (targetCamX - camera.x) * 0.1;
+        camera.y += (targetCamY - camera.y) * 0.1;
         
-        // Clamp Camera
         if(camera.x < 0) camera.x = 0;
         if(camera.x > WORLD_W * TILE_SIZE - width) camera.x = WORLD_W * TILE_SIZE - width;
         if(camera.y < 0) camera.y = 0;
         if(camera.y > WORLD_H * TILE_SIZE - height) camera.y = WORLD_H * TILE_SIZE - height;
 
-        // Day/Night Cycle
-        time++;
-        if (time > DAY_LENGTH) time = 0;
+        time = (time + 1) % DAY_LENGTH;
 
-        // Interaction (Mining/Placing)
         if (keys.action) {
             performAction();
-            keys.action = false; // Trigger once per tap
+            keys.action = false; 
         }
 
-        // Particles
         for (let i = particles.length - 1; i >= 0; i--) {
             let p = particles[i];
             p.x += p.vx;
             p.y += p.vy;
+            p.vy += 0.2; // Gravity for particles
             p.life--;
             if (p.life <= 0) particles.splice(i, 1);
         }
     }
 
     function handleCollisions(isX) {
-        // Check corners of player
         let corners = [
             { x: player.x, y: player.y },
             { x: player.x + player.w, y: player.y },
@@ -297,100 +327,104 @@
             let ty = Math.floor(p.y / TILE_SIZE);
             let block = getBlock(tx, ty);
 
-            if (block != BLOCKS.AIR) {
+            if (block != BLOCKS.AIR && block != BLOCKS.LEAVES) {
                 if (isX) {
-                    if (player.vx > 0) player.x = tx * TILE_SIZE - player.w - 0.1;
-                    else if (player.vx < 0) player.x = (tx + 1) * TILE_SIZE + 0.1;
+                    if (player.vx > 0) player.x = tx * TILE_SIZE - player.w - 0.01;
+                    else if (player.vx < 0) player.x = (tx + 1) * TILE_SIZE + 0.01;
                     player.vx = 0;
                 } else {
                     if (player.vy > 0) {
-                        player.y = ty * TILE_SIZE - player.h - 0.1;
+                        player.y = ty * TILE_SIZE - player.h - 0.01;
                         player.grounded = true;
                     } else if (player.vy < 0) {
-                        player.y = (ty + 1) * TILE_SIZE + 0.1;
+                        player.y = (ty + 1) * TILE_SIZE + 0.01;
                     }
                     player.vy = 0;
                 }
-                return; // Collision handled
+                return; 
             }
         }
     }
 
-    function performAction() {
-        // Find block in front of player
+    function getTargetTile() {
         let cx = player.x + player.w / 2;
-        let cy = player.y + player.h / 2;
-        
-        // Direction modifier
-        let dir = player.vx >= 0 ? 1 : -1;
-        if (Math.abs(player.vx) < 0.1) dir = keys.lastDir || 1; 
+        let dir = player.facingRight ? 1 : -1;
+        let tx = Math.floor((cx + dir * TILE_SIZE * 1.2) / TILE_SIZE);
+        let ty = Math.floor((player.y + player.h / 2) / TILE_SIZE);
+        return {tx, ty};
+    }
 
-        // Target coords (1 block away)
-        let tx = Math.floor((cx + dir * TILE_SIZE) / TILE_SIZE);
-        let ty = Math.floor(cy / TILE_SIZE);
-
+    function performAction() {
+        let {tx, ty} = getTargetTile();
         let currentBlock = getBlock(tx, ty);
 
         if (selectedBlock === 0) { 
-            // MINING MODE
             if (currentBlock != BLOCKS.AIR && currentBlock != BLOCKS.BEDROCK) {
-                // Add to inventory
                 if (!inventory[currentBlock]) inventory[currentBlock] = 0;
                 inventory[currentBlock]++;
-                
-                // Spawn particles
-                spawnParticles(tx * TILE_SIZE + TILE_SIZE/2, ty * TILE_SIZE + TILE_SIZE/2, COLORS[currentBlock]);
-                
-                // Remove block
+                spawnParticles(tx * TILE_SIZE + TILE_SIZE/2, ty * TILE_SIZE + TILE_SIZE/2, COLORS[currentBlock], 8);
                 setBlock(tx, ty, BLOCKS.AIR);
                 updateInventoryUI();
             }
         } else {
-            // PLACING MODE
-            if (currentBlock == BLOCKS.AIR && inventory[selectedBlock] > 0) {
-                // Don't place inside player
+            if ((currentBlock == BLOCKS.AIR || currentBlock == BLOCKS.LEAVES) && inventory[selectedBlock] > 0) {
                 if (!(tx * TILE_SIZE < player.x + player.w && (tx+1)*TILE_SIZE > player.x &&
                       ty * TILE_SIZE < player.y + player.h && (ty+1)*TILE_SIZE > player.y)) {
-                    
                     setBlock(tx, ty, selectedBlock);
                     inventory[selectedBlock]--;
+                    spawnParticles(tx * TILE_SIZE + TILE_SIZE/2, ty * TILE_SIZE + TILE_SIZE/2, '#fff', 4);
                     updateInventoryUI();
                 }
             }
         }
     }
 
-    function spawnParticles(x, y, color) {
-        for (let i = 0; i < 5; i++) {
+    function spawnParticles(x, y, color, count=5) {
+        for (let i = 0; i < count; i++) {
             particles.push({
                 x: x, y: y,
-                vx: (Math.random() - 0.5) * 4,
-                vy: (Math.random() - 0.5) * 4,
-                life: 20,
-                color: color
+                vx: (Math.random() - 0.5) * 6,
+                vy: (Math.random() - 1) * 5,
+                life: 15 + Math.random() * 15,
+                color: color,
+                size: 3 + Math.random() * 3
             });
         }
     }
 
-    /**
-     * RENDERING
-     */
     function draw() {
-        // 1. Sky & Background
+        // Sky
         let brightness = 1.0;
-        if (time > DAY_LENGTH * 0.6) brightness = 0.3; // Night
+        let timeRatio = time / DAY_LENGTH;
+        if (timeRatio > 0.45 && timeRatio < 0.55) brightness = 1 - (timeRatio-0.45)*10; // Sunset
+        else if (timeRatio >= 0.55 && timeRatio <= 0.9) brightness = 0.1; // Night
+        else if (timeRatio > 0.9 && timeRatio < 1.0) brightness = 0.1 + (timeRatio-0.9)*9; // Sunrise
         
-        ctx.fillStyle = `rgb(${135 * brightness}, ${206 * brightness}, ${235 * brightness})`;
+        let r = Math.floor(135 * brightness);
+        let g = Math.floor(206 * brightness);
+        let b = Math.floor(235 * brightness);
+        
+        // Stars at night
+        ctx.fillStyle = brightness < 0.3 ? '#0a0a2a' : `rgb(${r}, ${g}, ${b})`;
         ctx.fillRect(0, 0, width, height);
+        
+        if (brightness < 0.3) {
+            ctx.fillStyle = '#fff';
+            for(let i=0; i<50; i++) {
+                // Pseudo random stars based on camera pos
+                let sx = (i * 123 + camera.x * 0.1) % width;
+                let sy = (i * 321 + camera.y * 0.1) % (height/2);
+                ctx.fillRect(sx, sy, 2, 2);
+            }
+        }
 
         ctx.save();
         ctx.translate(-Math.floor(camera.x), -Math.floor(camera.y));
 
-        // 2. Draw Visible Blocks (Culling for performance)
-        let startCol = Math.floor(camera.x / TILE_SIZE);
-        let endCol = startCol + (width / TILE_SIZE) + 1;
-        let startRow = Math.floor(camera.y / TILE_SIZE);
-        let endRow = startRow + (height / TILE_SIZE) + 1;
+        let startCol = Math.max(0, Math.floor(camera.x / TILE_SIZE));
+        let endCol = Math.min(WORLD_W - 1, startCol + Math.ceil(width / TILE_SIZE));
+        let startRow = Math.max(0, Math.floor(camera.y / TILE_SIZE));
+        let endRow = Math.min(WORLD_H - 1, startRow + Math.ceil(height / TILE_SIZE));
 
         for (let y = startRow; y <= endRow; y++) {
             for (let x = startCol; x <= endCol; x++) {
@@ -399,78 +433,99 @@
                     ctx.fillStyle = COLORS[block];
                     ctx.fillRect(x * TILE_SIZE, y * TILE_SIZE, TILE_SIZE, TILE_SIZE);
                     
-                    // Simple lighting shade based on depth/surroundings
-                    ctx.fillStyle = "rgba(0,0,0,0.1)";
-                    ctx.fillRect(x * TILE_SIZE, y * TILE_SIZE, TILE_SIZE, TILE_SIZE);
+                    // Highlight top edge
+                    ctx.fillStyle = "rgba(255,255,255,0.15)";
+                    ctx.fillRect(x * TILE_SIZE, y * TILE_SIZE, TILE_SIZE, 3);
+                    // Shadow bottom/right edge
+                    ctx.fillStyle = "rgba(0,0,0,0.2)";
+                    ctx.fillRect(x * TILE_SIZE + TILE_SIZE - 3, y * TILE_SIZE, 3, TILE_SIZE);
+                    ctx.fillRect(x * TILE_SIZE, y * TILE_SIZE + TILE_SIZE - 3, TILE_SIZE, 3);
                 }
             }
         }
 
-        // 3. Draw Player
-        ctx.fillStyle = 'red';
-        ctx.fillRect(player.x, player.y, player.w, player.h);
-        // Eyes
-        ctx.fillStyle = 'white';
-        if (player.vx >= 0) ctx.fillRect(player.x + 12, player.y + 4, 4, 4);
-        else ctx.fillRect(player.x + 4, player.y + 4, 4, 4);
+        // Draw Player (Modernized slightly)
+        ctx.fillStyle = '#e74c3c';
+        ctx.beginPath();
+        ctx.roundRect(player.x, player.y, player.w, player.h, 4);
+        ctx.fill();
+        
+        // Eyes/Visor
+        ctx.fillStyle = '#fff';
+        let eyeX = player.facingRight ? player.x + 12 : player.x + 4;
+        ctx.fillRect(eyeX, player.y + 6, 8, 4);
+        ctx.fillStyle = '#3498db'; // pupil
+        ctx.fillRect(player.facingRight ? eyeX + 4 : eyeX, player.y + 6, 4, 4);
 
-        // 4. Draw Particles
+        // Particles
         for (let p of particles) {
             ctx.fillStyle = p.color;
-            ctx.fillRect(p.x, p.y, 4, 4);
+            ctx.globalAlpha = p.life / 30;
+            ctx.fillRect(p.x, p.y, p.size, p.size);
+            ctx.globalAlpha = 1.0;
         }
 
-        // 5. Selection Highlight
-        let cx = player.x + player.w / 2;
-        let dir = player.vx >= 0 ? 1 : -1;
-        if (Math.abs(player.vx) < 0.1) dir = keys.lastDir || 1;
-        let tx = Math.floor((cx + dir * TILE_SIZE) / TILE_SIZE);
-        let ty = Math.floor((player.y + player.h / 2) / TILE_SIZE);
-        
-        ctx.strokeStyle = 'white';
+        // Selection Highlight
+        let {tx, ty} = getTargetTile();
+        ctx.strokeStyle = 'rgba(255, 255, 255, 0.7)';
         ctx.lineWidth = 2;
         ctx.strokeRect(tx * TILE_SIZE, ty * TILE_SIZE, TILE_SIZE, TILE_SIZE);
 
         ctx.restore();
 
-        // 6. Day/Night Overlay UI
-        document.getElementById('debug').innerText = `Time: ${Math.floor(time)}`;
+        // UI Updates
+        let now = performance.now();
+        fps = Math.round(1000 / (now - lastTime));
+        lastTime = now;
+        
+        let timeOfDay = brightness > 0.5 ? "Day" : (brightness > 0.3 ? "Dusk/Dawn" : "Night");
+        document.getElementById('debug').innerText = `FPS: ${fps} | ${timeOfDay}`;
     }
 
-    /**
-     * UI & CONTROLS
-     */
     function updateInventoryUI() {
         const bar = document.getElementById('inventory-bar');
         bar.innerHTML = '';
         
-        // Pickaxe Slot
         let pickDiv = document.createElement('div');
         pickDiv.className = selectedBlock === 0 ? 'slot active' : 'slot';
         pickDiv.innerText = '⛏️';
-        pickDiv.onclick = () => { selectedBlock = 0; updateInventoryUI(); };
+        pickDiv.onclick = () => { selectedBlock = 0; updateInventoryUI(); updateActionBtn(); };
         bar.appendChild(pickDiv);
 
-        // Block Slots
         for (let id in inventory) {
             if (inventory[id] > 0) {
                 let div = document.createElement('div');
                 div.className = selectedBlock == id ? 'slot active' : 'slot';
                 div.style.backgroundColor = COLORS[id];
                 div.innerHTML = `<span>${inventory[id]}</span>`;
-                div.onclick = () => { selectedBlock = id; updateInventoryUI(); };
+                div.onclick = () => { selectedBlock = id; updateInventoryUI(); updateActionBtn(); };
                 bar.appendChild(div);
             }
+        }
+    }
+    
+    function updateActionBtn() {
+        let btn = document.getElementById('btn-interact');
+        if (selectedBlock === 0) {
+            btn.style.background = 'var(--danger)';
+            btn.innerText = "MINE";
+            btn.style.boxShadow = '0 5px 15px rgba(231, 76, 60, 0.5)';
+        } else {
+            btn.style.background = 'var(--accent)';
+            btn.innerText = "PLACE";
+            btn.style.boxShadow = '0 5px 15px rgba(46, 204, 113, 0.5)';
         }
     }
 
     function setupBtn(id, key) {
         const el = document.getElementById(id);
-        el.addEventListener('touchstart', (e) => { e.preventDefault(); keys[key] = true; if(key=='left') keys.lastDir=-1; if(key=='right') keys.lastDir=1; });
-        el.addEventListener('touchend', (e) => { e.preventDefault(); keys[key] = false; });
-        // Mouse for PC testing
-        el.addEventListener('mousedown', () => { keys[key] = true; if(key=='left') keys.lastDir=-1; if(key=='right') keys.lastDir=1; });
-        el.addEventListener('mouseup', () => { keys[key] = false; });
+        const press = (e) => { e.preventDefault(); keys[key] = true; };
+        const release = (e) => { e.preventDefault(); keys[key] = false; };
+        el.addEventListener('touchstart', press);
+        el.addEventListener('touchend', release);
+        el.addEventListener('mousedown', press);
+        el.addEventListener('mouseup', release);
+        el.addEventListener('mouseleave', release);
     }
 
     setupBtn('btn-left', 'left');
@@ -478,21 +533,6 @@
     setupBtn('btn-up', 'up');
     setupBtn('btn-interact', 'action');
 
-    // Change action button text based on mode
-    setInterval(() => {
-        let btn = document.getElementById('btn-interact');
-        if (selectedBlock === 0) {
-            btn.style.backgroundColor = '#e74c3c';
-            btn.innerText = "MINE";
-        } else {
-            btn.style.backgroundColor = '#27ae60';
-            btn.innerText = "PLACE";
-        }
-    }, 100);
-
-    /**
-     * GAME LOOP
-     */
     initWorld();
     
     function loop() {
@@ -500,7 +540,7 @@
         draw();
         requestAnimationFrame(loop);
     }
-    loop();
+    requestAnimationFrame(loop);
 
 </script>
 </body>

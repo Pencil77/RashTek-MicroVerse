@@ -7,6 +7,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="theme-color" content="#241b14">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;800<title>Temple Runner</title>display=swap" rel="stylesheet">
 <title>Temple Runner</title>
 <style>
   :root{
@@ -19,8 +20,8 @@
     width:100%; height:100%;
     position:fixed; inset:0;
     overflow:hidden;
-    background:#000;
-    font-family:'Trebuchet MS','Segoe UI',sans-serif;
+    background:#0f172a;
+    font-family: 'Poppins', sans-serif;
     -webkit-tap-highlight-color:transparent;
     user-select:none;
     touch-action:none;
@@ -29,7 +30,7 @@
   #game-wrap{
     position:relative; width:100%; height:100%;
     display:flex; align-items:center; justify-content:center;
-    background:#000;
+    background:#0f172a;
     padding-top:env(safe-area-inset-top);
     padding-bottom:env(safe-area-inset-bottom);
   }
@@ -52,9 +53,9 @@
     font-weight:bold;
     text-shadow:0 2px 4px rgba(0,0,0,0.7);
   }
-  #score-box{ color:var(--gold-bright); font-size:22px; letter-spacing:1px; }
+  #score-box{ color: #38bdf8; font-size:22px; letter-spacing:1px; }
   #best-box{ color:#e6d5c3; font-size:12px; margin-top:4px; font-weight:normal; }
-  #coin-box{ color:var(--gold-bright); font-size:18px; display:flex; align-items:center; gap:6px; }
+  #coin-box{ color: #38bdf8; font-size:18px; display:flex; align-items:center; gap:6px; }
   #combo-box{ color:#ff8a5c; font-size:13px; margin-top:4px; height:16px; }
 
   #pause-btn{
@@ -65,14 +66,14 @@
   .overlay{
     position:absolute; inset:0;
     display:flex; flex-direction:column; align-items:center; justify-content:center;
-    background:radial-gradient(ellipse at center, rgba(20,10,5,0.55), rgba(5,2,1,0.94));
+    background:rgba(15, 23, 42, 0.85); backdrop-filter: blur(8px);
     color:#f4e6cf; text-align:center; padding:20px;
   }
   .hidden{ display:none !important; }
   .title{
-    font-size:clamp(30px,7vw,54px); letter-spacing:4px; color:var(--gold-bright);
+    font-size:clamp(30px,7vw,54px); letter-spacing:4px; color: #38bdf8;
     text-shadow:0 0 18px rgba(255,200,90,0.5), 0 4px 0 #5a3a12;
-    margin:0 0 6px 0; font-family:Georgia,'Times New Roman',serif;
+    margin:0 0 6px 0; font-family: 'Poppins', sans-serif;
   }
   .subtitle{ font-size:13px; color:#c9b190; margin-bottom:24px; letter-spacing:2px; text-transform:uppercase; }
   .btn{
@@ -88,9 +89,9 @@
     border:2px solid #6a5636; margin-top:14px; font-size:14px; padding:10px 26px;
   }
   .instructions{ margin-top:24px; font-size:13px; color:#b39c7d; line-height:1.8; max-width:320px; }
-  .instructions b{ color:var(--gold-bright); }
+  .instructions b{ color: #38bdf8; }
   .final-score{ font-size:18px; margin:6px 0; color:#f4e6cf; }
-  .final-score span{ color:var(--gold-bright); font-size:24px; }
+  .final-score span{ color: #38bdf8; font-size:24px; }
   .new-best{ color:#ff8a5c; font-size:13px; letter-spacing:1px; margin-top:2px; height:16px; }
 
   #controls-mobile{ position:absolute; bottom:0; left:0; right:0; display:none; }

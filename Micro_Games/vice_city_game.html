@@ -1,64 +1,144 @@
-
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Termux Retro 3D</title>
+    <meta charset="UTF-8">
+    <title>Retro 3D Engine | Microverse</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <link href="https://fonts.googleapis.com/css2?family=VT323&display=swap" rel="stylesheet">
     <style>
+        :root {
+            --primary: #ff0055;
+            --secondary: #00f0ff;
+        }
+
         body { 
             margin: 0; background: #000; overflow: hidden; 
-            font-family: 'Courier New', monospace; touch-action: none; 
+            font-family: 'VT323', monospace; touch-action: none; 
+            color: #fff;
         }
-        canvas { display: block; width: 100%; height: 100%; }
         
-        /* UI OVERLAY */
-        #ui { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; }
+        canvas { 
+            display: block; 
+            width: 100%; 
+            height: 100%; 
+            image-rendering: pixelated; 
+        }
         
-        #debug { position: absolute; top: 10px; left: 10px; color: #0f0; background: rgba(0,0,0,0.5); padding: 5px; }
+        #ui { 
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; 
+            box-shadow: inset 0 0 50px rgba(0,0,0,0.8);
+        }
+        
+        #hud-top {
+            position: absolute; top: 15px; right: 15px; 
+            text-align: right; text-transform: uppercase;
+        }
+        
+        .hud-stat {
+            font-size: 24px;
+            text-shadow: 2px 2px 0 #000;
+            color: var(--secondary);
+            margin-bottom: 5px;
+        }
+
+        #debug { 
+            position: absolute; bottom: 10px; left: 50%; transform: translateX(-50%);
+            color: rgba(255,255,255,0.5); font-size: 16px; 
+        }
 
         /* CONTROLS */
-        .control-zone { position: absolute; bottom: 20px; width: 120px; height: 120px; pointer-events: auto; }
-        #stick-left { left: 20px; background: rgba(255, 255, 255, 0.1); border-radius: 50%; border: 2px solid rgba(255,255,255,0.3); }
-        #stick-right { right: 20px; background: rgba(255, 255, 255, 0.1); border-radius: 50%; border: 2px solid rgba(255,255,255,0.3); }
+        .control-zone { 
+            position: absolute; bottom: 30px; width: 120px; height: 120px; pointer-events: auto; 
+        }
+        
+        #stick-left { 
+            left: 30px; 
+            background: radial-gradient(circle, rgba(255,255,255,0.05), rgba(255,255,255,0.1)); 
+            border-radius: 50%; 
+            border: 2px solid rgba(0, 240, 255, 0.3); 
+            box-shadow: 0 0 20px rgba(0, 240, 255, 0.1);
+        }
+        
+        #stick-right { 
+            right: 30px; 
+            background: radial-gradient(circle, rgba(255,255,255,0.05), rgba(255,255,255,0.1)); 
+            border-radius: 50%; 
+            border: 2px solid rgba(255, 0, 85, 0.3); 
+            box-shadow: 0 0 20px rgba(255, 0, 85, 0.1);
+        }
         
         .knob { 
-            width: 50px; height: 50px; background: rgba(255, 255, 255, 0.5); border-radius: 50%; 
+            width: 40px; height: 40px; 
+            border-radius: 50%; 
             position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
             pointer-events: none;
+            transition: background 0.2s;
         }
+        
+        #knob-l { background: rgba(0, 240, 255, 0.6); box-shadow: 0 0 10px var(--secondary); }
+        #knob-r { background: rgba(255, 0, 85, 0.6); box-shadow: 0 0 10px var(--primary); }
 
         #crosshair {
-            position: absolute; top: 50%; left: 50%; width: 20px; height: 20px;
+            position: absolute; top: 50%; left: 50%; width: 24px; height: 24px;
             transform: translate(-50%, -50%); pointer-events: none;
         }
-        .ch-line { background: #0f0; position: absolute; }
+        .ch-line { background: rgba(255,255,255,0.8); position: absolute; box-shadow: 0 0 5px rgba(0,0,0,0.5); }
     
         .game-nav {
             position: fixed;
-            top: 10px;
-            left: 10px;
+            top: 15px;
+            left: 15px;
             z-index: 9999;
             text-decoration: none;
             color: #fff;
-            background: rgba(0,0,0,0.45);
-            border: 1px solid rgba(255,255,255,0.25);
-            padding: 7px 11px;
-            border-radius: 999px;
-            font-size: 13px;
+            background: rgba(0,0,0,0.6);
+            border: 1px solid rgba(255,255,255,0.2);
+            padding: 8px 16px;
+            border-radius: 4px;
+            font-size: 18px;
             backdrop-filter: blur(4px);
+            transition: all 0.2s;
+            pointer-events: auto;
+            text-transform: uppercase;
+            box-shadow: 2px 2px 0 var(--primary);
         }
-        .game-nav:hover { background: rgba(0,0,0,0.6); }
+        
+        .game-nav:hover { 
+            background: rgba(255,0,85,0.2); 
+            transform: translate(-2px, -2px);
+            box-shadow: 4px 4px 0 var(--primary);
+        }
+
+        /* Screen Glitch overlay */
+        .scanlines {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
+            background-size: 100% 4px, 3px 100%;
+            pointer-events: none;
+            z-index: 5;
+        }
     </style>
 </head>
 <body>
-    <a href="index.html" class="game-nav">← Games</a>
+    <a href="index.html" class="game-nav">← ESC</a>
 
+    <div class="scanlines"></div>
 
     <div id="ui">
-        <div id="debug">Generating World...</div>
+        <div id="hud-top">
+            <div class="hud-stat" id="fps-counter">FPS: 60</div>
+            <div class="hud-stat" style="color: #fff">HP: 100</div>
+        </div>
+        
+        <div id="debug">Pos: 0,0</div>
+        
         <div id="crosshair">
-            <div class="ch-line" style="width: 2px; height: 20px; left: 9px; top: 0;"></div>
-            <div class="ch-line" style="width: 20px; height: 2px; top: 9px; left: 0;"></div>
+            <div class="ch-line" style="width: 4px; height: 10px; left: 10px; top: 0;"></div>
+            <div class="ch-line" style="width: 4px; height: 10px; left: 10px; bottom: 0;"></div>
+            <div class="ch-line" style="width: 10px; height: 4px; top: 10px; left: 0;"></div>
+            <div class="ch-line" style="width: 10px; height: 4px; top: 10px; right: 0;"></div>
+            <div class="ch-line" style="width: 4px; height: 4px; top: 10px; left: 10px; background: var(--primary);"></div>
         </div>
         
         <div id="stick-left" class="control-zone">
@@ -73,156 +153,183 @@
     <canvas id="screen"></canvas>
 
 <script>
-    // --- ENGINE CONSTANTS ---
     const canvas = document.getElementById('screen');
-    const ctx = canvas.getContext('2d', { alpha: false }); // Optimize
+    const ctx = canvas.getContext('2d', { alpha: false, willReadFrequently: false }); 
     
-    // Resolution (Low res for retro feel & high FPS)
+    // Resolution (Low res for retro feel & performance)
     const SCREEN_W = 320;
     const SCREEN_H = 200;
     canvas.width = SCREEN_W;
     canvas.height = SCREEN_H;
+    
+    // Disable smoothing for pixelated look
+    ctx.imageSmoothingEnabled = false;
 
     // --- GAME STATE ---
-    const mapWidth = 32;
-    const mapHeight = 32;
-    let map = []; // 0 = empty, >0 = colored wall
+    const mapWidth = 24;
+    const mapHeight = 24;
+    let map = []; 
 
     let player = {
-        x: 16.5, y: 16.5,
-        dir: 0,        // Direction in radians
-        rotSpeed: 0,   // Current rotation speed
-        moveSpeed: 0   // Current movement speed
+        x: 12.5, y: 12.5,
+        dir: 0,
+        moveSpeed: 0
     };
 
-    // FOV settings
-    const FOV = Math.PI / 3;
-    const BLOCK_SIZE = 64; // For math scaling
-
-    // Generate Random City Map
     function initMap() {
         for (let y = 0; y < mapHeight; y++) {
             let row = [];
             for (let x = 0; x < mapWidth; x++) {
-                // Borders are walls
                 if (x === 0 || x === mapWidth - 1 || y === 0 || y === mapHeight - 1) {
-                    row.push(1);
+                    row.push(1); // Border wall
                 } else {
-                    // Random blocks (City buildings)
-                    if (Math.random() < 0.15) row.push(Math.floor(Math.random() * 4) + 1); // 1-4 color types
+                    // Random blocks
+                    if (Math.random() < 0.2) row.push(Math.floor(Math.random() * 4) + 1);
                     else row.push(0);
                 }
             }
             map.push(row);
         }
         // Clear spawn area
-        map[16][16] = 0; map[15][16] = 0; map[17][16] = 0;
-        map[16][15] = 0; map[16][17] = 0;
+        map[12][12] = 0; map[11][12] = 0; map[13][12] = 0;
+        map[12][11] = 0; map[12][13] = 0;
     }
 
-    // --- INPUT HANDLING (Touch Joysticks) ---
+    // --- INPUT HANDLING ---
     let input = { fwd: 0, strafe: 0, rot: 0 };
     
     function setupJoystick(id, knobId, callback) {
         const zone = document.getElementById(id);
         const knob = document.getElementById(knobId);
         let startX, startY;
+        let active = false;
         
-        zone.addEventListener('touchstart', e => {
+        const handleStart = (e) => {
             e.preventDefault();
-            startX = e.touches[0].clientX;
-            startY = e.touches[0].clientY;
-        }, {passive: false});
-
-        zone.addEventListener('touchmove', e => {
+            active = true;
+            let touch = e.touches ? e.touches[0] : e;
+            startX = touch.clientX;
+            startY = touch.clientY;
+            knob.style.transform = `translate(-50%, -50%) scale(1.2)`;
+        };
+        
+        const handleMove = (e) => {
+            if(!active) return;
             e.preventDefault();
-            const x = e.touches[0].clientX;
-            const y = e.touches[0].clientY;
+            let touch = e.touches ? e.touches[0] : e;
             
-            let dx = x - startX;
-            let dy = y - startY;
+            let dx = touch.clientX - startX;
+            let dy = touch.clientY - startY;
             
-            // Limit knob distance
             const max = 40;
             const dist = Math.sqrt(dx*dx + dy*dy);
             if(dist > max) { dx = (dx/dist)*max; dy = (dy/dist)*max; }
             
-            knob.style.transform = `translate(-50%, -50%) translate(${dx}px, ${dy}px)`;
-            
-            // Normalize -1 to 1
+            knob.style.transform = `translate(-50%, -50%) translate(${dx}px, ${dy}px) scale(1.2)`;
             callback(dx / max, dy / max);
-        }, {passive: false});
-
-        zone.addEventListener('touchend', e => {
-            e.preventDefault();
-            knob.style.transform = `translate(-50%, -50%)`;
+        };
+        
+        const handleEnd = (e) => {
+            active = false;
+            knob.style.transform = `translate(-50%, -50%) scale(1)`;
             callback(0, 0);
-        });
+        };
+
+        zone.addEventListener('touchstart', handleStart, {passive: false});
+        zone.addEventListener('touchmove', handleMove, {passive: false});
+        zone.addEventListener('touchend', handleEnd);
+        zone.addEventListener('touchcancel', handleEnd);
+        
+        // Mouse fallback for desktop testing
+        zone.addEventListener('mousedown', handleStart);
+        window.addEventListener('mousemove', handleMove);
+        window.addEventListener('mouseup', handleEnd);
     }
 
-    // Left Stick: Forward/Back (Y)
     setupJoystick('stick-left', 'knob-l', (x, y) => {
-        input.fwd = -y; // Up is negative Y on screen, but positive movement
+        input.fwd = -y; 
+        input.strafe = x;
     });
 
-    // Right Stick: Rotate (X)
     setupJoystick('stick-right', 'knob-r', (x, y) => {
         input.rot = x;
     });
 
-    // --- RAYCASTING ENGINE ---
+    // Keyboard fallback
+    document.addEventListener('keydown', e => {
+        if(e.key==='w'||e.key==='ArrowUp') input.fwd = 1;
+        if(e.key==='s'||e.key==='ArrowDown') input.fwd = -1;
+        if(e.key==='a') input.strafe = -1;
+        if(e.key==='d') input.strafe = 1;
+        if(e.key==='ArrowLeft') input.rot = -1;
+        if(e.key==='ArrowRight') input.rot = 1;
+    });
+    document.addEventListener('keyup', e => {
+        if(e.key==='w'||e.key==='s'||e.key==='ArrowUp'||e.key==='ArrowDown') input.fwd = 0;
+        if(e.key==='a'||e.key==='d') input.strafe = 0;
+        if(e.key==='ArrowLeft'||e.key==='ArrowRight') input.rot = 0;
+    });
+
+    // --- RAYCASTING ---
+    // Pre-calculate gradient for synthwave sky
+    const skyGradient = ctx.createLinearGradient(0, 0, 0, SCREEN_H/2);
+    skyGradient.addColorStop(0, "#000022");
+    skyGradient.addColorStop(0.5, "#4a004a");
+    skyGradient.addColorStop(1, "#ff0055");
+
+    // Floor grid styling
+    function drawBackground(pitch) {
+        // Sky
+        ctx.fillStyle = skyGradient;
+        ctx.fillRect(0, 0, SCREEN_W, SCREEN_H/2 + pitch);
+        
+        // Floor
+        ctx.fillStyle = '#0a0a0a';
+        ctx.fillRect(0, SCREEN_H/2 + pitch, SCREEN_W, SCREEN_H);
+        
+        // Horizon line glow
+        ctx.fillStyle = 'rgba(0, 240, 255, 0.5)';
+        ctx.fillRect(0, SCREEN_H/2 + pitch, SCREEN_W, 2);
+    }
+
     function castRays() {
-        // Floor & Ceiling (Simple fill)
-        ctx.fillStyle = '#333'; // Ceiling
-        ctx.fillRect(0, 0, SCREEN_W, SCREEN_H / 2);
-        ctx.fillStyle = '#111'; // Floor
-        ctx.fillRect(0, SCREEN_H / 2, SCREEN_W, SCREEN_H / 2);
+        const pitch = 0; // Look up/down (can add later)
+        
+        drawBackground(pitch);
 
-        for (let x = 0; x < SCREEN_W; x+=2) { // Skip 1 pixel for performance (320x200 is effectively 160 rays)
-            // Calculate ray position and direction
-            const cameraX = 2 * x / SCREEN_W - 1; // x-coordinate in camera space
-            const rayDirX = Math.cos(player.dir) + Math.cos(player.dir + Math.PI/2) * cameraX * 0.66; // 0.66 is FOV scale
-            const rayDirY = Math.sin(player.dir) + Math.sin(player.dir + Math.PI/2) * cameraX * 0.66;
+        const zBuffer = new Float32Array(SCREEN_W);
 
-            // Which box of the map we're in
+        for (let x = 0; x < SCREEN_W; x++) { 
+            const cameraX = 2 * x / SCREEN_W - 1; 
+            const rayDirX = Math.cos(player.dir) + Math.cos(player.dir + Math.PI/2) * cameraX * 0.7; // Wider FOV
+            const rayDirY = Math.sin(player.dir) + Math.sin(player.dir + Math.PI/2) * cameraX * 0.7;
+
             let mapX = Math.floor(player.x);
             let mapY = Math.floor(player.y);
 
-            // Length of ray from current position to next x or y-side
-            let sideDistX;
-            let sideDistY;
-
-            // Length of ray from one x or y-side to next x or y-side
+            let sideDistX, sideDistY;
             const deltaDistX = Math.abs(1 / rayDirX);
             const deltaDistY = Math.abs(1 / rayDirY);
             let perpWallDist;
 
-            // What direction to step in x or y-direction (either +1 or -1)
-            let stepX;
-            let stepY;
-
-            let hit = 0; // was there a wall hit?
-            let side; // was a NS or a EW wall hit?
+            let stepX, stepY;
+            let hit = 0; 
+            let side; 
             let wallType = 1;
 
             if (rayDirX < 0) {
-                stepX = -1;
-                sideDistX = (player.x - mapX) * deltaDistX;
+                stepX = -1; sideDistX = (player.x - mapX) * deltaDistX;
             } else {
-                stepX = 1;
-                sideDistX = (mapX + 1.0 - player.x) * deltaDistX;
+                stepX = 1; sideDistX = (mapX + 1.0 - player.x) * deltaDistX;
             }
             if (rayDirY < 0) {
-                stepY = -1;
-                sideDistY = (player.y - mapY) * deltaDistY;
+                stepY = -1; sideDistY = (player.y - mapY) * deltaDistY;
             } else {
-                stepY = 1;
-                sideDistY = (mapY + 1.0 - player.y) * deltaDistY;
+                stepY = 1; sideDistY = (mapY + 1.0 - player.y) * deltaDistY;
             }
 
-            // DDA Algorithm
             let depth = 0;
-            while (hit === 0 && depth < 20) { // Max depth 20 blocks
+            while (hit === 0 && depth < 24) { 
                 if (sideDistX < sideDistY) {
                     sideDistX += deltaDistX;
                     mapX += stepX;
@@ -232,73 +339,115 @@
                     mapY += stepY;
                     side = 1;
                 }
-                if (map[mapY][mapX] > 0) {
-                    hit = 1;
-                    wallType = map[mapY][mapX];
+                
+                // Bounds check
+                if(mapY >= 0 && mapY < mapHeight && mapX >= 0 && mapX < mapWidth) {
+                    if (map[mapY][mapX] > 0) {
+                        hit = 1;
+                        wallType = map[mapY][mapX];
+                    }
+                } else {
+                    hit = 1; // Hit outer bounds
                 }
                 depth++;
             }
 
-            // Calculate distance projected on camera direction (Fish-eye correction)
             if (side === 0) perpWallDist = (mapX - player.x + (1 - stepX) / 2) / rayDirX;
             else            perpWallDist = (mapY - player.y + (1 - stepY) / 2) / rayDirY;
 
-            // Calculate height of line to draw on screen
+            zBuffer[x] = perpWallDist;
+
             const lineHeight = Math.floor(SCREEN_H / perpWallDist);
 
-            // Calculate lowest and highest pixel to fill in current stripe
-            let drawStart = -lineHeight / 2 + SCREEN_H / 2;
+            let drawStart = -lineHeight / 2 + SCREEN_H / 2 + pitch;
             if (drawStart < 0) drawStart = 0;
-            let drawEnd = lineHeight / 2 + SCREEN_H / 2;
+            let drawEnd = lineHeight / 2 + SCREEN_H / 2 + pitch;
             if (drawEnd >= SCREEN_H) drawEnd = SCREEN_H - 1;
 
-            // Choose wall color
-            let color;
+            // Retro neon colors based on wall type
+            let baseR, baseG, baseB;
             switch(wallType) {
-                case 1: color = '#e74c3c'; break; // Red
-                case 2: color = '#3498db'; break; // Blue
-                case 3: color = '#2ecc71'; break; // Green
-                case 4: color = '#f1c40f'; break; // Yellow
-                default: color = '#fff';
+                case 1: baseR = 255; baseG = 0; baseB = 85; break;   // Neon Pink
+                case 2: baseR = 0; baseG = 240; baseB = 255; break;  // Neon Cyan
+                case 3: baseR = 170; baseG = 0; baseB = 255; break;  // Purple
+                case 4: baseR = 255; baseG = 255; baseB = 0; break;  // Yellow
+                default: baseR = 200; baseG = 200; baseB = 200;
             }
 
-            // Darken side walls for pseudo-3D effect
+            // Darken sides for depth
             if (side === 1) {
-                // Parse hex to darken slightly (lazy way: just reset to grey for side)
-                color = '#7f8c8d'; 
+                baseR *= 0.6; baseG *= 0.6; baseB *= 0.6;
             }
 
-            // Draw the vertical strip (2px wide)
-            ctx.fillStyle = color;
-            ctx.fillRect(x, drawStart, 2, drawEnd - drawStart);
+            // Distance fog (fade to black)
+            const maxDepth = 15;
+            let fogFactor = Math.max(0, 1 - (perpWallDist / maxDepth));
+            
+            baseR = Math.floor(baseR * fogFactor);
+            baseG = Math.floor(baseG * fogFactor);
+            baseB = Math.floor(baseB * fogFactor);
+
+            ctx.fillStyle = `rgb(${baseR}, ${baseG}, ${baseB})`;
+            ctx.fillRect(x, drawStart, 1, drawEnd - drawStart);
+            
+            // Wall wireframe / grid line effect (every block boundary)
+            let wallX = side === 0 ? player.y + perpWallDist * rayDirY : player.x + perpWallDist * rayDirX;
+            wallX -= Math.floor(wallX);
+            
+            // Draw block borders
+            if (wallX < 0.05 || wallX > 0.95 || drawStart > (SCREEN_H/2-10) && (drawStart%10 < 1)) {
+                ctx.fillStyle = 'rgba(0,0,0,0.5)';
+                ctx.fillRect(x, drawStart, 1, drawEnd - drawStart);
+            }
         }
     }
 
     // --- GAME LOOP ---
     let lastTime = 0;
+    let frames = 0;
+    let lastFpsTime = 0;
+
+    const debugEl = document.getElementById('debug');
+    const fpsEl = document.getElementById('fps-counter');
 
     function gameLoop(timestamp) {
-        const dt = (timestamp - lastTime) / 1000;
+        if(!lastTime) lastTime = timestamp;
+        const dt = Math.min((timestamp - lastTime) / 1000, 0.1); // Cap dt
         lastTime = timestamp;
 
-        // 1. Update Player
-        const moveSpeed = 3.0 * dt; // tiles per second
-        const rotSpeed = 2.0 * dt;  // radians per second
+        frames++;
+        if(timestamp - lastFpsTime >= 1000) {
+            fpsEl.textContent = `FPS: ${frames}`;
+            frames = 0;
+            lastFpsTime = timestamp;
+        }
 
-        // Rotation
+        // 1. Update Player
+        const moveSpeed = 4.0 * dt; 
+        const rotSpeed = 3.0 * dt;
+
         if (input.rot !== 0) {
             player.dir += input.rot * rotSpeed;
         }
 
-        // Movement
-        if (input.fwd !== 0) {
-            const moveStep = input.fwd * moveSpeed;
-            const newX = player.x + Math.cos(player.dir) * moveStep;
-            const newY = player.y + Math.sin(player.dir) * moveStep;
+        if (input.fwd !== 0 || input.strafe !== 0) {
+            // Forward movement
+            let dx = Math.cos(player.dir) * input.fwd * moveSpeed;
+            let dy = Math.sin(player.dir) * input.fwd * moveSpeed;
+            
+            // Strafing
+            dx += Math.cos(player.dir + Math.PI/2) * input.strafe * moveSpeed;
+            dy += Math.sin(player.dir + Math.PI/2) * input.strafe * moveSpeed;
 
-            // Simple collision
-            if (map[Math.floor(newY)][Math.floor(newX)] === 0) {
+            const newX = player.x + dx;
+            const newY = player.y + dy;
+            
+            const buffer = 0.2; // wall collision padding
+
+            if (map[Math.floor(player.y)][Math.floor(newX + Math.sign(dx)*buffer)] === 0) {
                 player.x = newX;
+            }
+            if (map[Math.floor(newY + Math.sign(dy)*buffer)][Math.floor(player.x)] === 0) {
                 player.y = newY;
             }
         }
@@ -306,9 +455,7 @@
         // 2. Render
         castRays();
         
-        // Debug info
-        document.getElementById('debug').innerText = 
-            `Pos: ${Math.floor(player.x)},${Math.floor(player.y)}`;
+        debugEl.innerText = `POS: ${player.x.toFixed(1)}, ${player.y.toFixed(1)}`;
 
         requestAnimationFrame(gameLoop);
     }

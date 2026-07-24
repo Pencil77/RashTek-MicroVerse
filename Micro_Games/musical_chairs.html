@@ -1,231 +1,381 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Musical Chairs</title>
+    <title>Musical Chairs - MicroVerse</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;500;700;900&display=swap" rel="stylesheet">
     <style>
+        :root {
+            --bg-grad-1: #0f2027;
+            --bg-grad-2: #203a43;
+            --bg-grad-3: #2c5364;
+            --primary: #00d2ff;
+            --secondary: #3a7bd5;
+            --accent: #ff007f;
+            --glass-bg: rgba(255, 255, 255, 0.05);
+            --glass-border: rgba(255, 255, 255, 0.1);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Poppins', sans-serif;
+        }
+
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #1a1a1a;
-            color: white;
+            background: linear-gradient(135deg, var(--bg-grad-1), var(--bg-grad-2), var(--bg-grad-3));
+            background-size: 400% 400%;
+            animation: gradientBG 15s ease infinite;
+            color: #fff;
+            min-height: 100vh;
             display: flex;
             flex-direction: column;
             align-items: center;
-            min-height: 100vh;
-            margin: 0;
-            padding: 20px;
+            justify-content: center;
+            overflow-x: hidden;
         }
 
-        h1 { color: #f1c40f; margin-bottom: 20px; }
-
-        .container {
-            background: #2c3e50;
-            padding: 25px;
-            border-radius: 15px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-            width: 90%;
-            max-width: 500px;
-            text-align: center;
+        @keyframes gradientBG {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
         }
 
-        .input-group { margin-bottom: 15px; text-align: left; }
-        label { display: block; margin-bottom: 5px; font-size: 14px; color: #bdc3c7; }
-        
-        input[type="text"] {
-            width: 100%;
-            padding: 12px;
-            background: #34495e;
-            border: 1px solid #7f8c8d;
-            border-radius: 5px;
-            color: white;
-            font-size: 16px;
-            box-sizing: border-box; 
-        }
-
-        .row { display: flex; gap: 10px; flex-wrap: wrap;}
-        .col { flex: 1; min-width: 100px; }
-
-        /* Time Input Style */
-        .time-input-wrapper {
-            position: relative;
-            background: #34495e;
-            border: 1px solid #7f8c8d;
-            border-radius: 5px;
+        .game-nav {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            z-index: 1000;
+            text-decoration: none;
+            color: #fff;
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            padding: 10px 20px;
+            border-radius: 50px;
+            font-size: 14px;
+            font-weight: 500;
+            backdrop-filter: blur(10px);
+            transition: all 0.3s ease;
             display: flex;
             align-items: center;
+            gap: 8px;
         }
-        .time-input {
-            background: transparent; border: none; color: white;
-            width: 100%; padding: 12px; font-size: 16px; text-align: center;
+
+        .game-nav:hover {
+            background: rgba(255,255,255,0.15);
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+        }
+
+        .container {
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: 24px;
+            padding: 40px;
+            width: 90%;
+            max-width: 800px;
+            backdrop-filter: blur(20px);
+            box-shadow: 0 25px 50px rgba(0,0,0,0.3);
+            text-align: center;
+            animation: slideUp 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(40px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        h1 {
+            font-size: 3rem;
+            font-weight: 900;
+            margin-bottom: 10px;
+            background: linear-gradient(to right, var(--primary), var(--accent));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 0 10px 20px rgba(0,0,0,0.2);
+        }
+
+        p.subtitle {
+            font-size: 1.1rem;
+            color: rgba(255,255,255,0.7);
+            margin-bottom: 30px;
+        }
+
+        .input-group {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            margin-bottom: 30px;
+            text-align: left;
+        }
+
+        .input-row {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+        
+        .input-field {
+            flex: 1;
+            min-width: 150px;
+        }
+
+        label {
+            font-size: 0.9rem;
+            color: rgba(255,255,255,0.8);
+            margin-bottom: 8px;
+            display: block;
+            font-weight: 500;
+        }
+
+        input {
+            width: 100%;
+            padding: 15px;
+            background: rgba(0,0,0,0.2);
+            border: 1px solid var(--glass-border);
+            border-radius: 12px;
+            color: #fff;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            outline: none;
+        }
+
+        input:focus {
+            background: rgba(0,0,0,0.4);
+            border-color: var(--primary);
+            box-shadow: 0 0 15px rgba(0, 210, 255, 0.3);
         }
 
         button {
-            background: #e74c3c;
+            background: linear-gradient(135deg, var(--secondary), var(--primary));
             color: white;
             border: none;
-            padding: 15px;
-            width: 100%;
-            font-size: 18px;
-            font-weight: bold;
-            border-radius: 8px;
+            padding: 16px 32px;
+            font-size: 1.2rem;
+            font-weight: 700;
+            border-radius: 50px;
             cursor: pointer;
-            margin-top: 10px;
-            transition: transform 0.1s;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            box-shadow: 0 10px 20px rgba(0, 210, 255, 0.3);
+            width: 100%;
+            max-width: 300px;
+            margin: 0 auto;
+            display: block;
         }
-        button:active { transform: scale(0.98); }
-        button:disabled { background: #7f8c8d; cursor: not-allowed; }
 
-        .playlist-controls {
-            display: flex; gap: 10px; margin-top: 10px; display: none;
+        button:hover {
+            transform: translateY(-3px) scale(1.02);
+            box-shadow: 0 15px 25px rgba(0, 210, 255, 0.4);
         }
-        .btn-nav { background: #2980b9; font-size: 16px; padding: 10px; }
+        
+        button:active {
+            transform: translateY(1px);
+        }
+        
+        button:disabled {
+            background: rgba(255,255,255,0.1);
+            color: rgba(255,255,255,0.3);
+            cursor: not-allowed;
+            box-shadow: none;
+            transform: none;
+        }
 
-        #status {
+        .controls {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
             margin-top: 20px;
-            font-size: 18px;
-            font-weight: bold;
-            color: #2ecc71;
-            min-height: 24px;
         }
-        .stop-info { color: #e74c3c !important; font-size: 20px !important; }
 
-        .video-wrapper {
-            position: relative; padding-bottom: 56.25%; height: 0;
-            margin-top: 20px; border-radius: 10px; overflow: hidden;
-            border: 2px solid #555; display: none;
+        .btn-small {
+            padding: 10px 20px;
+            font-size: 1rem;
+            width: auto;
+            background: rgba(255,255,255,0.1);
+            box-shadow: none;
+            border: 1px solid var(--glass-border);
         }
-        .video-wrapper iframe { position: absolute; top: 0; left: 0; width: 100%; height: 100%; }
-    
-        .game-nav {
-            position: fixed;
-            top: 10px;
-            left: 10px;
-            z-index: 9999;
-            text-decoration: none;
-            color: #fff;
-            background: rgba(0,0,0,0.45);
-            border: 1px solid rgba(255,255,255,0.25);
-            padding: 7px 11px;
-            border-radius: 999px;
-            font-size: 13px;
-            backdrop-filter: blur(4px);
+        
+        .btn-small:hover {
+            background: rgba(255,255,255,0.2);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
         }
-        .game-nav:hover { background: rgba(0,0,0,0.6); }
+
+        .status-box {
+            margin-top: 30px;
+            padding: 20px;
+            background: rgba(0,0,0,0.3);
+            border-radius: 16px;
+            font-size: 1.2rem;
+            font-weight: 600;
+            transition: all 0.3s;
+            border: 1px solid transparent;
+        }
+        
+        .status-playing {
+            color: var(--primary);
+            border-color: rgba(0, 210, 255, 0.3);
+            animation: pulse 2s infinite;
+        }
+        
+        .status-stopped {
+            color: var(--accent);
+            border-color: rgba(255, 0, 127, 0.3);
+        }
+        
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(0, 210, 255, 0.4); }
+            70% { box-shadow: 0 0 0 15px rgba(0, 210, 255, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(0, 210, 255, 0); }
+        }
+
+        .video-container {
+            margin-top: 30px;
+            border-radius: 16px;
+            overflow: hidden;
+            display: none;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.5);
+            position: relative;
+            padding-bottom: 56.25%; /* 16:9 Aspect Ratio */
+            height: 0;
+        }
+
+        .video-container iframe {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
     </style>
 </head>
 <body>
-    <a href="index.html" class="game-nav">← Games</a>
-
-
-    <h1>🎵 Musical Chairs</h1>
+    <a href="index.html" class="game-nav">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
+        Games Hub
+    </a>
 
     <div class="container">
+        <h1>Musical Chairs</h1>
+        <p class="subtitle">Enter a YouTube link and set random durations to start the ultimate party game!</p>
+
         <div class="input-group">
-            <label>YouTube Link (Video or Playlist):</label>
-            <input type="text" id="yt-link" placeholder="Paste YouTube link here..." value="https://youtube.com/playlist?list=PL9bw4S5ePsEF-J_tIORZ6xE_OXkGuKjjY&si=Edxn98n3lSnAFFsi">
-        </div>
-
-        <div class="row">
-            <div class="col input-group">
-                <label>Start From (MM:SS):</label>
-                <div class="time-input-wrapper">
-                    <input type="text" class="time-input" id="start-time" placeholder="0:05" value="0:05">
+            <div class="input-field">
+                <label>YouTube Video or Playlist Link</label>
+                <input type="text" id="yt-link" placeholder="e.g. https://youtu.be/..." />
+            </div>
+            
+            <div class="input-row">
+                <div class="input-field">
+                    <label>Start Time (m:s)</label>
+                    <input type="text" id="start-time" value="0:00" />
+                </div>
+                <div class="input-field">
+                    <label>Min Duration (m:s)</label>
+                    <input type="text" id="min-time" value="0:05" />
+                </div>
+                <div class="input-field">
+                    <label>Max Duration (m:s)</label>
+                    <input type="text" id="max-time" value="0:15" />
                 </div>
             </div>
         </div>
 
-        <div class="row">
-            <div class="col input-group">
-                <label>Min Duration (MM:SS):</label>
-                <div class="time-input-wrapper">
-                    <input type="text" class="time-input" id="min-time" placeholder="0:10" value="0:10">
-                </div>
-            </div>
-            <div class="col input-group">
-                <label>Max Duration (MM:SS):</label>
-                <div class="time-input-wrapper">
-                    <input type="text" class="time-input" id="max-time" placeholder="0:30" value="0:30">
-                </div>
-            </div>
+        <button id="play-btn" onclick="startRandomPlay()">Start Game 🎵</button>
+
+        <div id="playlist-nav" class="controls" style="display:none;">
+            <button class="btn-small" onclick="prevVideo()">⏮ Prev</button>
+            <button class="btn-small" onclick="nextVideo()">Next ⏭</button>
         </div>
 
-        <button id="play-btn" onclick="startRandomPlay()">▶ LOAD & PLAY</button>
-        
-        <div class="playlist-controls" id="playlist-nav">
-            <button class="btn-nav" onclick="prevVideo()">⏮ Prev Song</button>
-            <button class="btn-nav" onclick="nextVideo()">Next Song ⏭</button>
-        </div>
+        <div id="status" class="status-box" style="display:none;">Ready to play!</div>
 
-        <div id="status">Ready</div>
-
-        <div class="video-wrapper" id="video-box">
+        <div id="video-box" class="video-container">
             <div id="player"></div>
         </div>
     </div>
 
+    <!-- YouTube Iframe API -->
+    <script src="https://www.youtube.com/iframe_api"></script>
     <script>
-        var tag = document.createElement('script');
-        tag.src = "https://www.youtube.com/iframe_api";
-        var firstScriptTag = document.getElementsByTagName('script')[0];
-        firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+        let player;
+        let currentRandomDuration = 0;
+        let timerInterval = null;
+        let isApiReady = false;
+        let isPlaylist = false;
+        let shouldSkipIntro = false;
 
-        var player;
-        var currentRandomDuration = 0;
-        var timerInterval = null;
-        var isApiReady = false;
-        var isPlaylist = false;
-        var shouldSkipIntro = false; 
-
-        function onYouTubeIframeAPIReady() { isApiReady = true; }
+        function onYouTubeIframeAPIReady() { 
+            isApiReady = true; 
+        }
 
         function parseTime(input) {
             if (!input) return 0;
             if (!input.includes(':')) return parseInt(input) || 0;
-            var parts = input.split(':');
-            var m = parseInt(parts[0]) || 0;
-            var s = parseInt(parts[1]) || 0;
+            const parts = input.split(':');
+            const m = parseInt(parts[0]) || 0;
+            const s = parseInt(parts[1]) || 0;
             return (m * 60) + s;
         }
 
         function parseYouTubeUrl(url) {
-            var regExp = /^.*((youtu.be\/)|(v\/)|(\/u\/\w\/)|(embed\/)|(watch\?))\??v?=?([^#&?]*).*/;
-            var match = url.match(regExp);
-            var videoId = (match && match[7].length == 11) ? match[7] : false;
-            var listMatch = url.match(/[?&]list=([^#&?]+)/);
-            var listId = listMatch ? listMatch[1] : false;
-            return { videoId: videoId, listId: listId };
+            const regExp = /^.*((youtu.be\/)|(v\/)|(\/u\/\w\/)|(embed\/)|(watch\?))\??v?=?([^#&?]*).*/;
+            const match = url.match(regExp);
+            const videoId = (match && match[7].length == 11) ? match[7] : false;
+            const listMatch = url.match(/[?&]list=([^#&?]+)/);
+            const listId = listMatch ? listMatch[1] : false;
+            return { videoId, listId };
+        }
+
+        function updateStatus(msg, stateClass = '') {
+            const statusEl = document.getElementById('status');
+            statusEl.style.display = 'block';
+            statusEl.innerHTML = msg;
+            statusEl.className = 'status-box ' + stateClass;
         }
 
         function startRandomPlay() {
-            if (!isApiReady) { alert("YouTube API loading..."); return; }
+            if (!isApiReady) { 
+                alert("YouTube API is still loading. Please try again in a second."); 
+                return; 
+            }
 
-            var url = document.getElementById('yt-link').value;
-            if (!url) { alert("Please paste a link first!"); return; }
+            const url = document.getElementById('yt-link').value.trim();
+            if (!url) { 
+                alert("Please paste a valid YouTube link first!"); 
+                return; 
+            }
 
-            var startSec = parseTime(document.getElementById('start-time').value);
-            var minSec = parseTime(document.getElementById('min-time').value);
-            var maxSec = parseTime(document.getElementById('max-time').value);
+            const startSec = parseTime(document.getElementById('start-time').value);
+            const minSec = parseTime(document.getElementById('min-time').value);
+            const maxSec = parseTime(document.getElementById('max-time').value);
 
-            if (minSec >= maxSec) { alert("Min duration must be less than Max!"); return; }
+            if (minSec >= maxSec) { 
+                alert("Max Duration must be strictly greater than Min Duration!"); 
+                return; 
+            }
 
-            var ids = parseYouTubeUrl(url);
-            if (!ids.videoId && !ids.listId) { alert("Invalid YouTube URL"); return; }
+            const ids = parseYouTubeUrl(url);
+            if (!ids.videoId && !ids.listId) { 
+                alert("Invalid YouTube URL"); 
+                return; 
+            }
 
             isPlaylist = !!ids.listId;
             document.getElementById('playlist-nav').style.display = isPlaylist ? 'flex' : 'none';
             document.getElementById('video-box').style.display = 'block';
             document.getElementById('play-btn').disabled = true;
-            document.getElementById('status').innerText = "Loading...";
-
-            // Initial Random Time Calculation
+            
+            updateStatus("Loading Video...", "");
             prepareRandomTimer();
 
-            var playerConfig = {
-                height: '360',
-                width: '640',
-                playerVars: { 'start': startSec, 'autoplay': 1 },
+            const playerConfig = {
+                playerVars: { 'start': startSec, 'autoplay': 1, 'controls': 1 },
                 events: {
                     'onReady': onPlayerReady,
                     'onStateChange': onPlayerStateChange
@@ -235,7 +385,7 @@
             if (player && typeof player.loadVideoById === 'function') {
                 if (isPlaylist) {
                     player.loadPlaylist({list: ids.listId, listType: 'playlist', index: 0, startSeconds: startSec});
-                    player.setShuffle(true); // Enable Shuffle
+                    player.setShuffle(true);
                 } else {
                     player.loadVideoById({videoId: ids.videoId, startSeconds: startSec});
                 }
@@ -252,83 +402,73 @@
         }
 
         function prepareRandomTimer() {
-            var minSec = parseTime(document.getElementById('min-time').value);
-            var maxSec = parseTime(document.getElementById('max-time').value);
-            // Calculate random duration
+            const minSec = parseTime(document.getElementById('min-time').value);
+            const maxSec = parseTime(document.getElementById('max-time').value);
             currentRandomDuration = Math.floor(Math.random() * (maxSec - minSec + 1)) + minSec;
         }
 
         function onPlayerReady(event) {
-            if(isPlaylist) event.target.setShuffle(true); // Shuffle on init
-            
-            var startSec = parseTime(document.getElementById('start-time').value);
+            if(isPlaylist) event.target.setShuffle(true);
+            const startSec = parseTime(document.getElementById('start-time').value);
             event.target.seekTo(startSec);
             event.target.playVideo();
             startTracking();
         }
 
         function onPlayerStateChange(event) {
-            // State 1 = PLAYING
             if (event.data === YT.PlayerState.PLAYING) {
-                // Force jump to start time if skipping tracks
                 if (shouldSkipIntro) {
-                    var startSec = parseTime(document.getElementById('start-time').value);
+                    const startSec = parseTime(document.getElementById('start-time').value);
                     player.seekTo(startSec);
                     shouldSkipIntro = false; 
-                    
                     prepareRandomTimer();
                     startTracking();
                 }
-            }
-
-            if (event.data === YT.PlayerState.ENDED) {
-                clearInterval(timerInterval);
-                document.getElementById('status').innerText = "Finished.";
+            } else if (event.data === YT.PlayerState.ENDED) {
+                if(timerInterval) clearInterval(timerInterval);
+                updateStatus("Finished.", "");
                 document.getElementById('play-btn').disabled = false;
+                document.getElementById('play-btn').innerText = "Play Again 🎵";
             }
         }
 
         function startTracking() {
             if (timerInterval) clearInterval(timerInterval);
 
-            var startSec = parseTime(document.getElementById('start-time').value);
-            var hasStarted = false;
-            var targetTimestamp = 0; // The video timestamp where we stop
+            const startSec = parseTime(document.getElementById('start-time').value);
+            let hasStarted = false;
+            let targetTimestamp = 0;
 
-            document.getElementById('status').innerText = "Buffering...";
-            document.getElementById('status').className = "";
+            updateStatus("Buffering...", "");
 
-            timerInterval = setInterval(function() {
+            timerInterval = setInterval(() => {
                 if (!player || !player.getCurrentTime) return;
 
-                var currentTime = player.getCurrentTime();
-                var playerState = player.getPlayerState();
+                const currentTime = player.getCurrentTime();
+                const playerState = player.getPlayerState();
 
-                if (playerState === 1) { // Playing
+                if (playerState === 1) { 
                     if (!hasStarted) {
-                        // Wait until we are close to the start time (or past it)
                         if(Math.abs(currentTime - startSec) < 2 || currentTime > startSec) {
                             hasStarted = true;
-                            // ALIGNMENT FIX: Strictly add duration to user's Start Time
                             targetTimestamp = startSec + currentRandomDuration;
                         }
                     }
 
                     if (hasStarted) {
-                        document.getElementById('status').innerText = "Playing... 🎵";
-                        document.getElementById('status').style.color = "#2ecc71";
+                        updateStatus("Music is Playing... 🕺💃", "status-playing");
 
                         if (currentTime >= targetTimestamp) {
                             player.pauseVideo();
                             clearInterval(timerInterval);
                             
-                            var playedTime = (currentTime - startSec).toFixed(1);
-                            var stopStamp = currentTime.toFixed(1);
+                            const playedTime = (currentTime - startSec).toFixed(1);
                             
-                            // Updated Display Logic to avoid confusion
-                            document.getElementById('status').innerHTML = "🛑 PLAYED for " + playedTime + "s <br><span style='font-size:16px'>(Stopped at " + stopStamp + "s)</span>";
-                            document.getElementById('status').className = "stop-info";
-                            document.getElementById('play-btn').disabled = false;
+                            updateStatus(`🛑 STOP! Find a chair!<br><span style="font-size:0.9rem; font-weight:400; opacity:0.8;">Played for ${playedTime}s</span>`, "status-stopped");
+                            
+                            const btn = document.getElementById('play-btn');
+                            btn.disabled = false;
+                            btn.innerText = "Next Round 🎵";
                         }
                     }
                 }
@@ -353,10 +493,8 @@
 
         function updateUIForSkip() {
             document.getElementById('play-btn').disabled = true;
-            document.getElementById('status').className = "";
-            document.getElementById('status').innerText = "Skipping track...";
+            updateStatus("Skipping track...", "");
         }
-
     </script>
 </body>
 </html>

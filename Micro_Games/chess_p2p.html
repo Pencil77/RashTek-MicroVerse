@@ -1,42 +1,193 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+    <meta charset="UTF-8">
     <title>P2P Serverless Chess</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://unpkg.com/@chrisoakman/chessboardjs@1.0.0/dist/chessboard-1.0.0.min.css">
     <style>
-        body { background: #222; color: #eee; font-family: monospace; display: flex; flex-direction: column; align-items: center; margin: 0; padding: 10px; }
-        h2 { color: #f1c40f; margin: 5px; }
+        :root {
+            --bg-grad-1: #0f2027;
+            --bg-grad-2: #203a43;
+            --bg-grad-3: #2c5364;
+            --glass-bg: rgba(255, 255, 255, 0.1);
+            --glass-border: rgba(255, 255, 255, 0.2);
+            --primary: #00f2fe;
+            --secondary: #4facfe;
+            --accent: #f1c40f;
+            --danger: #e74c3c;
+            --success: #2ecc71;
+            --text-main: #f8f9fa;
+        }
+        body { 
+            background: linear-gradient(135deg, var(--bg-grad-1), var(--bg-grad-2), var(--bg-grad-3));
+            color: var(--text-main); 
+            font-family: 'Poppins', sans-serif; 
+            display: flex; 
+            flex-direction: column; 
+            align-items: center; 
+            margin: 0; 
+            padding: 20px;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+        h2 { 
+            color: var(--primary); 
+            margin: 10px 0; 
+            font-weight: 800;
+            text-shadow: 0 4px 10px rgba(0,0,0,0.3);
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
         
-        #game-area { display: none; width: 100%; max-width: 400px; }
-        #board { width: 100%; margin-bottom: 10px; }
+        /* Glassmorphism utility */
+        .glass {
+            background: var(--glass-bg);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid var(--glass-border);
+            border-radius: 16px;
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+        }
+
+        #game-area { 
+            display: none; 
+            width: 100%; 
+            max-width: 450px; 
+            padding: 20px;
+            animation: fadeIn 0.5s ease;
+        }
+        #board { width: 100%; margin-bottom: 15px; border-radius: 8px; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
         
-        #lobby { background: #333; padding: 20px; border-radius: 10px; text-align: center; max-width: 350px; width: 90%; }
-        input { padding: 10px; width: 70%; border-radius: 5px; border: none; text-align: center; margin-bottom: 10px; }
-        button { padding: 10px 20px; border-radius: 5px; border: none; font-weight: bold; cursor: pointer; width: 100%; margin: 5px 0; }
-        .btn-host { background: #27ae60; color: white; }
-        .btn-join { background: #3498db; color: white; }
-        .btn-copy { background: #555; color: white; font-size: 12px; width: auto; }
+        #lobby { 
+            padding: 30px; 
+            text-align: center; 
+            max-width: 400px; 
+            width: 90%; 
+            margin-top: 20px;
+            animation: slideUp 0.6s ease;
+        }
         
-        #status { font-weight: bold; color: #e74c3c; margin-bottom: 10px; }
-        .id-box { background: #111; padding: 10px; border: 1px dashed #777; font-size: 14px; color: #f1c40f; margin: 10px 0; user-select: all; word-break: break-all; }
+        p { margin: 10px 0; font-weight: 300; }
+        
+        input { 
+            padding: 12px 15px; 
+            width: 85%; 
+            border-radius: 8px; 
+            border: 1px solid var(--glass-border); 
+            background: rgba(0,0,0,0.2);
+            color: #fff;
+            text-align: center; 
+            margin-bottom: 15px; 
+            font-family: 'Poppins', sans-serif;
+            outline: none;
+            transition: all 0.3s;
+        }
+        input:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 10px rgba(0, 242, 254, 0.3);
+        }
+        
+        button { 
+            padding: 12px 24px; 
+            border-radius: 8px; 
+            border: none; 
+            font-weight: 600; 
+            font-family: 'Poppins', sans-serif;
+            cursor: pointer; 
+            width: 100%; 
+            margin: 5px 0; 
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        }
+        button:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(0,0,0,0.3); }
+        button:active { transform: translateY(1px); }
+        
+        .btn-host { background: linear-gradient(45deg, #11998e, #38ef7d); color: white; }
+        .btn-join { background: linear-gradient(45deg, var(--secondary), var(--primary)); color: white; }
+        .btn-copy { background: rgba(255,255,255,0.1); color: white; font-size: 12px; width: auto; border: 1px solid rgba(255,255,255,0.2); }
+        .btn-copy:hover { background: rgba(255,255,255,0.2); }
+        .btn-reload { background: linear-gradient(45deg, #cb2d3e, #ef473a); color: white; }
+        
+        #status { 
+            font-weight: 600; 
+            color: var(--accent); 
+            margin-bottom: 15px; 
+            padding: 8px 15px;
+            border-radius: 20px;
+            background: rgba(0,0,0,0.3);
+            display: inline-block;
+        }
+        .id-box { 
+            background: rgba(0,0,0,0.4); 
+            padding: 12px; 
+            border-radius: 8px;
+            border: 1px dashed var(--primary); 
+            font-size: 15px; 
+            color: var(--primary); 
+            margin: 10px auto; 
+            user-select: all; 
+            word-break: break-all; 
+            font-family: monospace;
+            width: 85%;
+        }
     
         .game-nav {
             position: fixed;
-            top: 10px;
-            left: 10px;
+            top: 15px;
+            left: 15px;
             z-index: 9999;
             text-decoration: none;
             color: #fff;
             background: rgba(0,0,0,0.45);
             border: 1px solid rgba(255,255,255,0.25);
-            padding: 7px 11px;
-            border-radius: 999px;
-            font-size: 13px;
-            backdrop-filter: blur(4px);
+            padding: 8px 16px;
+            border-radius: 30px;
+            font-size: 14px;
+            font-weight: 600;
+            backdrop-filter: blur(8px);
+            transition: all 0.3s ease;
         }
-        .game-nav:hover { background: rgba(0,0,0,0.6); }
+        .game-nav:hover { background: rgba(0,0,0,0.7); transform: scale(1.05); }
+
+        .game-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            background: rgba(0,0,0,0.2);
+            padding: 10px 15px;
+            border-radius: 10px;
+        }
+        .turn-indicator {
+            font-weight: bold;
+            padding: 5px 10px;
+            border-radius: 5px;
+            background: rgba(255,255,255,0.1);
+        }
+
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.02); } 100% { transform: scale(1); } }
+
+        .game-over-overlay {
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.8);
+            display: none;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 10;
+            border-radius: 8px;
+            backdrop-filter: blur(5px);
+            animation: fadeIn 0.5s ease;
+        }
+        .game-over-overlay h3 { color: var(--accent); font-size: 24px; margin-bottom: 20px; }
     </style>
 
     <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
@@ -45,31 +196,36 @@
     <script src="https://unpkg.com/peerjs@1.4.7/dist/peerjs.min.js"></script>
 </head>
 <body>
-    <a href="index.html" class="game-nav">← Games</a>
-
+    <a href="index.html" class="game-nav">← Back to Games</a>
 
     <h2>⚡ P2P Chess</h2>
     <div id="status">Connecting to Global Network...</div>
 
-    <div id="lobby">
+    <div id="lobby" class="glass">
         <p>Your ID:</p>
         <div id="my-id" class="id-box">...</div>
         <button class="btn-copy" onclick="copyId()">Copy ID</button>
         
-        <hr style="border-color: #444; margin: 20px 0;">
+        <hr style="border: 0; height: 1px; background: rgba(255,255,255,0.1); margin: 25px 0;">
         
         <p>Challenge a Friend:</p>
         <input type="text" id="opponent-id" placeholder="Paste Opponent's ID here">
         <button class="btn-join" onclick="joinGame()">CONNECT & PLAY</button>
     </div>
 
-    <div id="game-area">
-        <div style="display:flex; justify-content:space-between; margin-bottom:5px;">
-            <span>You: <b id="my-color">?</b></span>
-            <span id="turn-display">Turn: White</span>
+    <div id="game-area" class="glass">
+        <div class="game-header">
+            <span>You: <b id="my-color" style="color:var(--primary)">?</b></span>
+            <span id="turn-display" class="turn-indicator">Turn: White</span>
         </div>
-        <div id="board"></div>
-        <button onclick="location.reload()" style="background:#c0392b; color:white;">Reload / New Game</button>
+        <div style="position: relative;">
+            <div id="board"></div>
+            <div id="game-over-screen" class="game-over-overlay">
+                <h3 id="game-over-text">Game Over!</h3>
+                <button class="btn-reload" onclick="location.reload()" style="width: 80%;">New Game</button>
+            </div>
+        </div>
+        <button class="btn-reload" onclick="location.reload()" style="margin-top: 15px;">Abandon / Reload</button>
     </div>
 
 <script>
@@ -80,33 +236,31 @@
     var myId = null;
     var myColor = 'white'; 
 
-    // --- THE FIX: ADD GOOGLE STUN SERVERS ---
     var peerConfig = {
         config: {
             'iceServers': [
                 { url: 'stun:stun.l.google.com:19302' },
-                { url: 'stun:stun1.l.google.com:19302' },
-                { url: 'stun:stun2.l.google.com:19302' }
+                { url: 'stun:stun1.l.google.com:19302' }
             ]
         }
     };
 
-    // Initialize Peer with the fix
     peer = new Peer(null, peerConfig);
 
     peer.on('open', function(id) {
         myId = id;
         document.getElementById('my-id').innerText = id;
-        document.getElementById('status').innerText = "Online. Ready.";
-        document.getElementById('status').style.color = "#2ecc71";
+        let statusEl = document.getElementById('status');
+        statusEl.innerText = "Online & Ready";
+        statusEl.style.color = "var(--success)";
+        statusEl.style.textShadow = "0 0 10px rgba(46, 204, 113, 0.5)";
     });
 
     peer.on('error', function(err) {
-        alert("Connection Error: " + err.type);
-        document.getElementById('status').innerText = "Error: " + err.type;
+        document.getElementById('status').innerText = "Connection Error";
+        document.getElementById('status').style.color = "var(--danger)";
     });
 
-    // Handle Incoming Connection
     peer.on('connection', function(c) {
         if(conn) { c.close(); return; }
         conn = c;
@@ -116,9 +270,11 @@
 
     function joinGame() {
         var otherId = document.getElementById('opponent-id').value.trim();
-        if(!otherId) { alert("Enter an ID!"); return; }
+        if(!otherId) { alert("Please enter a valid ID to connect!"); return; }
 
-        document.getElementById('status').innerText = "Connecting...";
+        let statusEl = document.getElementById('status');
+        statusEl.innerText = "Connecting...";
+        statusEl.style.color = "var(--primary)";
         
         conn = peer.connect(otherId);
         myColor = 'black'; 
@@ -127,16 +283,18 @@
             setupConnection();
         });
         
-        // If connection fails or takes too long
         setTimeout(function(){
             if(!conn.open) {
-                document.getElementById('status').innerText = "Connection taking long... (Firewall?)";
+                statusEl.innerText = "Connection timeout... Check ID.";
+                statusEl.style.color = "var(--danger)";
             }
         }, 5000);
     }
 
     function setupConnection() {
-        document.getElementById('status').innerText = "Connected!";
+        let statusEl = document.getElementById('status');
+        statusEl.innerText = "Connected! Match Started.";
+        statusEl.style.color = "var(--success)";
         startGame();
 
         conn.on('data', function(data) {
@@ -192,17 +350,36 @@
     function updateStatus() {
         var turn = game.turn() === 'w' ? 'White' : 'Black';
         var statusText = "Turn: " + turn;
-        if (game.in_checkmate()) statusText = "Game Over! " + turn + " lost.";
-        else if (game.in_draw()) statusText = "Draw!";
-        else if (game.in_check()) statusText += " (CHECK!)";
-        document.getElementById('turn-display').innerText = statusText;
+        var turnDisp = document.getElementById('turn-display');
+        
+        if (game.in_checkmate()) {
+            statusText = "Checkmate!";
+            showGameOver(turn + " lost by checkmate.");
+        } else if (game.in_draw()) {
+            statusText = "Draw!";
+            showGameOver("Game ended in a draw.");
+        } else if (game.in_check()) {
+            statusText += " (CHECK)";
+            turnDisp.style.color = "var(--danger)";
+        } else {
+            turnDisp.style.color = "var(--text-main)";
+        }
+        
+        turnDisp.innerText = statusText;
+    }
+    
+    function showGameOver(msg) {
+        document.getElementById('game-over-screen').style.display = 'flex';
+        document.getElementById('game-over-text').innerText = msg;
     }
 
     function copyId() {
         navigator.clipboard.writeText(myId);
-        alert("ID Copied!");
+        let btn = document.querySelector('.btn-copy');
+        btn.innerText = "Copied!";
+        btn.style.background = "var(--success)";
+        setTimeout(() => { btn.innerText = "Copy ID"; btn.style.background = "rgba(255,255,255,0.1)"; }, 2000);
     }
 </script>
 </body>
 </html>
-

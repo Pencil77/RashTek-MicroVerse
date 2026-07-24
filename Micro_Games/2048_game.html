@@ -1,113 +1,197 @@
-
 <!DOCTYPE html>
 <html>
 <head>
     <title>2048 Termux</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
     <style>
+        :root {
+            --bg-color: #0f172a;
+            --text-color: #f8fafc;
+            --board-bg: rgba(255, 255, 255, 0.1);
+            --tile-bg: rgba(255, 255, 255, 0.05);
+            --primary: #3b82f6;
+            --primary-hover: #2563eb;
+        }
+
         body {
-            background-color: #faf8ef;
-            color: #776e65;
-            font-family: "Clear Sans", "Helvetica Neue", Arial, sans-serif;
+            background: linear-gradient(135deg, #1e293b, #0f172a);
+            color: var(--text-color);
+            font-family: 'Poppins', sans-serif;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
             height: 100vh;
             margin: 0;
-            touch-action: none; /* Prevent scrolling */
+            touch-action: none;
+            overflow: hidden;
         }
-        h1 { font-size: 60px; margin: 0; color: #776e65; }
+        
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 320px;
+            margin-bottom: 20px;
+        }
+
+        h1 { 
+            font-size: 48px; 
+            margin: 0; 
+            background: -webkit-linear-gradient(45deg, #60a5fa, #a78bfa);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-weight: 700;
+        }
+
         .score-container {
-            background: #bbada0;
-            padding: 5px 15px;
-            border-radius: 5px;
-            color: white;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 8px 20px;
+            border-radius: 12px;
             font-size: 18px;
-            font-weight: bold;
-            margin-bottom: 10px;
+            font-weight: 600;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            text-align: center;
         }
+        .score-container span { display: block; font-size: 22px; }
+
         #game-board {
-            width: 300px;
-            height: 300px;
-            background: #bbada0;
-            border-radius: 6px;
+            width: 320px;
+            height: 320px;
+            background: var(--board-bg);
+            border-radius: 16px;
             padding: 10px;
             display: grid;
             grid-template-columns: repeat(4, 1fr);
             grid-template-rows: repeat(4, 1fr);
             gap: 10px;
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            position: relative;
         }
+        
         .tile {
             width: 100%;
             height: 100%;
-            background: #cdc1b4;
-            border-radius: 3px;
+            background: var(--tile-bg);
+            border-radius: 10px;
             display: flex;
             justify-content: center;
             align-items: center;
-            font-size: 30px;
-            font-weight: bold;
-            color: #776e65;
-            transition: transform 0.1s ease-in-out;
+            font-size: 28px;
+            font-weight: 700;
+            color: transparent;
+            transition: transform 0.15s cubic-bezier(0.4, 0, 0.2, 1), background-color 0.2s ease;
         }
         
-        /* Tile Colors */
-        .t-0 { background: #cdc1b4; color: transparent; }
-        .t-2 { background: #eee4da; }
-        .t-4 { background: #ede0c8; }
-        .t-8 { background: #f2b179; color: #f9f6f2; }
-        .t-16 { background: #f59563; color: #f9f6f2; }
-        .t-32 { background: #f67c5f; color: #f9f6f2; }
-        .t-64 { background: #f65e3b; color: #f9f6f2; }
-        .t-128 { background: #edcf72; color: #f9f6f2; font-size: 24px; }
-        .t-256 { background: #edcc61; color: #f9f6f2; font-size: 24px; }
-        .t-512 { background: #edc850; color: #f9f6f2; font-size: 24px; }
-        .t-1024 { background: #edc53f; color: #f9f6f2; font-size: 20px; }
-        .t-2048 { background: #edc22e; color: #f9f6f2; font-size: 20px; box-shadow: 0 0 10px #edc22e; }
+        /* Vibrant Tile Colors */
+        .t-0 { background: var(--tile-bg); }
+        .t-2 { background: #334155; color: #f8fafc; }
+        .t-4 { background: #475569; color: #f8fafc; }
+        .t-8 { background: #3b82f6; color: #ffffff; }
+        .t-16 { background: #8b5cf6; color: #ffffff; }
+        .t-32 { background: #d946ef; color: #ffffff; }
+        .t-64 { background: #ec4899; color: #ffffff; }
+        .t-128 { background: #f43f5e; color: #ffffff; font-size: 24px; box-shadow: 0 0 10px rgba(244,63,94,0.5); }
+        .t-256 { background: #f59e0b; color: #ffffff; font-size: 24px; box-shadow: 0 0 12px rgba(245,158,11,0.6); }
+        .t-512 { background: #10b981; color: #ffffff; font-size: 24px; box-shadow: 0 0 14px rgba(16,185,129,0.7); }
+        .t-1024 { background: #06b6d4; color: #ffffff; font-size: 20px; box-shadow: 0 0 16px rgba(6,182,212,0.8); }
+        .t-2048 { background: #facc15; color: #000000; font-size: 20px; box-shadow: 0 0 20px rgba(250,204,21,1); }
 
-        .controls { margin-top: 20px; font-size: 14px; color: #777; }
-        button {
-            background: #8f7a66; color: white; border: none; padding: 10px 20px;
-            font-size: 18px; border-radius: 5px; cursor: pointer; margin-top: 10px;
+        .new-tile { animation: pop 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+        @keyframes pop {
+            0% { transform: scale(0); }
+            50% { transform: scale(1.2); }
+            100% { transform: scale(1); }
         }
+
+        .controls { margin-top: 24px; font-size: 14px; color: #cbd5e1; opacity: 0.8; }
+        button.new-game {
+            background: linear-gradient(135deg, var(--primary), var(--primary-hover));
+            color: white; 
+            border: none; 
+            padding: 12px 28px;
+            font-size: 18px; 
+            font-weight: 600;
+            border-radius: 30px; 
+            cursor: pointer; 
+            margin-top: 24px;
+            box-shadow: 0 4px 15px rgba(59, 130, 246, 0.4);
+            transition: all 0.2s ease;
+            font-family: inherit;
+        }
+        button.new-game:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(59, 130, 246, 0.6); }
+        button.new-game:active { transform: translateY(1px); }
     
         .game-nav {
             position: fixed;
-            top: 10px;
-            left: 10px;
+            top: 15px;
+            left: 15px;
             z-index: 9999;
             text-decoration: none;
             color: #fff;
-            background: rgba(0,0,0,0.45);
-            border: 1px solid rgba(255,255,255,0.25);
-            padding: 7px 11px;
-            border-radius: 999px;
-            font-size: 13px;
+            background: rgba(255,255,255,0.1);
+            border: 1px solid rgba(255,255,255,0.2);
+            padding: 8px 16px;
+            border-radius: 30px;
+            font-size: 14px;
+            font-weight: 600;
+            backdrop-filter: blur(8px);
+            transition: background 0.2s;
+        }
+        .game-nav:hover { background: rgba(255,255,255,0.2); }
+
+        .overlay {
+            position: absolute;
+            inset: 0;
+            background: rgba(15, 23, 42, 0.85);
+            border-radius: 16px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 10;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
             backdrop-filter: blur(4px);
         }
-        .game-nav:hover { background: rgba(0,0,0,0.6); }
+        .overlay.active { opacity: 1; pointer-events: all; }
+        .overlay h2 { font-size: 36px; margin-bottom: 10px; color: #f8fafc; }
+        .overlay .final-score { font-size: 20px; color: #94a3b8; margin-bottom: 20px; }
     </style>
 </head>
 <body>
     <a href="index.html" class="game-nav">← Games</a>
 
-
-    <div style="display:flex; justify-content:space-between; width: 300px; align-items:center;">
+    <div class="header">
         <h1>2048</h1>
-        <div class="score-container">Score: <span id="score">0</span></div>
+        <div class="score-container">Score<span id="score">0</span></div>
     </div>
 
-    <div id="game-board"></div>
+    <div id="game-board">
+        <div class="overlay" id="game-over">
+            <h2>Game Over!</h2>
+            <div class="final-score">Score: <span id="final-score">0</span></div>
+            <button class="new-game" onclick="initGame()">Try Again</button>
+        </div>
+    </div>
 
-    <button onclick="initGame()">New Game</button>
-    <div class="controls">Swipe to move tiles</div>
+    <button class="new-game" onclick="initGame()">New Game</button>
+    <div class="controls">Swipe or use arrow keys to move tiles</div>
 
     <script>
         const boardElement = document.getElementById('game-board');
         const scoreElement = document.getElementById('score');
+        const gameOverEl = document.getElementById('game-over');
+        const finalScoreEl = document.getElementById('final-score');
         let board = [];
         let score = 0;
+        let tilesMap = new Map();
 
         function initGame() {
             board = [
@@ -118,6 +202,13 @@
             ];
             score = 0;
             scoreElement.innerText = "0";
+            gameOverEl.classList.remove('active');
+            
+            // Clear board visually (except overlay)
+            Array.from(boardElement.children).forEach(child => {
+                if(child.id !== 'game-over') child.remove();
+            });
+
             spawnTile();
             spawnTile();
             drawBoard();
@@ -137,19 +228,21 @@
         }
 
         function drawBoard() {
-            boardElement.innerHTML = "";
+            // Keep the overlay
+            Array.from(boardElement.children).forEach(child => {
+                if(child.id !== 'game-over') child.remove();
+            });
+
             for (let r = 0; r < 4; r++) {
                 for (let c = 0; c < 4; c++) {
                     let val = board[r][c];
                     let tile = document.createElement("div");
                     tile.className = "tile t-" + (val > 2048 ? "2048" : val);
-                    tile.innerText = val > 0 ? val : "";
+                    if(val > 0) tile.innerText = val;
                     boardElement.appendChild(tile);
                 }
             }
         }
-
-        // --- Game Logic ---
 
         function slide(row) {
             let arr = row.filter(val => val);
@@ -171,6 +264,7 @@
         }
 
         function move(dir) {
+            if(gameOverEl.classList.contains('active')) return;
             let oldBoard = JSON.stringify(board);
             
             if (dir === 'left' || dir === 'right') {
@@ -203,23 +297,20 @@
         }
 
         function checkGameOver() {
-            // Check for empty spots
             for(let r=0; r<4; r++)
                 for(let c=0; c<4; c++)
                     if(board[r][c] == 0) return;
 
-            // Check for merges
             for(let r=0; r<4; r++) {
                 for(let c=0; c<4; c++) {
                     if(c<3 && board[r][c] == board[r][c+1]) return;
                     if(r<3 && board[r][c] == board[r+1][c]) return;
                 }
             }
-            alert("Game Over! Score: " + score);
+            finalScoreEl.innerText = score;
+            gameOverEl.classList.add('active');
         }
 
-        // --- Controls (Keyboard & Touch) ---
-        
         document.addEventListener('keydown', (e) => {
             if (e.key === "ArrowLeft") move('left');
             if (e.key === "ArrowRight") move('right');
@@ -227,7 +318,6 @@
             if (e.key === "ArrowDown") move('down');
         });
 
-        // Touch Swipe Logic
         let touchStartX = 0;
         let touchStartY = 0;
 
@@ -235,6 +325,8 @@
             touchStartX = e.touches[0].clientX;
             touchStartY = e.touches[0].clientY;
         }, {passive: false});
+
+        document.addEventListener('touchmove', (e) => { e.preventDefault(); }, {passive: false}); // Prevent scroll
 
         document.addEventListener('touchend', (e) => {
             if(!touchStartX || !touchStartY) return;
