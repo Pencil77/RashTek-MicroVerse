@@ -2,8 +2,10 @@ import os
 import re
 
 # --- CONFIGURATION ---
-# We use '..' to point to the parent directory (the folder containing 'python_based_games')
-PARENT_DIR = ".." 
+# Output goes to the folder that contains 'python_based_games', resolved
+# relative to this script so it works no matter where you run it from.
+SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+PARENT_DIR = os.path.dirname(SCRIPT_DIR)
 
 # 1. SETUP THE INDEX HTML HEADER
 index_content = """
@@ -33,19 +35,19 @@ index_content = """
     <div class="game-container">
 """
 
-print(f"--- 🔄 Converting Games to Parent Directory ({os.path.abspath(PARENT_DIR)}) ---")
+print(f"--- 🔄 Converting Games to Parent Directory ({PARENT_DIR}) ---")
 
-# 2. SCAN CURRENT FOLDER (.) FOR ALL PYTHON FILES
-files = [f for f in os.listdir('.') if f.endswith('.py')]
+# 2. SCAN THIS SCRIPT'S FOLDER FOR ALL PYTHON FILES
+files = [f for f in os.listdir(SCRIPT_DIR) if f.endswith('.py')]
 files.sort()
 
 count = 0
 
 for py_file in files:
-    if py_file == "convert_games.py":
+    if py_file == os.path.basename(__file__):
         continue
 
-    with open(py_file, 'r', encoding='utf-8') as f:
+    with open(os.path.join(SCRIPT_DIR, py_file), 'r', encoding='utf-8') as f:
         content = f.read()
 
     # 3. LOOK FOR THE HTML TEMPLATE

@@ -1,0 +1,16 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+
+# Local databases (created when running the terminal-based games)
+*.db
+*.sqlite3
+
+# OS / editor noise
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/

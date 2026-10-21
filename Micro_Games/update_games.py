@@ -1411,11 +1411,19 @@ mario_code = """<!DOCTYPE html>
 </body>
 </html>"""
 
-with open('/home/mrzoromit3/projects/RashTek-MicroVerse/Micro_Games/chess_p2p.html', 'w') as f:
-    f.write(chess_code)
+# Write output next to this script so the paths work on any machine.
+import os
 
-with open('/home/mrzoromit3/projects/RashTek-MicroVerse/Micro_Games/craft_game.html', 'w') as f:
-    f.write(craft_code)
+_GAMES_DIR = os.path.dirname(os.path.abspath(__file__))
 
-with open('/home/mrzoromit3/projects/RashTek-MicroVerse/Micro_Games/mario_game.html', 'w') as f:
-    f.write(mario_code)
+_outputs = {
+    'chess_p2p.html': chess_code,
+    'craft_game.html': craft_code,
+    'mario_game.html': mario_code,
+}
+
+for _name, _code in _outputs.items():
+    _path = os.path.join(_GAMES_DIR, _name)
+    with open(_path, 'w', encoding='utf-8') as f:
+        f.write(_code)
+    print(f"Wrote {_path}")
