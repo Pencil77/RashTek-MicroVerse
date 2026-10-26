@@ -255,6 +255,96 @@
     </div>
 
 <script>
+    // --- NEON SHOOTER WEB AUDIO SYNTHESIZER ---
+    class ShooterAudio {
+        constructor() {
+            this.ctx = null;
+        }
+        init() {
+            try {
+                if (!this.ctx) {
+                    const AC = window.AudioContext || window.webkitAudioContext;
+                    if (AC) this.ctx = new AC();
+                }
+                if (this.ctx && this.ctx.state === 'suspended') {
+                    this.ctx.resume();
+                }
+            } catch (err) {
+                console.warn('Audio init error:', err);
+            }
+        }
+        playLaser() {
+            if (!this.ctx) return;
+            try {
+                const now = this.ctx.currentTime;
+                const osc = this.ctx.createOscillator();
+                const gain = this.ctx.createGain();
+                osc.type = 'sawtooth';
+                osc.frequency.setValueAtTime(880, now);
+                osc.frequency.exponentialRampToValueAtTime(140, now + 0.08);
+                gain.gain.setValueAtTime(0.12, now);
+                gain.gain.exponentialRampToValueAtTime(0.01, now + 0.08);
+                osc.connect(gain);
+                gain.connect(this.ctx.destination);
+                osc.start(now);
+                osc.stop(now + 0.08);
+            } catch (err) {}
+        }
+        playExplosion(isTank) {
+            if (!this.ctx) return;
+            try {
+                const now = this.ctx.currentTime;
+                const osc = this.ctx.createOscillator();
+                const gain = this.ctx.createGain();
+                osc.type = 'sawtooth';
+                osc.frequency.setValueAtTime(isTank ? 120 : 180, now);
+                osc.frequency.exponentialRampToValueAtTime(30, now + (isTank ? 0.35 : 0.18));
+                gain.gain.setValueAtTime(isTank ? 0.35 : 0.18, now);
+                gain.gain.exponentialRampToValueAtTime(0.01, now + (isTank ? 0.35 : 0.18));
+                osc.connect(gain);
+                gain.connect(this.ctx.destination);
+                osc.start(now);
+                osc.stop(now + (isTank ? 0.35 : 0.18));
+            } catch (err) {}
+        }
+        playPlayerHit() {
+            if (!this.ctx) return;
+            try {
+                const now = this.ctx.currentTime;
+                const osc = this.ctx.createOscillator();
+                const gain = this.ctx.createGain();
+                osc.type = 'square';
+                osc.frequency.setValueAtTime(240, now);
+                osc.frequency.exponentialRampToValueAtTime(60, now + 0.25);
+                gain.gain.setValueAtTime(0.25, now);
+                gain.gain.exponentialRampToValueAtTime(0.01, now + 0.25);
+                osc.connect(gain);
+                gain.connect(this.ctx.destination);
+                osc.start(now);
+                osc.stop(now + 0.25);
+            } catch (err) {}
+        }
+        playGameOver() {
+            if (!this.ctx) return;
+            try {
+                const now = this.ctx.currentTime;
+                [300, 260, 220, 160].forEach((freq, idx) => {
+                    const osc = this.ctx.createOscillator();
+                    const gain = this.ctx.createGain();
+                    osc.type = 'triangle';
+                    osc.frequency.setValueAtTime(freq, now + idx * 0.14);
+                    gain.gain.setValueAtTime(0.2, now + idx * 0.14);
+                    gain.gain.exponentialRampToValueAtTime(0.001, now + idx * 0.14 + 0.22);
+                    osc.connect(gain);
+                    gain.connect(this.ctx.destination);
+                    osc.start(now + idx * 0.14);
+                    osc.stop(now + idx * 0.14 + 0.22);
+                });
+            } catch (err) {}
+        }
+    }
+    const shooterAudio = new ShooterAudio();
+
     const canvas = document.getElementById("gameCanvas");
     const ctx = canvas.getContext("2d");
 
@@ -636,9 +726,24 @@
     // --- INPUT HANDLING ---
     function setupBtn(id, key) {
         const el = document.getElementById(id);
-        el.addEventListener('touchstart', (e) => { e.preventDefault(); keys[key] = true; });
-        el.addEventListener('touchend', (e) => { e.preventDefault(); keys[key] = false; });
-        el.addEventListener('mousedown', () => { keys[key] = true; });
+        if (!el) return;
+        el.addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            shooterAudio.init();
+            keys[key] = true;
+        }, { passive: false });
+        el.addEventListener('touchend', (e) => {
+            e.preventDefault();
+            keys[key] = false;
+        }, { passive: false });
+        el.addEventListener('touchcancel', (e) => {
+            e.preventDefault();
+            keys[key] = false;
+        }, { passive: false });
+        el.addEventListener('mousedown', () => {
+            shooterAudio.init();
+            keys[key] = true;
+        });
         el.addEventListener('mouseup', () => { keys[key] = false; });
         el.addEventListener('mouseleave', () => { keys[key] = false; });
     }
