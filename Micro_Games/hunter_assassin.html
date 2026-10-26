@@ -7,13 +7,13 @@
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;800;900&family=Rajdhani:wght@500;700&display=swap" rel="stylesheet">
     <style>
         :root {
-            --bg-dark: #0a0c10;
+            --bg-dark: #080a0f;
             --neon-cyan: #00f0ff;
             --neon-red: #ff2a5f;
             --neon-yellow: #ffd000;
             --neon-green: #00ff88;
-            --panel-bg: rgba(14, 18, 27, 0.85);
-            --border-glow: rgba(0, 240, 255, 0.25);
+            --panel-bg: rgba(13, 17, 26, 0.88);
+            --border-glow: rgba(0, 240, 255, 0.28);
         }
 
         * {
@@ -44,7 +44,7 @@
             max-width: 100%;
             max-height: 100%;
             overflow: hidden;
-            background: #0d0f14;
+            background: #0b0d12;
         }
 
         canvas {
@@ -78,11 +78,11 @@
             border: 1px solid var(--border-glow);
             padding: 8px 16px;
             border-radius: 20px;
-            backdrop-filter: blur(8px);
+            backdrop-filter: blur(10px);
             display: flex;
             align-items: center;
             gap: 8px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+            box-shadow: 0 4px 18px rgba(0,0,0,0.6);
         }
 
         .hud-label {
@@ -135,7 +135,7 @@
             display: flex;
             align-items: center;
             gap: 6px;
-            backdrop-filter: blur(8px);
+            backdrop-filter: blur(10px);
             transition: all 0.2s;
             pointer-events: auto;
         }
@@ -156,9 +156,9 @@
             height: 110px;
             border-radius: 12px;
             border: 1px solid var(--border-glow);
-            background: rgba(10, 14, 22, 0.85);
+            background: rgba(10, 14, 22, 0.88);
             box-shadow: 0 4px 20px rgba(0,0,0,0.6);
-            backdrop-filter: blur(5px);
+            backdrop-filter: blur(6px);
             pointer-events: none;
             z-index: 20;
         }
@@ -202,7 +202,7 @@
             width: 100%;
             height: 100%;
             background: rgba(6, 8, 14, 0.88);
-            backdrop-filter: blur(12px);
+            backdrop-filter: blur(14px);
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -494,12 +494,12 @@
 
 <script>
 /**
- * HUNTER ASSASSIN - TACTICAL STEALTH WEB MINI-GAME
+ * HUNTER ASSASSIN - TACTICAL STEALTH WEB MINI-GAME (ENHANCED GRAPHICS)
  * Built for RashTek MicroVerse
- * Inspired by top-down stealth assassination mechanics
+ * Stylized 2.5D visual design inspired by Ruby Games
  */
 
-// --- AUDIO SYNTHESIZER (100% Web Audio API, Zero External Assets) ---
+// --- AUDIO SYNTHESIZER ---
 class SoundSystem {
     constructor() {
         this.ctx = null;
@@ -534,7 +534,7 @@ class SoundSystem {
     playSlash() {
         if (!this.enabled || !this.ctx) return;
         const now = this.ctx.currentTime;
-        const bufferSize = this.ctx.sampleRate * 0.15;
+        const bufferSize = this.ctx.sampleRate * 0.16;
         const buffer = this.ctx.createBuffer(1, bufferSize, this.ctx.sampleRate);
         const data = buffer.getChannelData(0);
         for (let i = 0; i < bufferSize; i++) {
@@ -544,13 +544,13 @@ class SoundSystem {
         noise.buffer = buffer;
         const filter = this.ctx.createBiquadFilter();
         filter.type = 'bandpass';
-        filter.frequency.setValueAtTime(1400, now);
-        filter.frequency.exponentialRampToValueAtTime(400, now + 0.15);
-        filter.Q.value = 3.0;
+        filter.frequency.setValueAtTime(1600, now);
+        filter.frequency.exponentialRampToValueAtTime(350, now + 0.16);
+        filter.Q.value = 3.5;
 
         const gain = this.ctx.createGain();
-        gain.gain.setValueAtTime(0.4, now);
-        gain.gain.exponentialRampToValueAtTime(0.01, now + 0.15);
+        gain.gain.setValueAtTime(0.45, now);
+        gain.gain.exponentialRampToValueAtTime(0.01, now + 0.16);
 
         noise.connect(filter);
         filter.connect(gain);
@@ -565,7 +565,7 @@ class SoundSystem {
         const gain = this.ctx.createGain();
         osc.type = 'sawtooth';
         osc.frequency.setValueAtTime(450, now);
-        osc.frequency.linearRampToValueAtTime(750, now + 0.18);
+        osc.frequency.linearRampToValueAtTime(800, now + 0.18);
         gain.gain.setValueAtTime(0.2, now);
         gain.gain.exponentialRampToValueAtTime(0.01, now + 0.22);
         osc.connect(gain);
@@ -577,7 +577,7 @@ class SoundSystem {
     playGunshot() {
         if (!this.enabled || !this.ctx) return;
         const now = this.ctx.currentTime;
-        const bufferSize = this.ctx.sampleRate * 0.12;
+        const bufferSize = this.ctx.sampleRate * 0.14;
         const buffer = this.ctx.createBuffer(1, bufferSize, this.ctx.sampleRate);
         const data = buffer.getChannelData(0);
         for (let i = 0; i < bufferSize; i++) {
@@ -588,12 +588,12 @@ class SoundSystem {
 
         const osc = this.ctx.createOscillator();
         osc.type = 'sine';
-        osc.frequency.setValueAtTime(120, now);
-        osc.frequency.exponentialRampToValueAtTime(30, now + 0.1);
+        osc.frequency.setValueAtTime(140, now);
+        osc.frequency.exponentialRampToValueAtTime(25, now + 0.1);
 
         const gain = this.ctx.createGain();
-        gain.gain.setValueAtTime(0.5, now);
-        gain.gain.exponentialRampToValueAtTime(0.01, now + 0.12);
+        gain.gain.setValueAtTime(0.55, now);
+        gain.gain.exponentialRampToValueAtTime(0.01, now + 0.14);
 
         noise.connect(gain);
         osc.connect(gain);
@@ -601,7 +601,36 @@ class SoundSystem {
 
         noise.start(now);
         osc.start(now);
-        osc.stop(now + 0.12);
+        osc.stop(now + 0.14);
+    }
+
+    playExplosion() {
+        if (!this.enabled || !this.ctx) return;
+        const now = this.ctx.currentTime;
+        const bufferSize = this.ctx.sampleRate * 0.4;
+        const buffer = this.ctx.createBuffer(1, bufferSize, this.ctx.sampleRate);
+        const data = buffer.getChannelData(0);
+        for (let i = 0; i < bufferSize; i++) {
+            data[i] = (Math.random() * 2 - 1) * Math.exp(-i / (bufferSize * 0.3));
+        }
+        const noise = this.ctx.createBufferSource();
+        noise.buffer = buffer;
+
+        const osc = this.ctx.createOscillator();
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(100, now);
+        osc.frequency.exponentialRampToValueAtTime(20, now + 0.35);
+
+        const gain = this.ctx.createGain();
+        gain.gain.setValueAtTime(0.65, now);
+        gain.gain.exponentialRampToValueAtTime(0.01, now + 0.4);
+
+        noise.connect(gain);
+        osc.connect(gain);
+        gain.connect(this.ctx.destination);
+        noise.start(now);
+        osc.start(now);
+        osc.stop(now + 0.4);
     }
 
     playGem() {
@@ -613,18 +642,18 @@ class SoundSystem {
             const start = this.ctx.currentTime + idx * 0.05;
             osc.type = 'sine';
             osc.frequency.setValueAtTime(freq, start);
-            gain.gain.setValueAtTime(0.15, start);
-            gain.gain.exponentialRampToValueAtTime(0.001, start + 0.18);
+            gain.gain.setValueAtTime(0.18, start);
+            gain.gain.exponentialRampToValueAtTime(0.001, start + 0.2);
             osc.connect(gain);
             gain.connect(this.ctx.destination);
             osc.start(start);
-            osc.stop(start + 0.18);
+            osc.stop(start + 0.2);
         });
     }
 
     playVictory() {
         if (!this.enabled || !this.ctx) return;
-        const chords = [523.25, 659.25, 783.99, 1046.50]; // C5, E5, G5, C6
+        const chords = [523.25, 659.25, 783.99, 1046.50];
         chords.forEach((freq, i) => {
             const osc = this.ctx.createOscillator();
             const gain = this.ctx.createGain();
@@ -646,14 +675,14 @@ class SoundSystem {
         const osc = this.ctx.createOscillator();
         const gain = this.ctx.createGain();
         osc.type = 'sine';
-        osc.frequency.setValueAtTime(600, now);
-        osc.frequency.exponentialRampToValueAtTime(150, now + 0.15);
-        gain.gain.setValueAtTime(0.2, now);
-        gain.gain.exponentialRampToValueAtTime(0.01, now + 0.15);
+        osc.frequency.setValueAtTime(650, now);
+        osc.frequency.exponentialRampToValueAtTime(140, now + 0.16);
+        gain.gain.setValueAtTime(0.22, now);
+        gain.gain.exponentialRampToValueAtTime(0.01, now + 0.16);
         osc.connect(gain);
         gain.connect(this.ctx.destination);
         osc.start(now);
-        osc.stop(now + 0.15);
+        osc.stop(now + 0.16);
     }
 }
 
@@ -664,10 +693,10 @@ const OPERATIVES = [
     {
         id: 'stalker',
         name: 'Shadow Stalker',
-        desc: 'Balanced infiltrator with high combat resilience.',
-        speed: 3.4,
+        desc: 'Balanced infiltrator with tactical twin katanas.',
+        speed: 3.5,
         maxHp: 100,
-        dashCooldown: 2.5,
+        dashCooldown: 2.2,
         color: '#00f0ff',
         cost: 0,
         unlocked: true
@@ -676,9 +705,9 @@ const OPERATIVES = [
         id: 'ninja',
         name: 'Cyber Shinobi',
         desc: 'High velocity assassin with rapid dash recovery.',
-        speed: 4.2,
+        speed: 4.3,
         maxHp: 80,
-        dashCooldown: 1.4,
+        dashCooldown: 1.3,
         color: '#ffd000',
         cost: 400,
         unlocked: false
@@ -687,9 +716,9 @@ const OPERATIVES = [
         id: 'juggernaut',
         name: 'Iron Vanguard',
         desc: 'Armored commando with massive HP and bullet shielding.',
-        speed: 2.9,
+        speed: 3.0,
         maxHp: 190,
-        dashCooldown: 3.2,
+        dashCooldown: 3.0,
         color: '#ff2a5f',
         cost: 800,
         unlocked: false
@@ -698,16 +727,16 @@ const OPERATIVES = [
         id: 'spectre',
         name: 'Phantom Ghost',
         desc: 'Silent operative. Sentries take 50% longer to spot.',
-        speed: 3.8,
+        speed: 3.9,
         maxHp: 110,
-        dashCooldown: 2.0,
+        dashCooldown: 1.8,
         color: '#00ff88',
         cost: 1500,
         unlocked: false
     }
 ];
 
-// --- GAME STATE ---
+// --- GAME ENGINE ---
 class Game {
     constructor() {
         this.canvas = document.getElementById('game-canvas');
@@ -718,7 +747,6 @@ class Game {
         this.width = window.innerWidth;
         this.height = window.innerHeight;
 
-        // Persistent stats
         this.gems = parseInt(localStorage.getItem('rtk_assassin_gems') || '0', 10);
         this.currentOperativeId = localStorage.getItem('rtk_assassin_op') || 'stalker';
         this.loadUnlockedOperatives();
@@ -727,11 +755,15 @@ class Game {
         this.player = null;
         this.guards = [];
         this.obstacles = [];
+        this.barrels = [];
         this.gemsList = [];
         this.bullets = [];
         this.particles = [];
+        this.slashWaves = [];
+        this.downedBodies = [];
         this.floatingTexts = [];
         this.tapRipples = [];
+        this.ambientDust = [];
 
         this.worldWidth = 1400;
         this.worldHeight = 1100;
@@ -740,10 +772,9 @@ class Game {
         this.shakeTime = 0;
         this.shakeMagnitude = 0;
 
-        this.inputMode = 'tap'; // 'tap', 'joystick', 'keyboard'
         this.targetPos = null;
         this.keys = {};
-        this.touchStart = null;
+        this.touchData = null;
         this.joystickActive = false;
         this.joystickPos = { x: 0, y: 0 };
         this.joystickVector = { x: 0, y: 0 };
@@ -755,11 +786,26 @@ class Game {
 
         this.lastTime = performance.now();
 
+        this.initDust();
         this.initDOM();
         this.initEvents();
         this.resize();
         this.loadSector(this.sectorIndex);
         this.loop();
+    }
+
+    initDust() {
+        this.ambientDust = [];
+        for (let i = 0; i < 45; i++) {
+            this.ambientDust.push({
+                x: Math.random() * this.worldWidth,
+                y: Math.random() * this.worldHeight,
+                vx: (Math.random() - 0.5) * 8,
+                vy: (Math.random() - 0.5) * 8,
+                radius: Math.random() * 1.5 + 0.8,
+                alpha: Math.random() * 0.4 + 0.1
+            });
+        }
     }
 
     loadUnlockedOperatives() {
@@ -838,7 +884,6 @@ class Game {
     initEvents() {
         window.addEventListener('resize', () => this.resize());
 
-        // Keyboard
         window.addEventListener('keydown', (e) => {
             sound.init();
             this.keys[e.key.toLowerCase()] = true;
@@ -852,9 +897,6 @@ class Game {
             this.keys[e.key.toLowerCase()] = false;
         });
 
-        // Pointer & Touch Events (Seamless Tap-to-Move + Drag-to-Steer)
-        this.touchData = null;
-
         this.canvas.addEventListener('pointerdown', (e) => {
             sound.init();
             if (e.pointerType === 'touch') {
@@ -866,7 +908,6 @@ class Game {
                     isDragging: false
                 };
             } else {
-                // Desktop Click to move
                 const worldPos = this.screenToWorld(e.clientX, e.clientY);
                 this.setDestination(worldPos.x, worldPos.y);
             }
@@ -908,7 +949,6 @@ class Game {
         const endTouch = (e) => {
             if (e.pointerType === 'touch' && this.touchData && e.pointerId === this.touchData.id) {
                 if (!this.touchData.isDragging) {
-                    // Quick Tap -> Destination Navigation
                     const worldPos = this.screenToWorld(e.clientX, e.clientY);
                     this.setDestination(worldPos.x, worldPos.y);
                 }
@@ -923,8 +963,6 @@ class Game {
         this.canvas.addEventListener('pointercancel', endTouch);
     }
 
-
-
     screenToWorld(sx, sy) {
         return {
             x: sx + this.camera.x,
@@ -933,16 +971,15 @@ class Game {
     }
 
     setDestination(wx, wy) {
-        // Clamp to world
-        wx = Math.max(30, Math.min(this.worldWidth - 30, wx));
-        wy = Math.max(30, Math.min(this.worldHeight - 30, wy));
+        wx = Math.max(35, Math.min(this.worldWidth - 35, wx));
+        wy = Math.max(35, Math.min(this.worldHeight - 35, wy));
 
         this.targetPos = { x: wx, y: wy };
         this.tapRipples.push({
             x: wx,
             y: wy,
-            radius: 5,
-            maxRadius: 36,
+            radius: 6,
+            maxRadius: 38,
             alpha: 1.0,
             color: this.getOperative().color
         });
@@ -954,13 +991,12 @@ class Game {
         const op = this.getOperative();
         this.player.dashTimer = op.dashCooldown;
         this.player.isDashing = true;
-        this.player.dashDuration = 0.18;
+        this.player.dashDuration = 0.2;
 
-        // Spawn dash ghost trails
-        for (let i = 0; i < 6; i++) {
+        for (let i = 0; i < 7; i++) {
             this.particles.push({
-                x: this.player.x + (Math.random() * 20 - 10),
-                y: this.player.y + (Math.random() * 20 - 10),
+                x: this.player.x + (Math.random() * 24 - 12),
+                y: this.player.y + (Math.random() * 24 - 12),
                 vx: -Math.cos(this.player.angle) * 3,
                 vy: -Math.sin(this.player.angle) * 3,
                 radius: 12,
@@ -986,6 +1022,8 @@ class Game {
         this.stealthAlarmTriggered = false;
         this.bullets = [];
         this.particles = [];
+        this.slashWaves = [];
+        this.downedBodies = [];
         this.floatingTexts = [];
         this.tapRipples = [];
         this.targetPos = null;
@@ -999,6 +1037,8 @@ class Game {
             hp: op.maxHp,
             maxHp: op.maxHp,
             angle: 0,
+            walkCycle: 0,
+            isMoving: false,
             dashTimer: 0,
             isDashing: false,
             dashDuration: 0,
@@ -1007,19 +1047,18 @@ class Game {
 
         this.obstacles = [];
         this.guards = [];
+        this.barrels = [];
         this.gemsList = [];
 
-        // Build outer world boundaries
         this.worldWidth = 1400;
         this.worldHeight = 1100;
 
-        // Outer perimeter walls
-        this.obstacles.push({ x: 0, y: 0, w: this.worldWidth, h: 20 });
-        this.obstacles.push({ x: 0, y: this.worldHeight - 20, w: this.worldWidth, h: 20 });
-        this.obstacles.push({ x: 0, y: 0, w: 20, h: this.worldHeight });
-        this.obstacles.push({ x: this.worldWidth - 20, y: 0, w: 20, h: this.worldHeight });
+        // Perimeter boundary walls
+        this.obstacles.push({ x: 0, y: 0, w: this.worldWidth, h: 25, type: 'wall' });
+        this.obstacles.push({ x: 0, y: this.worldHeight - 25, w: this.worldWidth, h: 25, type: 'wall' });
+        this.obstacles.push({ x: 0, y: 0, w: 25, h: this.worldHeight, type: 'wall' });
+        this.obstacles.push({ x: this.worldWidth - 25, y: 0, w: 25, h: this.worldHeight, type: 'wall' });
 
-        // Sector specific layout
         const sectorCycle = index % 5;
         this.buildLayout(sectorCycle);
 
@@ -1027,22 +1066,23 @@ class Game {
     }
 
     buildLayout(type) {
-        // Adds crates and structures
-        const addCrate = (x, y, w, h) => this.obstacles.push({ x, y, w, h });
-        const addGuard = (x, y, waypoints, type = 'rifle') => {
+        const addCrate = (x, y, w, h, ctype = 'metal') => this.obstacles.push({ x, y, w, h, type: ctype });
+        const addBarrel = (x, y) => this.barrels.push({ x, y, radius: 16, hp: 1, exploded: false });
+        const addGuard = (x, y, waypoints, gtype = 'rifle') => {
             this.guards.push({
                 x, y,
                 radius: 18,
                 angle: 0,
-                type,
-                hp: type === 'heavy' ? 2 : 1,
-                speed: type === 'heavy' ? 1.4 : 1.9,
-                fovAngle: (type === 'heavy' ? 65 : 55) * (Math.PI / 180),
-                fovDist: type === 'heavy' ? 240 : 210,
+                type: gtype,
+                walkCycle: Math.random() * 10,
+                hp: gtype === 'heavy' ? 2 : 1,
+                speed: gtype === 'heavy' ? 1.4 : 1.9,
+                fovAngle: (gtype === 'heavy' ? 68 : 55) * (Math.PI / 180),
+                fovDist: gtype === 'heavy' ? 245 : 215,
                 waypoints,
                 currentWp: 0,
-                state: 'patrol', // 'patrol', 'alerting', 'combat', 'search'
-                alertProgress: 0, // 0 to 1
+                state: 'patrol',
+                alertProgress: 0,
                 shootCooldown: 0,
                 searchTimer: 0,
                 lastSeenPos: null
@@ -1050,19 +1090,21 @@ class Game {
         };
 
         const addGem = (x, y, val = 50) => {
-            this.gemsList.push({ x, y, radius: 10, val, angle: 0 });
+            this.gemsList.push({ x, y, radius: 11, val, angle: Math.random() * Math.PI, bob: Math.random() * 10 });
         };
 
         if (type === 0) {
-            // Sector 1: Docking Warehouse (Warm-up stealth intro)
-            addCrate(260, 60, 160, 220);
-            addCrate(260, 400, 160, 280);
-            addCrate(580, 200, 200, 140);
-            addCrate(580, 500, 200, 220);
-            addCrate(920, 120, 180, 260);
-            addCrate(920, 520, 180, 240);
+            // Sector 1: Cargo Bay
+            addCrate(260, 60, 160, 220, 'metal');
+            addCrate(260, 400, 160, 280, 'wood');
+            addCrate(580, 200, 200, 140, 'metal');
+            addCrate(580, 500, 200, 220, 'wood');
+            addCrate(920, 120, 180, 260, 'metal');
+            addCrate(920, 520, 180, 240, 'wood');
 
-            // 3 Sentries
+            addBarrel(500, 320);
+            addBarrel(860, 480);
+
             addGuard(480, 160, [{ x: 480, y: 160 }, { x: 480, y: 460 }]);
             addGuard(820, 600, [{ x: 820, y: 600 }, { x: 820, y: 220 }]);
             addGuard(1180, 360, [{ x: 1180, y: 200 }, { x: 1180, y: 700 }]);
@@ -1072,20 +1114,19 @@ class Game {
             addGem(1010, 440, 100);
 
         } else if (type === 1) {
-            // Sector 2: Cargo Hub
-            addCrate(200, 150, 180, 160);
-            addCrate(200, 420, 180, 180);
-            addCrate(200, 720, 180, 180);
+            // Sector 2: Depot Armory
+            addCrate(200, 150, 180, 160, 'wood');
+            addCrate(200, 420, 180, 180, 'metal');
+            addCrate(200, 720, 180, 180, 'wood');
+            addCrate(520, 260, 220, 340, 'metal');
+            addCrate(520, 720, 220, 200, 'wood');
+            addCrate(880, 140, 180, 220, 'metal');
+            addCrate(880, 480, 180, 260, 'wood');
+            addCrate(1160, 320, 140, 340, 'metal');
 
-            addCrate(520, 260, 220, 340);
-            addCrate(520, 720, 220, 200);
+            addBarrel(450, 480);
+            addBarrel(1100, 480);
 
-            addCrate(880, 140, 180, 220);
-            addCrate(880, 480, 180, 260);
-
-            addCrate(1160, 320, 140, 340);
-
-            // 4 Sentries
             addGuard(420, 220, [{ x: 420, y: 220 }, { x: 420, y: 760 }]);
             addGuard(780, 720, [{ x: 780, y: 720 }, { x: 780, y: 200 }]);
             addGuard(1080, 220, [{ x: 1080, y: 220 }, { x: 1080, y: 750 }]);
@@ -1097,15 +1138,18 @@ class Game {
 
         } else if (type === 2) {
             // Sector 3: Generator Core
-            addCrate(260, 200, 140, 480);
-            addCrate(520, 140, 260, 140);
-            addCrate(520, 680, 260, 140);
-            addCrate(580, 380, 140, 160); // Central Core
-            addCrate(900, 200, 140, 480);
-            addCrate(1140, 140, 160, 280);
-            addCrate(1140, 540, 160, 280);
+            addCrate(260, 200, 140, 480, 'metal');
+            addCrate(520, 140, 260, 140, 'wood');
+            addCrate(520, 680, 260, 140, 'wood');
+            addCrate(580, 380, 140, 160, 'metal');
+            addCrate(900, 200, 140, 480, 'metal');
+            addCrate(1140, 140, 160, 280, 'wood');
+            addCrate(1140, 540, 160, 280, 'metal');
 
-            // 5 Sentries including a Heavy
+            addBarrel(460, 440);
+            addBarrel(840, 440);
+            addBarrel(650, 100);
+
             addGuard(440, 260, [{ x: 440, y: 260 }, { x: 440, y: 650 }]);
             addGuard(820, 650, [{ x: 820, y: 650 }, { x: 820, y: 260 }]);
             addGuard(650, 280, [{ x: 650, y: 280 }, { x: 650, y: 600 }], 'heavy');
@@ -1118,15 +1162,17 @@ class Game {
 
         } else if (type === 3) {
             // Sector 4: Laser Vault & High Security
-            addCrate(220, 120, 140, 320);
-            addCrate(220, 560, 140, 320);
-            addCrate(480, 240, 340, 140);
-            addCrate(480, 600, 340, 140);
-            addCrate(920, 120, 140, 320);
-            addCrate(920, 560, 140, 320);
-            addCrate(1180, 280, 120, 360);
+            addCrate(220, 120, 140, 320, 'metal');
+            addCrate(220, 560, 140, 320, 'wood');
+            addCrate(480, 240, 340, 140, 'metal');
+            addCrate(480, 600, 340, 140, 'wood');
+            addCrate(920, 120, 140, 320, 'metal');
+            addCrate(920, 560, 140, 320, 'wood');
+            addCrate(1180, 280, 120, 360, 'metal');
 
-            // 6 Sentries
+            addBarrel(420, 480);
+            addBarrel(880, 480);
+
             addGuard(380, 240, [{ x: 380, y: 240 }, { x: 380, y: 700 }]);
             addGuard(650, 160, [{ x: 650, y: 160 }, { x: 650, y: 800 }], 'heavy');
             addGuard(840, 700, [{ x: 840, y: 700 }, { x: 840, y: 240 }]);
@@ -1139,16 +1185,19 @@ class Game {
             addGem(1080, 480, 100);
 
         } else {
-            // Sector 5: Master Compound (High Stakes)
-            addCrate(240, 180, 180, 180);
-            addCrate(240, 540, 180, 180);
-            addCrate(540, 140, 180, 260);
-            addCrate(540, 500, 180, 260);
-            addCrate(840, 180, 180, 180);
-            addCrate(840, 540, 180, 180);
-            addCrate(1120, 240, 160, 400);
+            // Sector 5: Master Compound
+            addCrate(240, 180, 180, 180, 'metal');
+            addCrate(240, 540, 180, 180, 'wood');
+            addCrate(540, 140, 180, 260, 'metal');
+            addCrate(540, 500, 180, 260, 'wood');
+            addCrate(840, 180, 180, 180, 'metal');
+            addCrate(840, 540, 180, 180, 'wood');
+            addCrate(1120, 240, 160, 400, 'metal');
 
-            // 7 Sentries with 2 Heavies
+            addBarrel(480, 440);
+            addBarrel(780, 440);
+            addBarrel(1000, 120);
+
             addGuard(450, 260, [{ x: 450, y: 260 }, { x: 450, y: 700 }]);
             addGuard(750, 680, [{ x: 750, y: 680 }, { x: 750, y: 220 }], 'heavy');
             addGuard(1040, 260, [{ x: 1040, y: 260 }, { x: 1040, y: 700 }]);
@@ -1180,18 +1229,10 @@ class Game {
     update(dt) {
         if (!this.player || this.isGameOver || this.isVictory) return;
 
-        // Operative stats
         const op = this.getOperative();
 
-        // Screen Shake decay
-        if (this.shakeTime > 0) {
-            this.shakeTime -= dt;
-        }
-
-        // Dash cooldown
-        if (this.player.dashTimer > 0) {
-            this.player.dashTimer -= dt;
-        }
+        if (this.shakeTime > 0) this.shakeTime -= dt;
+        if (this.player.dashTimer > 0) this.player.dashTimer -= dt;
 
         if (this.player.isDashing) {
             this.player.dashDuration -= dt;
@@ -1200,27 +1241,34 @@ class Game {
             }
         }
 
+        // --- AMBIENT DUST UPDATE ---
+        this.ambientDust.forEach(d => {
+            d.x += d.vx * dt;
+            d.y += d.vy * dt;
+            if (d.x < 0) d.x = this.worldWidth;
+            if (d.x > this.worldWidth) d.x = 0;
+            if (d.y < 0) d.y = this.worldHeight;
+            if (d.y > this.worldHeight) d.y = 0;
+        });
+
         // --- PLAYER MOVEMENT ---
         let moveX = 0;
         let moveY = 0;
 
-        // 1. Keyboard
         if (this.keys['w'] || this.keys['arrowup']) moveY -= 1;
         if (this.keys['s'] || this.keys['arrowdown']) moveY += 1;
         if (this.keys['a'] || this.keys['arrowleft']) moveX -= 1;
         if (this.keys['d'] || this.keys['arrowright']) moveX += 1;
 
         if (moveX !== 0 || moveY !== 0) {
-            this.targetPos = null; // Keyboard overrides tap
+            this.targetPos = null;
             const len = Math.hypot(moveX, moveY);
             moveX /= len;
             moveY /= len;
         } else if (this.joystickActive && (this.joystickVector.x !== 0 || this.joystickVector.y !== 0)) {
-            // 2. Touch Virtual Joystick
             moveX = this.joystickVector.x;
             moveY = this.joystickVector.y;
         } else if (this.targetPos) {
-            // 3. Tap to move navigation
             const dx = this.targetPos.x - this.player.x;
             const dy = this.targetPos.y - this.player.y;
             const dist = Math.hypot(dx, dy);
@@ -1233,30 +1281,29 @@ class Game {
             }
         }
 
-        // Apply Player Movement with Collision Sliding
         if (moveX !== 0 || moveY !== 0) {
+            this.player.isMoving = true;
             const currentSpeed = (this.player.isDashing ? op.speed * 2.8 : op.speed) * 60 * dt;
-            const targetAngle = Math.atan2(moveY, moveX);
-            this.player.angle = targetAngle;
+            this.player.angle = Math.atan2(moveY, moveX);
+            this.player.walkCycle += currentSpeed * 0.18;
 
-            // X axis step
             const nextX = this.player.x + moveX * currentSpeed;
             if (!this.checkCircleObstacleCollision(nextX, this.player.y, this.player.radius)) {
                 this.player.x = nextX;
             }
 
-            // Y axis step
             const nextY = this.player.y + moveY * currentSpeed;
             if (!this.checkCircleObstacleCollision(this.player.x, nextY, this.player.radius)) {
                 this.player.y = nextY;
             }
 
-            // Footsteps sound
             this.player.stepDist += currentSpeed;
-            if (this.player.stepDist > 30) {
+            if (this.player.stepDist > 32) {
                 this.player.stepDist = 0;
                 sound.playFootstep();
             }
+        } else {
+            this.player.isMoving = false;
         }
 
         // Camera Follow
@@ -1265,7 +1312,6 @@ class Game {
         this.camera.x += (targetCamX - this.camera.x) * 0.1;
         this.camera.y += (targetCamY - this.camera.y) * 0.1;
 
-        // Clamp camera
         this.camera.x = Math.max(0, Math.min(this.worldWidth - this.width, this.camera.x));
         this.camera.y = Math.max(0, Math.min(this.worldHeight - this.height, this.camera.y));
 
@@ -1275,26 +1321,22 @@ class Game {
         for (let i = this.guards.length - 1; i >= 0; i--) {
             const g = this.guards[i];
 
-            // 1. Check Melee Assassination Strike
+            // 1. Check Melee Strike
             const distToPlayer = Math.hypot(this.player.x - g.x, this.player.y - g.y);
-            const strikeRange = this.player.radius + g.radius + 14;
+            const strikeRange = this.player.radius + g.radius + 15;
 
             if (distToPlayer <= strikeRange) {
-                // ASSASSINATE!
                 this.assassinateGuard(i);
                 continue;
             }
 
-            // 2. Vision Check (Can Guard see Player?)
+            // 2. Line of Sight
             const canSeePlayer = this.checkGuardLineOfSight(g, this.player.x, this.player.y);
 
             if (canSeePlayer) {
-                // Face player
                 g.angle = Math.atan2(this.player.y - g.y, this.player.x - g.x);
                 g.lastSeenPos = { x: this.player.x, y: this.player.y };
-
-                // Increment Alert Progress
-                g.alertProgress += dt * 3.2 * playerInSightFactor;
+                g.alertProgress += dt * 3.4 * playerInSightFactor;
 
                 if (g.state !== 'combat' && g.alertProgress >= 0.3) {
                     if (g.state !== 'alerting') {
@@ -1304,14 +1346,12 @@ class Game {
                 }
 
                 if (g.alertProgress >= 1.0) {
-                    // Full Hostile Combat State
                     if (g.state !== 'combat') {
                         g.state = 'combat';
                         this.stealthAlarmTriggered = true;
                         this.triggerAlarmAlertNearbyGuards(g.x, g.y);
                     }
 
-                    // Gunfire Attack
                     g.shootCooldown -= dt;
                     if (g.shootCooldown <= 0) {
                         this.guardShoot(g);
@@ -1319,26 +1359,22 @@ class Game {
                     }
                 }
             } else {
-                // Guard cannot see player
                 if (g.state === 'combat') {
-                    // Lost sight, transition to Search
                     g.state = 'search';
-                    g.searchTimer = 3.5;
+                    g.searchTimer = 3.8;
                 } else if (g.state === 'alerting') {
-                    // Cooldown alert
                     g.alertProgress = Math.max(0, g.alertProgress - dt * 1.5);
                     if (g.alertProgress === 0) g.state = 'patrol';
                 }
 
-                // AI States behavior
                 if (g.state === 'search') {
                     g.searchTimer -= dt;
-                    // Move toward last seen position
                     if (g.lastSeenPos) {
                         const sDist = Math.hypot(g.lastSeenPos.x - g.x, g.lastSeenPos.y - g.y);
                         if (sDist > 15) {
                             const angle = Math.atan2(g.lastSeenPos.y - g.y, g.lastSeenPos.x - g.x);
                             g.angle = angle;
+                            g.walkCycle += g.speed * 60 * dt * 0.16;
                             g.x += Math.cos(angle) * g.speed * 60 * dt;
                             g.y += Math.sin(angle) * g.speed * 60 * dt;
                         }
@@ -1348,7 +1384,6 @@ class Game {
                         g.alertProgress = 0;
                     }
                 } else if (g.state === 'patrol') {
-                    // Normal Patrol along waypoints
                     if (g.waypoints && g.waypoints.length > 1) {
                         const wp = g.waypoints[g.currentWp];
                         const wDist = Math.hypot(wp.x - g.x, wp.y - g.y);
@@ -1356,8 +1391,8 @@ class Game {
                             g.currentWp = (g.currentWp + 1) % g.waypoints.length;
                         } else {
                             const targetAngle = Math.atan2(wp.y - g.y, wp.x - g.x);
-                            // Smooth angle turn
                             g.angle = targetAngle;
+                            g.walkCycle += g.speed * 60 * dt * 0.16;
                             g.x += Math.cos(g.angle) * g.speed * 60 * dt;
                             g.y += Math.sin(g.angle) * g.speed * 60 * dt;
                         }
@@ -1373,22 +1408,32 @@ class Game {
             b.y += b.vy * dt;
             b.life -= dt;
 
-            // Obstacle collision
+            // Check explosive barrels
+            for (let j = this.barrels.length - 1; j >= 0; j--) {
+                const bar = this.barrels[j];
+                if (!bar.exploded && Math.hypot(bar.x - b.x, bar.y - b.y) <= bar.radius + 4) {
+                    this.explodeBarrel(j);
+                    this.bullets.splice(i, 1);
+                    break;
+                }
+            }
+            if (i >= this.bullets.length) continue;
+
+            // Check obstacle collision
             if (this.checkPointObstacleCollision(b.x, b.y)) {
-                this.spawnSparks(b.x, b.y, '#ffd000', 4);
+                this.spawnSparks(b.x, b.y, '#ffd000', 5);
                 this.bullets.splice(i, 1);
                 continue;
             }
 
-            // Player hit collision
+            // Check player hit
             const pDist = Math.hypot(this.player.x - b.x, this.player.y - b.y);
             if (pDist <= this.player.radius) {
-                // Bullet hit player
-                const damage = (op.id === 'juggernaut') ? b.damage * 0.55 : b.damage;
+                const damage = (op.id === 'juggernaut') ? b.damage * 0.5 : b.damage;
                 this.player.hp = Math.max(0, this.player.hp - damage);
                 this.triggerScreenShake(0.2, 7);
                 this.spawnBlood(this.player.x, this.player.y, 8);
-                this.spawnFloatingText(`-${Math.round(damage)}`, this.player.x, this.player.y - 15, '#ff2a5f');
+                this.spawnFloatingText(`-${Math.round(damage)}`, this.player.x, this.player.y - 18, '#ff2a5f');
 
                 this.bullets.splice(i, 1);
                 this.updateHUD();
@@ -1405,24 +1450,24 @@ class Game {
             }
         }
 
-        // --- GEMS COLLECTION ---
+        // --- GEMS UPDATE ---
         for (let i = this.gemsList.length - 1; i >= 0; i--) {
             const gem = this.gemsList[i];
-            gem.angle += dt * 3;
+            gem.angle += dt * 2.8;
+            gem.bob += dt * 4;
             const dist = Math.hypot(this.player.x - gem.x, this.player.y - gem.y);
 
-            // Magnetic pickup
-            if (dist < 90) {
+            if (dist < 95) {
                 const angle = Math.atan2(this.player.y - gem.y, this.player.x - gem.x);
-                gem.x += Math.cos(angle) * 320 * dt;
-                gem.y += Math.sin(angle) * 320 * dt;
+                gem.x += Math.cos(angle) * 340 * dt;
+                gem.y += Math.sin(angle) * 340 * dt;
             }
 
             if (dist <= this.player.radius + gem.radius) {
                 sound.playGem();
                 this.gems += gem.val;
-                this.spawnFloatingText(`+${gem.val} 💎`, gem.x, gem.y - 10, '#00f0ff');
-                this.spawnSparks(gem.x, gem.y, '#00f0ff', 6);
+                this.spawnFloatingText(`+${gem.val} 💎`, gem.x, gem.y - 12, '#00f0ff');
+                this.spawnSparks(gem.x, gem.y, '#00f0ff', 7);
                 this.gemsList.splice(i, 1);
                 this.updateHUD();
                 this.saveUnlockedOperatives();
@@ -1441,6 +1486,13 @@ class Game {
             p.y += p.vy;
             p.alpha -= p.decay;
             if (p.alpha <= 0) this.particles.splice(i, 1);
+        }
+
+        // Update Slash Waves
+        for (let i = this.slashWaves.length - 1; i >= 0; i--) {
+            const sw = this.slashWaves[i];
+            sw.alpha -= dt * 3.5;
+            if (sw.alpha <= 0) this.slashWaves.splice(i, 1);
         }
 
         // Update Floating Texts
@@ -1463,22 +1515,41 @@ class Game {
     assassinateGuard(idx) {
         const g = this.guards[idx];
         sound.playSlash();
-        this.triggerScreenShake(0.18, 5);
+        this.triggerScreenShake(0.18, 6);
 
-        // Splatter & FX
-        this.spawnBlood(g.x, g.y, 18);
-        this.spawnSparks(g.x, g.y, '#ff2a5f', 12);
-        this.spawnFloatingText('STEALTH STRIKE!', g.x, g.y - 25, '#ffd000');
+        // Blade Slash Arc Wave
+        this.slashWaves.push({
+            x: g.x,
+            y: g.y,
+            angle: this.player.angle,
+            radius: 34,
+            alpha: 1.0,
+            color: this.getOperative().color
+        });
+
+        // Downed guard body persists on floor
+        this.downedBodies.push({
+            x: g.x,
+            y: g.y,
+            angle: g.angle,
+            type: g.type,
+            alpha: 0.85
+        });
+
+        this.spawnBlood(g.x, g.y, 22);
+        this.spawnSparks(g.x, g.y, '#ffd000', 14);
+        this.spawnFloatingText('STEALTH KILL!', g.x, g.y - 25, '#ffd000');
 
         // Drop Gems
         const gemDropCount = g.type === 'heavy' ? 3 : 2;
         for (let i = 0; i < gemDropCount; i++) {
             this.gemsList.push({
-                x: g.x + (Math.random() * 30 - 15),
-                y: g.y + (Math.random() * 30 - 15),
-                radius: 10,
+                x: g.x + (Math.random() * 32 - 16),
+                y: g.y + (Math.random() * 32 - 16),
+                radius: 11,
                 val: 50,
-                angle: 0
+                angle: Math.random() * Math.PI,
+                bob: Math.random() * 10
             });
         }
 
@@ -1486,27 +1557,56 @@ class Game {
         this.updateHUD();
     }
 
+    explodeBarrel(idx) {
+        const bar = this.barrels[idx];
+        bar.exploded = true;
+        sound.playExplosion();
+        this.triggerScreenShake(0.3, 10);
+
+        this.spawnSparks(bar.x, bar.y, '#ff4400', 25);
+        this.spawnSparks(bar.x, bar.y, '#ffd000', 20);
+
+        // Blast radius damages guards and player
+        const blastRadius = 140;
+        for (let i = this.guards.length - 1; i >= 0; i--) {
+            const g = this.guards[i];
+            if (Math.hypot(g.x - bar.x, g.y - bar.y) <= blastRadius) {
+                this.assassinateGuard(i);
+            }
+        }
+
+        const pDist = Math.hypot(this.player.x - bar.x, this.player.y - bar.y);
+        if (pDist <= blastRadius) {
+            const dmg = 45;
+            this.player.hp = Math.max(0, this.player.hp - dmg);
+            this.spawnFloatingText(`-${dmg}`, this.player.x, this.player.y - 18, '#ff2a5f');
+            this.updateHUD();
+            if (this.player.hp <= 0) this.onGameOver();
+        }
+
+        this.barrels.splice(idx, 1);
+    }
+
     guardShoot(g) {
         sound.playGunshot();
         this.triggerScreenShake(0.1, 3);
 
-        const spread = (Math.random() - 0.5) * 0.12;
+        const spread = (Math.random() - 0.5) * 0.1;
         const shootAngle = g.angle + spread;
-        const speed = 650;
+        const speed = 700;
 
         this.bullets.push({
-            x: g.x + Math.cos(g.angle) * (g.radius + 10),
-            y: g.y + Math.sin(g.angle) * (g.radius + 10),
+            x: g.x + Math.cos(g.angle) * (g.radius + 15),
+            y: g.y + Math.sin(g.angle) * (g.radius + 15),
             vx: Math.cos(shootAngle) * speed,
             vy: Math.sin(shootAngle) * speed,
             damage: g.type === 'heavy' ? 24 : 16,
             life: 1.8
         });
 
-        // Muzzle smoke particle
         this.particles.push({
-            x: g.x + Math.cos(g.angle) * (g.radius + 12),
-            y: g.y + Math.sin(g.angle) * (g.radius + 12),
+            x: g.x + Math.cos(g.angle) * (g.radius + 18),
+            y: g.y + Math.sin(g.angle) * (g.radius + 18),
             vx: (Math.random() - 0.5) * 1.5,
             vy: (Math.random() - 0.5) * 1.5,
             radius: 8,
@@ -1523,13 +1623,13 @@ class Game {
                 if (dist <= 380) {
                     g.state = 'search';
                     g.lastSeenPos = { x: gx, y: gy };
-                    g.searchTimer = 4.0;
+                    g.searchTimer = 4.2;
                 }
             }
         });
     }
 
-    // --- LINE OF SIGHT & RAYCASTING ---
+    // --- RAYCASTING LINE OF SIGHT ---
     checkGuardLineOfSight(guard, px, py) {
         const dx = px - guard.x;
         const dy = py - guard.y;
@@ -1537,7 +1637,6 @@ class Game {
 
         if (dist > guard.fovDist) return false;
 
-        // Angle check
         let angleToTarget = Math.atan2(dy, dx);
         let diff = angleToTarget - guard.angle;
         while (diff < -Math.PI) diff += Math.PI * 2;
@@ -1545,7 +1644,6 @@ class Game {
 
         if (Math.abs(diff) > guard.fovAngle / 2) return false;
 
-        // Raycast against all obstacles
         return !this.lineIntersectsAnyObstacle(guard.x, guard.y, px, py);
     }
 
@@ -1564,11 +1662,9 @@ class Game {
         const minY = rect.y;
         const maxY = rect.y + rect.h;
 
-        // Check if either endpoint is inside rect
         if (x1 >= minX && x1 <= maxX && y1 >= minY && y1 <= maxY) return true;
         if (x2 >= minX && x2 <= maxX && y2 >= minY && y2 <= maxY) return true;
 
-        // Check all 4 edges
         return (
             this.lineLineIntersection(x1, y1, x2, y2, minX, minY, maxX, minY) ||
             this.lineLineIntersection(x1, y1, x2, y2, maxX, minY, maxX, maxY) ||
@@ -1593,6 +1689,12 @@ class Game {
             const nearestY = Math.max(obs.y, Math.min(cy, obs.y + obs.h));
             const dist = Math.hypot(cx - nearestX, cy - nearestY);
             if (dist < r) return true;
+        }
+        for (let bar of this.barrels) {
+            if (!bar.exploded) {
+                const dist = Math.hypot(cx - bar.x, cy - bar.y);
+                if (dist < r + bar.radius) return true;
+            }
         }
         return false;
     }
@@ -1648,7 +1750,7 @@ class Game {
         this.floatingTexts.push({
             text, x, y,
             color,
-            vy: 35,
+            vy: 36,
             life: 1.2,
             maxLife: 1.2
         });
@@ -1753,11 +1855,10 @@ class Game {
         this.modalRoster.classList.add('active');
     }
 
-    // --- RENDERING ---
+    // --- 2.5D RENDERING PIPELINE ---
     render() {
         this.ctx.clearRect(0, 0, this.width, this.height);
 
-        // Screen Shake offset
         let offsetX = -this.camera.x;
         let offsetY = -this.camera.y;
 
@@ -1769,10 +1870,13 @@ class Game {
         this.ctx.save();
         this.ctx.translate(offsetX, offsetY);
 
-        // 1. Draw Tactical Floor Grid
-        this.drawFloorGrid();
+        // 1. Stylized Concrete Warehouse Floor with Hazard Markings
+        this.drawWarehouseFloor();
 
-        // 2. Draw Tap Ripples
+        // 2. Downed Guard Bodies (Persisting Ground Marks)
+        this.downedBodies.forEach(b => this.drawDownedBody(b));
+
+        // 3. Tap Navigation Ripples
         this.tapRipples.forEach(r => {
             this.ctx.save();
             this.ctx.beginPath();
@@ -1784,25 +1888,34 @@ class Game {
             this.ctx.restore();
         });
 
-        // 3. Draw Guard Flashlight Cones (with Raycast Shadow Obstruction)
+        // 4. Guard Flashlights (Raycasted Dynamic Light Cones with Soft Edges)
         this.guards.forEach(g => this.drawGuardVisionCone(g));
 
-        // 4. Draw Obstacles / Crates
-        this.obstacles.forEach(obs => this.drawObstacle(obs));
+        // 5. Ambient Dust Particles (Floating In Air / Beams)
+        this.drawAmbientDust();
 
-        // 5. Draw Gems
-        this.gemsList.forEach(gem => this.drawGem(gem));
+        // 6. 2.5D Pseudo-3D Obstacles (Crates, Containers, Walls)
+        this.obstacles.forEach(obs => this.draw3DObstacle(obs));
 
-        // 6. Draw Bullets
+        // 7. Explosive Red TNT Barrels
+        this.barrels.forEach(bar => this.drawBarrel(bar));
+
+        // 8. Glowing 3D Faceted Gems
+        this.gemsList.forEach(gem => this.draw3DGem(gem));
+
+        // 9. Bullets
         this.bullets.forEach(b => this.drawBullet(b));
 
-        // 7. Draw Guards
+        // 10. Guards (Stylized Armored Sentries with Rifles & Lasers)
         this.guards.forEach(g => this.drawGuard(g));
 
-        // 8. Draw Player
+        // 11. Player (Stylized Operative with Walking Strides & Twin Blades)
         if (this.player) this.drawPlayer(this.player);
 
-        // 9. Draw Particles
+        // 12. Crescent Katana Slash Arcs
+        this.slashWaves.forEach(sw => this.drawSlashWave(sw));
+
+        // 13. Particles & Sparks
         this.particles.forEach(p => {
             this.ctx.save();
             this.ctx.beginPath();
@@ -1813,7 +1926,7 @@ class Game {
             this.ctx.restore();
         });
 
-        // 10. Draw Floating Texts
+        // 14. Floating Combat Damage & Gem Texts
         this.floatingTexts.forEach(t => {
             this.ctx.save();
             this.ctx.font = 'bold 15px Orbitron, sans-serif';
@@ -1827,66 +1940,247 @@ class Game {
         });
 
         this.ctx.restore();
+
+        // 15. Cinematic Ambient Vignette (Dark Moody Stealth Atmosphere)
+        this.drawCinematicVignette();
     }
 
-    drawFloorGrid() {
-        const step = 80;
-        this.ctx.strokeStyle = '#151923';
-        this.ctx.lineWidth = 1;
-        this.ctx.beginPath();
+    drawWarehouseFloor() {
+        const tileSize = 64;
+        const cols = Math.ceil(this.worldWidth / tileSize);
+        const rows = Math.ceil(this.worldHeight / tileSize);
 
-        for (let x = 0; x <= this.worldWidth; x += step) {
-            this.ctx.moveTo(x, 0);
-            this.ctx.lineTo(x, this.worldHeight);
+        for (let r = 0; r < rows; r++) {
+            for (let c = 0; c < cols; c++) {
+                const x = c * tileSize;
+                const y = r * tileSize;
+                const isEven = (c + r) % 2 === 0;
+
+                this.ctx.fillStyle = isEven ? '#12151d' : '#151922';
+                this.ctx.fillRect(x, y, tileSize, tileSize);
+
+                // Subtle tile border joint
+                this.ctx.strokeStyle = '#0e1017';
+                this.ctx.lineWidth = 1;
+                this.ctx.strokeRect(x, y, tileSize, tileSize);
+            }
         }
-        for (let y = 0; y <= this.worldHeight; y += step) {
-            this.ctx.moveTo(0, y);
-            this.ctx.lineTo(this.worldWidth, y);
-        }
+
+        // Perimeter Yellow/Black Caution Stripes
+        this.drawHazardBorder(25, 25, this.worldWidth - 50, this.worldHeight - 50);
+    }
+
+    drawHazardBorder(x, y, w, h) {
+        this.ctx.save();
+        this.ctx.strokeStyle = '#ffd000';
+        this.ctx.lineWidth = 4;
+        this.ctx.strokeRect(x, y, w, h);
+
+        // Corner hazard diagonals
+        const drawStripes = (sx, sy, sw, sh) => {
+            this.ctx.save();
+            this.ctx.beginPath();
+            this.ctx.rect(sx, sy, sw, sh);
+            this.ctx.clip();
+            this.ctx.fillStyle = '#ffd000';
+            for (let i = -sw; i < sw + sh; i += 16) {
+                this.ctx.beginPath();
+                this.ctx.moveTo(sx + i, sy);
+                this.ctx.lineTo(sx + i + 8, sy);
+                this.ctx.lineTo(sx + i + 8 - sh, sy + sh);
+                this.ctx.lineTo(sx + i - sh, sy + sh);
+                this.ctx.fill();
+            }
+            this.ctx.restore();
+        };
+
+        drawStripes(x, y, 70, 10);
+        drawStripes(x + w - 70, y, 70, 10);
+        drawStripes(x, y + h - 10, 70, 10);
+        drawStripes(x + w - 70, y + h - 10, 70, 10);
+        this.ctx.restore();
+    }
+
+    drawDownedBody(b) {
+        this.ctx.save();
+        this.ctx.translate(b.x, b.y);
+        this.ctx.rotate(b.angle);
+
+        // Dark tactical puddle
+        this.ctx.fillStyle = 'rgba(15, 6, 10, 0.7)';
+        this.ctx.beginPath();
+        this.ctx.ellipse(0, 0, 24, 15, 0, 0, Math.PI * 2);
+        this.ctx.fill();
+
+        // Downed guard silhouette
+        this.ctx.fillStyle = b.type === 'heavy' ? '#321d24' : '#1c222d';
+        this.ctx.strokeStyle = '#000000';
+        this.ctx.lineWidth = 1.5;
+
+        // Torso
+        this.ctx.fillRect(-12, -7, 24, 14);
+        this.ctx.strokeRect(-12, -7, 24, 14);
+
+        // Helmet
+        this.ctx.beginPath();
+        this.ctx.arc(14, 0, 7, 0, Math.PI * 2);
+        this.ctx.fillStyle = '#2d3748';
+        this.ctx.fill();
         this.ctx.stroke();
 
-        // Perimeter border
-        this.ctx.strokeStyle = 'rgba(0, 240, 255, 0.3)';
-        this.ctx.lineWidth = 3;
-        this.ctx.strokeRect(20, 20, this.worldWidth - 40, this.worldHeight - 40);
+        this.ctx.restore();
     }
 
-    drawObstacle(obs) {
-        // Metallic Shipping Container / Military Crate
+    draw3DObstacle(obs) {
+        const depth = 16; // 2.5D perspective height
+
         this.ctx.save();
-        this.ctx.fillStyle = '#1e2430';
-        this.ctx.fillRect(obs.x, obs.y, obs.w, obs.h);
 
-        // Inner bevel
-        this.ctx.strokeStyle = '#2d3748';
-        this.ctx.lineWidth = 2;
-        this.ctx.strokeRect(obs.x + 2, obs.y + 2, obs.w - 4, obs.h - 4);
+        // 1. Projected Floor Drop-Shadow
+        this.ctx.fillStyle = 'rgba(0, 0, 0, 0.45)';
+        this.ctx.fillRect(obs.x + 8, obs.y + depth, obs.w, obs.h);
 
-        // Cross braces on crates
-        if (obs.w > 40 && obs.h > 40) {
-            this.ctx.strokeStyle = '#181d27';
+        if (obs.type === 'wall') {
+            // Concrete Perimeter Blast Wall
+            this.ctx.fillStyle = '#1c202a';
+            this.ctx.fillRect(obs.x, obs.y, obs.w, obs.h);
+
+            // Top rim
+            this.ctx.fillStyle = '#2e3546';
+            this.ctx.fillRect(obs.x, obs.y, obs.w, 4);
+            this.ctx.strokeStyle = '#10131a';
+            this.ctx.strokeRect(obs.x, obs.y, obs.w, obs.h);
+
+        } else if (obs.type === 'wood') {
+            // Wooden Cargo Crate (3D Block)
+            // Front / South face in shadow
+            this.ctx.fillStyle = '#5c3a21';
+            this.ctx.fillRect(obs.x, obs.y + obs.h - depth, obs.w, depth);
+
+            // Front planks
+            this.ctx.strokeStyle = '#3d2514';
+            this.ctx.lineWidth = 1.5;
+            for (let px = obs.x + 20; px < obs.x + obs.w; px += 20) {
+                this.ctx.beginPath();
+                this.ctx.moveTo(px, obs.y + obs.h - depth);
+                this.ctx.lineTo(px, obs.y + obs.h);
+                this.ctx.stroke();
+            }
+
+            // Top face (Illuminated)
+            this.ctx.fillStyle = '#a66e3b';
+            this.ctx.fillRect(obs.x, obs.y, obs.w, obs.h - depth);
+
+            // Wood slats on top
+            this.ctx.strokeStyle = '#825227';
+            this.ctx.lineWidth = 1.5;
+            for (let py = obs.y + 18; py < obs.y + obs.h - depth; py += 18) {
+                this.ctx.beginPath();
+                this.ctx.moveTo(obs.x, py);
+                this.ctx.lineTo(obs.x + obs.w, py);
+                this.ctx.stroke();
+            }
+
+            // Cross diagonal bracing
+            this.ctx.strokeStyle = '#c4874d';
             this.ctx.lineWidth = 2;
-            this.ctx.beginPath();
-            this.ctx.moveTo(obs.x + 4, obs.y + 4);
-            this.ctx.lineTo(obs.x + obs.w - 4, obs.y + obs.h - 4);
-            this.ctx.moveTo(obs.x + obs.w - 4, obs.y + 4);
-            this.ctx.lineTo(obs.x + 4, obs.y + obs.h - 4);
-            this.ctx.stroke();
+            this.ctx.strokeRect(obs.x + 3, obs.y + 3, obs.w - 6, obs.h - depth - 6);
+
+            // Metal corner caps
+            this.ctx.fillStyle = '#2b2f38';
+            const cap = 8;
+            this.ctx.fillRect(obs.x, obs.y, cap, cap);
+            this.ctx.fillRect(obs.x + obs.w - cap, obs.y, cap, cap);
+            this.ctx.fillRect(obs.x, obs.y + obs.h - depth - cap, cap, cap);
+            this.ctx.fillRect(obs.x + obs.w - cap, obs.y + obs.h - depth - cap, cap, cap);
+
+        } else {
+            // Metal Shipping Container (3D Ribbed Corrugated Steel)
+            // Front / South face in shadow
+            this.ctx.fillStyle = '#17202f';
+            this.ctx.fillRect(obs.x, obs.y + obs.h - depth, obs.w, depth);
+
+            // Vertical ribs on front
+            this.ctx.strokeStyle = '#0c121d';
+            this.ctx.lineWidth = 2;
+            for (let rx = obs.x + 12; rx < obs.x + obs.w; rx += 14) {
+                this.ctx.beginPath();
+                this.ctx.moveTo(rx, obs.y + obs.h - depth);
+                this.ctx.lineTo(rx, obs.y + obs.h);
+                this.ctx.stroke();
+            }
+
+            // Top face (Illuminated military navy/steel)
+            this.ctx.fillStyle = '#2c3c56';
+            this.ctx.fillRect(obs.x, obs.y, obs.w, obs.h - depth);
+
+            // Corrugated ribs on top
+            this.ctx.strokeStyle = '#394d6e';
+            this.ctx.lineWidth = 2;
+            for (let rx = obs.x + 14; rx < obs.x + obs.w; rx += 16) {
+                this.ctx.beginPath();
+                this.ctx.moveTo(rx, obs.y + 4);
+                this.ctx.lineTo(rx, obs.y + obs.h - depth - 4);
+                this.ctx.stroke();
+            }
+
+            // Border frame
+            this.ctx.strokeStyle = '#1b2536';
+            this.ctx.lineWidth = 2;
+            this.ctx.strokeRect(obs.x, obs.y, obs.w, obs.h - depth);
+
+            // White Stencil Marking on container
+            if (obs.w > 60 && obs.h > 60) {
+                this.ctx.fillStyle = 'rgba(255, 255, 255, 0.4)';
+                this.ctx.font = 'bold 9px Orbitron, sans-serif';
+                this.ctx.fillText('CARGO-08', obs.x + 8, obs.y + 14);
+            }
         }
 
-        // Corner metallic bolts
-        this.ctx.fillStyle = '#00f0ff';
-        this.ctx.globalAlpha = 0.4;
-        this.ctx.fillRect(obs.x + 4, obs.y + 4, 3, 3);
-        this.ctx.fillRect(obs.x + obs.w - 7, obs.y + 4, 3, 3);
-        this.ctx.fillRect(obs.x + 4, obs.y + obs.h - 7, 3, 3);
-        this.ctx.fillRect(obs.x + obs.w - 7, obs.y + obs.h - 7, 3, 3);
+        this.ctx.restore();
+    }
+
+    drawBarrel(bar) {
+        if (bar.exploded) return;
+        this.ctx.save();
+        this.ctx.translate(bar.x, bar.y);
+
+        // Shadow
+        this.ctx.fillStyle = 'rgba(0,0,0,0.45)';
+        this.ctx.beginPath();
+        this.ctx.ellipse(3, 8, bar.radius, bar.radius * 0.6, 0, 0, Math.PI * 2);
+        this.ctx.fill();
+
+        // Red Barrel Cylinder
+        this.ctx.beginPath();
+        this.ctx.arc(0, 0, bar.radius, 0, Math.PI * 2);
+        this.ctx.fillStyle = '#c02626';
+        this.ctx.strokeStyle = '#7f1d1d';
+        this.ctx.lineWidth = 2;
+        this.ctx.fill();
+        this.ctx.stroke();
+
+        // Inner rim
+        this.ctx.beginPath();
+        this.ctx.arc(0, 0, bar.radius * 0.7, 0, Math.PI * 2);
+        this.ctx.fillStyle = '#dc2626';
+        this.ctx.strokeStyle = '#991b1b';
+        this.ctx.lineWidth = 1.5;
+        this.ctx.fill();
+        this.ctx.stroke();
+
+        // Yellow Warning Flame / TNT text
+        this.ctx.fillStyle = '#ffd000';
+        this.ctx.font = 'bold 9px Orbitron, sans-serif';
+        this.ctx.textAlign = 'center';
+        this.ctx.textBaseline = 'middle';
+        this.ctx.fillText('TNT', 0, 0);
+
         this.ctx.restore();
     }
 
     drawGuardVisionCone(g) {
-        // Raycasting vision cone clipped by walls
-        const rayCount = 36;
+        const rayCount = 42;
         const startAngle = g.angle - g.fovAngle / 2;
         const angleStep = g.fovAngle / rayCount;
 
@@ -1896,7 +2190,6 @@ class Game {
             const rayAngle = startAngle + i * angleStep;
             let closestDist = g.fovDist;
 
-            // Check ray intersection against obstacles
             const rx2 = g.x + Math.cos(rayAngle) * g.fovDist;
             const ry2 = g.y + Math.sin(rayAngle) * g.fovDist;
 
@@ -1921,27 +2214,272 @@ class Game {
         }
         this.ctx.closePath();
 
-        // Cone gradient color based on guard state
-        let gradColor = 'rgba(255, 208, 0, ';
-        if (g.state === 'combat') gradColor = 'rgba(255, 42, 95, ';
-        else if (g.state === 'alerting') gradColor = 'rgba(255, 140, 0, ';
+        let baseColor = '255, 208, 0';
+        if (g.state === 'combat') baseColor = '255, 42, 95';
+        else if (g.state === 'alerting') baseColor = '255, 140, 0';
 
-        const grad = this.ctx.createRadialGradient(g.x, g.y, 10, g.x, g.y, g.fovDist);
-        grad.addColorStop(0, gradColor + '0.55)');
-        grad.addColorStop(0.7, gradColor + '0.25)');
-        grad.addColorStop(1, gradColor + '0.0)');
+        // Outer ambient glow
+        const grad = this.ctx.createRadialGradient(g.x, g.y, 14, g.x, g.y, g.fovDist);
+        grad.addColorStop(0, `rgba(${baseColor}, 0.65)`);
+        grad.addColorStop(0.5, `rgba(${baseColor}, 0.28)`);
+        grad.addColorStop(1, `rgba(${baseColor}, 0.0)`);
 
         this.ctx.fillStyle = grad;
         this.ctx.fill();
 
         // Edge stroke
-        this.ctx.strokeStyle = gradColor + '0.45)';
-        this.ctx.lineWidth = 1.5;
+        this.ctx.strokeStyle = `rgba(${baseColor}, 0.55)`;
+        this.ctx.lineWidth = 2;
         this.ctx.stroke();
 
         this.ctx.restore();
     }
 
+    drawAmbientDust() {
+        this.ctx.save();
+        this.ambientDust.forEach(d => {
+            this.ctx.beginPath();
+            this.ctx.arc(d.x, d.y, d.radius, 0, Math.PI * 2);
+            this.ctx.fillStyle = '#ffffff';
+            this.ctx.globalAlpha = d.alpha;
+            this.ctx.fill();
+        });
+        this.ctx.restore();
+    }
+
+    draw3DGem(gem) {
+        const floatY = Math.sin(gem.bob) * 3;
+        this.ctx.save();
+        this.ctx.translate(gem.x, gem.y + floatY);
+
+        // Ground shadow
+        this.ctx.fillStyle = 'rgba(0, 240, 255, 0.25)';
+        this.ctx.beginPath();
+        this.ctx.ellipse(0, 14, 8, 4, 0, 0, Math.PI * 2);
+        this.ctx.fill();
+
+        this.ctx.rotate(gem.angle);
+
+        // Radiant diamond flare
+        this.ctx.shadowColor = '#00f0ff';
+        this.ctx.shadowBlur = 14;
+
+        // Outer Facet
+        this.ctx.fillStyle = '#00f0ff';
+        this.ctx.beginPath();
+        this.ctx.moveTo(0, -gem.radius);
+        this.ctx.lineTo(gem.radius, 0);
+        this.ctx.lineTo(0, gem.radius);
+        this.ctx.lineTo(-gem.radius, 0);
+        this.ctx.closePath();
+        this.ctx.fill();
+
+        // Inner Light Facet
+        this.ctx.fillStyle = '#e0faff';
+        this.ctx.beginPath();
+        this.ctx.moveTo(0, -gem.radius * 0.45);
+        this.ctx.lineTo(gem.radius * 0.45, 0);
+        this.ctx.lineTo(0, gem.radius * 0.45);
+        this.ctx.lineTo(-gem.radius * 0.45, 0);
+        this.ctx.closePath();
+        this.ctx.fill();
+
+        this.ctx.restore();
+    }
+
+    drawBullet(b) {
+        this.ctx.save();
+        this.ctx.beginPath();
+        this.ctx.arc(b.x, b.y, 4, 0, Math.PI * 2);
+        this.ctx.fillStyle = '#ffd000';
+        this.ctx.shadowColor = '#ff2a5f';
+        this.ctx.shadowBlur = 10;
+        this.ctx.fill();
+
+        // Bullet streak trail
+        this.ctx.strokeStyle = 'rgba(255, 208, 0, 0.4)';
+        this.ctx.lineWidth = 2;
+        this.ctx.beginPath();
+        this.ctx.moveTo(b.x, b.y);
+        this.ctx.lineTo(b.x - b.vx * 0.04, b.y - b.vy * 0.04);
+        this.ctx.stroke();
+        this.ctx.restore();
+    }
+
+    drawSlashWave(sw) {
+        this.ctx.save();
+        this.ctx.translate(sw.x, sw.y);
+        this.ctx.rotate(sw.angle);
+        this.ctx.globalAlpha = sw.alpha;
+
+        // Glowing Katana Arc Trail
+        this.ctx.beginPath();
+        this.ctx.arc(0, 0, sw.radius, -Math.PI * 0.45, Math.PI * 0.45);
+        this.ctx.strokeStyle = sw.color;
+        this.ctx.lineWidth = 6;
+        this.ctx.shadowColor = sw.color;
+        this.ctx.shadowBlur = 16;
+        this.ctx.stroke();
+
+        this.ctx.beginPath();
+        this.ctx.arc(0, 0, sw.radius, -Math.PI * 0.35, Math.PI * 0.35);
+        this.ctx.strokeStyle = '#ffffff';
+        this.ctx.lineWidth = 2.5;
+        this.ctx.stroke();
+        this.ctx.restore();
+    }
+
+    // --- CHARACTER SPRITE: SENTRY (GUARD) ---
+    drawGuard(g) {
+        this.ctx.save();
+        this.ctx.translate(g.x, g.y);
+
+        // Ground shadow
+        this.ctx.fillStyle = 'rgba(0,0,0,0.45)';
+        this.ctx.beginPath();
+        this.ctx.ellipse(0, 5, g.radius * 0.9, g.radius * 0.5, 0, 0, Math.PI * 2);
+        this.ctx.fill();
+
+        this.ctx.rotate(g.angle);
+
+        // 1. Patrolling Boots / Leg Strides
+        const legOffset = Math.sin(g.walkCycle) * 6;
+        this.ctx.fillStyle = '#0f172a';
+        this.ctx.fillRect(-7, 8 + legOffset, 6, 8);
+        this.ctx.fillRect(1, 8 - legOffset, 6, 8);
+
+        // 2. Tactical Assault Rifle / Weapon
+        this.ctx.fillStyle = '#1e293b';
+        this.ctx.fillRect(8, 2, 18, 5); // Rifle barrel
+        this.ctx.fillRect(6, 4, 8, 8);  // Rifle stock & grip
+
+        // Flashlight Mounted on Rifle
+        this.ctx.fillStyle = '#ffd000';
+        this.ctx.fillRect(24, 1, 4, 7);
+
+        // Red Laser Aim Line in Combat
+        if (g.state === 'combat') {
+            this.ctx.save();
+            this.ctx.strokeStyle = 'rgba(255, 42, 95, 0.7)';
+            this.ctx.lineWidth = 1.5;
+            this.ctx.beginPath();
+            this.ctx.moveTo(26, 4);
+            this.ctx.lineTo(260, 4);
+            this.ctx.stroke();
+            this.ctx.restore();
+        }
+
+        // 3. Armored Shoulders & Torso
+        this.ctx.beginPath();
+        this.ctx.ellipse(0, 0, g.radius * 0.85, g.radius * 0.65, 0, 0, Math.PI * 2);
+        this.ctx.fillStyle = g.type === 'heavy' ? '#451a24' : '#1e293b';
+        this.ctx.strokeStyle = g.type === 'heavy' ? '#ff2a5f' : '#475569';
+        this.ctx.lineWidth = 2;
+        this.ctx.fill();
+        this.ctx.stroke();
+
+        // 4. Combat Helmet & Visor
+        this.ctx.beginPath();
+        this.ctx.arc(0, 0, g.radius * 0.55, 0, Math.PI * 2);
+        this.ctx.fillStyle = g.type === 'heavy' ? '#230e15' : '#0f172a';
+        this.ctx.fill();
+
+        // Visor glow
+        this.ctx.fillStyle = (g.state === 'combat') ? '#ff2a5f' : '#ffd000';
+        this.ctx.fillRect(g.radius * 0.15, -4, 5, 8);
+
+        this.ctx.restore();
+
+        // Alert Indicator Emote
+        if (g.state === 'alerting' || g.state === 'combat') {
+            this.ctx.save();
+            this.ctx.font = '900 24px Orbitron, sans-serif';
+            this.ctx.fillStyle = (g.state === 'combat') ? '#ff2a5f' : '#ffd000';
+            this.ctx.textAlign = 'center';
+            this.ctx.shadowColor = this.ctx.fillStyle;
+            this.ctx.shadowBlur = 12;
+            this.ctx.fillText('!', g.x, g.y - g.radius - 12);
+            this.ctx.restore();
+        } else if (g.state === 'search') {
+            this.ctx.save();
+            this.ctx.font = '900 20px Orbitron, sans-serif';
+            this.ctx.fillStyle = '#ffd000';
+            this.ctx.textAlign = 'center';
+            this.ctx.fillText('?', g.x, g.y - g.radius - 12);
+            this.ctx.restore();
+        }
+    }
+
+    // --- CHARACTER SPRITE: HUNTER (PLAYER OPERATIVE) ---
+    drawPlayer(p) {
+        const op = this.getOperative();
+        this.ctx.save();
+        this.ctx.translate(p.x, p.y);
+
+        // Ground shadow
+        this.ctx.fillStyle = 'rgba(0,0,0,0.5)';
+        this.ctx.beginPath();
+        this.ctx.ellipse(0, 6, p.radius * 0.9, p.radius * 0.55, 0, 0, Math.PI * 2);
+        this.ctx.fill();
+
+        this.ctx.rotate(p.angle);
+
+        // 1. Animated Running Boots / Strides
+        const stride = p.isMoving ? Math.sin(p.walkCycle) * 7 : 0;
+        this.ctx.fillStyle = '#0a0e17';
+        this.ctx.fillRect(-8, 9 + stride, 6, 8);
+        this.ctx.fillRect(2, 9 - stride, 6, 8);
+
+        // 2. Twin Combat Blades / Katanas
+        this.ctx.fillStyle = '#cbd5e1'; // Metallic blade
+        this.ctx.fillRect(8, -12, 18, 3);
+        this.ctx.fillRect(8, 9, 18, 3);
+
+        // Blade Handles
+        this.ctx.fillStyle = op.color;
+        this.ctx.fillRect(4, -13, 5, 5);
+        this.ctx.fillRect(4, 8, 5, 5);
+
+        // 3. Stealth Operative Shoulders & Ballistic Vest
+        this.ctx.beginPath();
+        this.ctx.ellipse(0, 0, p.radius * 0.9, p.radius * 0.7, 0, 0, Math.PI * 2);
+        this.ctx.fillStyle = '#0f172a';
+        this.ctx.strokeStyle = op.color;
+        this.ctx.lineWidth = 2.5;
+        this.ctx.shadowColor = op.color;
+        this.ctx.shadowBlur = p.isDashing ? 18 : 6;
+        this.ctx.fill();
+        this.ctx.stroke();
+
+        // 4. Tactical Hood / Cowl & High-Tech Goggles
+        this.ctx.beginPath();
+        this.ctx.arc(0, 0, p.radius * 0.52, 0, Math.PI * 2);
+        this.ctx.fillStyle = '#060911';
+        this.ctx.fill();
+
+        // Glowing Visor
+        this.ctx.fillStyle = op.color;
+        this.ctx.shadowColor = op.color;
+        this.ctx.shadowBlur = 10;
+        this.ctx.fillRect(p.radius * 0.12, -4, 6, 8);
+
+        this.ctx.restore();
+    }
+
+    drawCinematicVignette() {
+        const rad = Math.max(this.width, this.height) * 0.75;
+        const grad = this.ctx.createRadialGradient(
+            this.width / 2, this.height / 2, rad * 0.45,
+            this.width / 2, this.height / 2, rad
+        );
+        grad.addColorStop(0, 'rgba(0, 0, 0, 0.0)');
+        grad.addColorStop(1, 'rgba(4, 6, 10, 0.65)');
+
+        this.ctx.fillStyle = grad;
+        this.ctx.fillRect(0, 0, this.width, this.height);
+    }
+
+    // --- RAY INTERSECTIONS ---
     getRayRectIntersectionDist(x1, y1, x2, y2, rect) {
         const minX = rect.x;
         const maxX = rect.x + rect.w;
@@ -1984,116 +2522,6 @@ class Game {
         return null;
     }
 
-    drawGem(gem) {
-        this.ctx.save();
-        this.ctx.translate(gem.x, gem.y);
-        this.ctx.rotate(gem.angle);
-
-        // Gem glow
-        this.ctx.shadowColor = '#00f0ff';
-        this.ctx.shadowBlur = 12;
-
-        this.ctx.fillStyle = '#00f0ff';
-        this.ctx.beginPath();
-        this.ctx.moveTo(0, -gem.radius);
-        this.ctx.lineTo(gem.radius, 0);
-        this.ctx.lineTo(0, gem.radius);
-        this.ctx.lineTo(-gem.radius, 0);
-        this.ctx.closePath();
-        this.ctx.fill();
-
-        // Inner highlight
-        this.ctx.fillStyle = '#ffffff';
-        this.ctx.beginPath();
-        this.ctx.moveTo(0, -gem.radius * 0.4);
-        this.ctx.lineTo(gem.radius * 0.4, 0);
-        this.ctx.lineTo(0, gem.radius * 0.4);
-        this.ctx.lineTo(-gem.radius * 0.4, 0);
-        this.ctx.closePath();
-        this.ctx.fill();
-
-        this.ctx.restore();
-    }
-
-    drawBullet(b) {
-        this.ctx.save();
-        this.ctx.beginPath();
-        this.ctx.arc(b.x, b.y, 4, 0, Math.PI * 2);
-        this.ctx.fillStyle = '#ffd000';
-        this.ctx.shadowColor = '#ff2a5f';
-        this.ctx.shadowBlur = 8;
-        this.ctx.fill();
-        this.ctx.restore();
-    }
-
-    drawGuard(g) {
-        this.ctx.save();
-        this.ctx.translate(g.x, g.y);
-        this.ctx.rotate(g.angle);
-
-        // Flashlight source
-        this.ctx.fillStyle = '#ffd000';
-        this.ctx.fillRect(g.radius * 0.6, -3, 8, 6);
-
-        // Guard body
-        this.ctx.beginPath();
-        this.ctx.arc(0, 0, g.radius, 0, Math.PI * 2);
-        this.ctx.fillStyle = g.type === 'heavy' ? '#3b1d28' : '#1e293b';
-        this.ctx.strokeStyle = g.type === 'heavy' ? '#ff2a5f' : '#64748b';
-        this.ctx.lineWidth = 2.5;
-        this.ctx.fill();
-        this.ctx.stroke();
-
-        // Helmet visor
-        this.ctx.fillStyle = (g.state === 'combat') ? '#ff2a5f' : '#ffd000';
-        this.ctx.fillRect(g.radius * 0.2, -5, 6, 10);
-
-        this.ctx.restore();
-
-        // Alert Emote / Indicator above head
-        if (g.state === 'alerting' || g.state === 'combat') {
-            this.ctx.save();
-            this.ctx.font = 'bold 22px Orbitron, sans-serif';
-            this.ctx.fillStyle = (g.state === 'combat') ? '#ff2a5f' : '#ffd000';
-            this.ctx.textAlign = 'center';
-            this.ctx.shadowColor = this.ctx.fillStyle;
-            this.ctx.shadowBlur = 10;
-            this.ctx.fillText('!', g.x, g.y - g.radius - 8);
-            this.ctx.restore();
-        } else if (g.state === 'search') {
-            this.ctx.save();
-            this.ctx.font = 'bold 18px Orbitron, sans-serif';
-            this.ctx.fillStyle = '#ffd000';
-            this.ctx.textAlign = 'center';
-            this.ctx.fillText('?', g.x, g.y - g.radius - 8);
-            this.ctx.restore();
-        }
-    }
-
-    drawPlayer(p) {
-        const op = this.getOperative();
-        this.ctx.save();
-        this.ctx.translate(p.x, p.y);
-        this.ctx.rotate(p.angle);
-
-        // Stealth operative body
-        this.ctx.beginPath();
-        this.ctx.arc(0, 0, p.radius, 0, Math.PI * 2);
-        this.ctx.fillStyle = '#0f172a';
-        this.ctx.strokeStyle = op.color;
-        this.ctx.lineWidth = 3;
-        this.ctx.shadowColor = op.color;
-        this.ctx.shadowBlur = p.isDashing ? 18 : 6;
-        this.ctx.fill();
-        this.ctx.stroke();
-
-        // Direction / Katana weapon sheath
-        this.ctx.fillStyle = op.color;
-        this.ctx.fillRect(p.radius * 0.4, -4, 8, 8);
-
-        this.ctx.restore();
-    }
-
     // --- MINIMAP RADAR ---
     renderMinimap() {
         const mCtx = this.minimapCtx;
@@ -2104,23 +2532,28 @@ class Game {
         const scaleX = mw / this.worldWidth;
         const scaleY = mh / this.worldHeight;
 
-        // Background
         mCtx.fillStyle = 'rgba(10, 14, 22, 0.9)';
         mCtx.fillRect(0, 0, mw, mh);
 
-        // Obstacles
         mCtx.fillStyle = 'rgba(255, 255, 255, 0.15)';
         this.obstacles.forEach(obs => {
             mCtx.fillRect(obs.x * scaleX, obs.y * scaleY, obs.w * scaleX, obs.h * scaleY);
         });
 
-        // Gems
+        mCtx.fillStyle = '#ff4400';
+        this.barrels.forEach(bar => {
+            if (!bar.exploded) {
+                mCtx.beginPath();
+                mCtx.arc(bar.x * scaleX, bar.y * scaleY, 2, 0, Math.PI * 2);
+                mCtx.fill();
+            }
+        });
+
         mCtx.fillStyle = '#00f0ff';
         this.gemsList.forEach(gem => {
             mCtx.fillRect(gem.x * scaleX - 1, gem.y * scaleY - 1, 2, 2);
         });
 
-        // Guards
         this.guards.forEach(g => {
             mCtx.fillStyle = (g.state === 'combat') ? '#ff2a5f' : '#ffd000';
             mCtx.beginPath();
@@ -2128,7 +2561,6 @@ class Game {
             mCtx.fill();
         });
 
-        // Player
         if (this.player) {
             mCtx.fillStyle = '#00ff88';
             mCtx.beginPath();
@@ -2136,14 +2568,13 @@ class Game {
             mCtx.fill();
         }
 
-        // Radar grid crosshairs
         mCtx.strokeStyle = 'rgba(0, 240, 255, 0.2)';
         mCtx.lineWidth = 1;
         mCtx.strokeRect(0, 0, mw, mh);
     }
 }
 
-// Start Game on load
+// Start Game
 window.addEventListener('load', () => {
     new Game();
 });
