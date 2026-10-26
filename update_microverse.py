@@ -21,12 +21,12 @@ folders = {
 # Friendly display names for files whose raw name reads poorly.
 NAME_OVERRIDES = {
     "2048_game": "2048",
-    "chess_game": "Chess (Terminal-style)",
     "chess_p2p": "P2P Online Chess",
     "craft_game": "Craft World",
-    "mario_game": "Super Run",
+    "mario_game": "Super Mario Run",
     "Temple_Run": "Temple Run",
-    "vice_city_game": "Vice City",
+    "vice_city_game": "GTA: Vice City",
+    "hunter_assassin": "Hunter Assassin",
     "save_the_dog": "Save the Dog",
     "shooting_game": "Shooting Game",
     "snake_game": "Snake",
@@ -37,12 +37,12 @@ NAME_OVERRIDES = {
 # Optional one-line descriptions shown under each title.
 DESCRIPTIONS = {
     "2048_game": "Slide tiles and reach 2048",
-    "chess_game": "Play chess in your terminal",
     "chess_p2p": "Real-time chess with a friend, no server needed",
     "craft_game": "2D sandbox mining and building",
-    "mario_game": "Classic side-scrolling platformer",
+    "mario_game": "Classic platformer with authentic sprites & retro audio",
     "Temple_Run": "Endless runner over temple ruins",
-    "vice_city_game": "Top-down city driving action",
+    "vice_city_game": "80s open-world driving, car jacking & police pursuits",
+    "hunter_assassin": "Tactical 2.5D stealth operative missions",
     "save_the_dog": "Draw shields to protect the dog",
     "shooting_game": "Aim fast, shoot faster",
     "snake_game": "The classic snake, in your browser",
