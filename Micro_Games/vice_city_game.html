@@ -2,468 +2,1571 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Retro 3D Engine | Microverse</title>
+    <title>GTA: Vice City - 80s Neon Drive & Heist | MicroVerse</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <link href="https://fonts.googleapis.com/css2?family=VT323&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=Press+Start+2P&family=Rajdhani:wght@600;700&display=swap" rel="stylesheet">
     <style>
         :root {
-            --primary: #ff0055;
-            --secondary: #00f0ff;
+            --vice-pink: #ff2a8d;
+            --vice-cyan: #00f0ff;
+            --vice-yellow: #ffd000;
+            --vice-purple: #7a1fd6;
+            --vice-green: #38ef7d;
         }
 
-        body { 
-            margin: 0; background: #000; overflow: hidden; 
-            font-family: 'VT323', monospace; touch-action: none; 
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            user-select: none;
+            -webkit-user-select: none;
+            touch-action: none;
+        }
+
+        body {
+            background: #080314;
             color: #fff;
-        }
-        
-        canvas { 
-            display: block; 
-            width: 100%; 
-            height: 100%; 
-            image-rendering: pixelated; 
-        }
-        
-        #ui { 
-            position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; 
-            box-shadow: inset 0 0 50px rgba(0,0,0,0.8);
-        }
-        
-        #hud-top {
-            position: absolute; top: 15px; right: 15px; 
-            text-align: right; text-transform: uppercase;
-        }
-        
-        .hud-stat {
-            font-size: 24px;
-            text-shadow: 2px 2px 0 #000;
-            color: var(--secondary);
-            margin-bottom: 5px;
+            font-family: 'Rajdhani', sans-serif;
+            overflow: hidden;
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
 
-        #debug { 
-            position: absolute; bottom: 10px; left: 50%; transform: translateX(-50%);
-            color: rgba(255,255,255,0.5); font-size: 16px; 
+        #game-container {
+            position: relative;
+            width: 100vw;
+            height: 100vh;
+            overflow: hidden;
+            background: #110d24;
         }
 
-        /* CONTROLS */
-        .control-zone { 
-            position: absolute; bottom: 30px; width: 120px; height: 120px; pointer-events: auto; 
-        }
-        
-        #stick-left { 
-            left: 30px; 
-            background: radial-gradient(circle, rgba(255,255,255,0.05), rgba(255,255,255,0.1)); 
-            border-radius: 50%; 
-            border: 2px solid rgba(0, 240, 255, 0.3); 
-            box-shadow: 0 0 20px rgba(0, 240, 255, 0.1);
-        }
-        
-        #stick-right { 
-            right: 30px; 
-            background: radial-gradient(circle, rgba(255,255,255,0.05), rgba(255,255,255,0.1)); 
-            border-radius: 50%; 
-            border: 2px solid rgba(255, 0, 85, 0.3); 
-            box-shadow: 0 0 20px rgba(255, 0, 85, 0.1);
-        }
-        
-        .knob { 
-            width: 40px; height: 40px; 
-            border-radius: 50%; 
-            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
-            pointer-events: none;
-            transition: background 0.2s;
-        }
-        
-        #knob-l { background: rgba(0, 240, 255, 0.6); box-shadow: 0 0 10px var(--secondary); }
-        #knob-r { background: rgba(255, 0, 85, 0.6); box-shadow: 0 0 10px var(--primary); }
-
-        #crosshair {
-            position: absolute; top: 50%; left: 50%; width: 24px; height: 24px;
-            transform: translate(-50%, -50%); pointer-events: none;
-        }
-        .ch-line { background: rgba(255,255,255,0.8); position: absolute; box-shadow: 0 0 5px rgba(0,0,0,0.5); }
-    
-        .game-nav {
-            position: fixed;
-            top: 15px;
-            left: 15px;
-            z-index: 9999;
-            text-decoration: none;
-            color: #fff;
-            background: rgba(0,0,0,0.6);
-            border: 1px solid rgba(255,255,255,0.2);
-            padding: 8px 16px;
-            border-radius: 4px;
-            font-size: 18px;
-            backdrop-filter: blur(4px);
-            transition: all 0.2s;
-            pointer-events: auto;
-            text-transform: uppercase;
-            box-shadow: 2px 2px 0 var(--primary);
-        }
-        
-        .game-nav:hover { 
-            background: rgba(255,0,85,0.2); 
-            transform: translate(-2px, -2px);
-            box-shadow: 4px 4px 0 var(--primary);
+        canvas {
+            display: block;
+            width: 100%;
+            height: 100%;
         }
 
-        /* Screen Glitch overlay */
+        /* Scanline CRT Arcade Effect */
         .scanlines {
             position: absolute;
             top: 0; left: 0; width: 100%; height: 100%;
-            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
-            background-size: 100% 4px, 3px 100%;
+            background: linear-gradient(rgba(18, 16, 26, 0) 50%, rgba(0, 0, 0, 0.22) 50%);
+            background-size: 100% 4px;
             pointer-events: none;
             z-index: 5;
+        }
+
+        /* Top HUD */
+        .hud-top {
+            position: absolute;
+            top: 14px;
+            left: 16px;
+            right: 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            pointer-events: none;
+            z-index: 20;
+        }
+
+        .hud-left {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            pointer-events: auto;
+        }
+
+        .hud-right {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            gap: 4px;
+        }
+
+        .game-nav {
+            background: rgba(14, 8, 30, 0.85);
+            border: 2px solid var(--vice-pink);
+            color: #fff;
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 13px;
+            font-weight: 900;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            box-shadow: 0 0 15px rgba(255, 42, 141, 0.4);
+            backdrop-filter: blur(8px);
+            transition: all 0.2s;
+            text-transform: uppercase;
+        }
+
+        .game-nav:hover, .game-nav:active {
+            background: var(--vice-pink);
+            color: #000;
+            transform: scale(1.04);
+            box-shadow: 0 0 25px rgba(255, 42, 141, 0.8);
+        }
+
+        /* GTA Vice City Cash HUD */
+        .cash-display {
+            font-family: 'Press Start 2P', monospace;
+            font-size: 22px;
+            color: var(--vice-green);
+            text-shadow: 3px 3px 0 #000, 0 0 10px rgba(56, 239, 125, 0.6);
+            letter-spacing: 2px;
+        }
+
+        /* Health & Armor Bars */
+        .stat-bars {
+            display: flex;
+            gap: 12px;
+            margin-top: 4px;
+        }
+
+        .bar-wrap {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            background: rgba(0, 0, 0, 0.65);
+            padding: 4px 8px;
+            border-radius: 6px;
+            border: 1px solid rgba(255,255,255,0.15);
+        }
+
+        .bar-icon {
+            font-size: 14px;
+        }
+
+        .bar-outer {
+            width: 75px;
+            height: 10px;
+            background: rgba(255,255,255,0.15);
+            border-radius: 3px;
+            overflow: hidden;
+        }
+
+        .bar-inner {
+            height: 100%;
+            width: 100%;
+            transition: width 0.2s ease;
+        }
+
+        .bar-hp { background: linear-gradient(90deg, #ff2a5f, #ff6b8b); }
+        .bar-armor { background: linear-gradient(90deg, #00f0ff, #70f7ff); }
+
+        /* Wanted Stars */
+        .wanted-stars {
+            font-size: 20px;
+            letter-spacing: 4px;
+            color: #4a4e69;
+            text-shadow: 2px 2px 0 #000;
+        }
+
+        .wanted-star.active {
+            color: var(--vice-yellow);
+            text-shadow: 0 0 12px var(--vice-yellow), 2px 2px 0 #000;
+            animation: pulseStar 0.8s infinite alternate;
+        }
+
+        @keyframes pulseStar {
+            from { transform: scale(1); }
+            to { transform: scale(1.15); }
+        }
+
+        /* Radio Station Banner */
+        #radio-banner {
+            position: absolute;
+            top: 75px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: linear-gradient(90deg, rgba(255, 42, 141, 0.85), rgba(122, 31, 214, 0.85));
+            border: 2px solid var(--vice-cyan);
+            border-radius: 20px;
+            padding: 6px 20px;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 14px;
+            font-weight: 900;
+            color: #fff;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            box-shadow: 0 0 20px rgba(0, 240, 255, 0.6);
+            backdrop-filter: blur(8px);
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.4s ease;
+            z-index: 25;
+        }
+
+        #radio-banner.show {
+            opacity: 1;
+        }
+
+        /* Minimap Radar */
+        #radar-canvas {
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            width: 110px;
+            height: 110px;
+            border-radius: 50%;
+            border: 3px solid var(--vice-pink);
+            background: rgba(10, 4, 22, 0.88);
+            box-shadow: 0 0 25px rgba(255, 42, 141, 0.5), inset 0 0 15px rgba(0,0,0,0.8);
+            pointer-events: none;
+            z-index: 20;
+        }
+
+        /* Action Buttons (Enter Car, Shoot, Radio) */
+        .action-controls {
+            position: absolute;
+            bottom: 25px;
+            right: 25px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            z-index: 30;
+            pointer-events: auto;
+        }
+
+        .btn-action {
+            width: 68px;
+            height: 68px;
+            border-radius: 50%;
+            border: 2px solid rgba(255,255,255,0.3);
+            background: rgba(18, 12, 36, 0.85);
+            color: #fff;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 11px;
+            font-weight: 900;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 2px;
+            backdrop-filter: blur(8px);
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.6);
+            transition: all 0.15s;
+        }
+
+        .btn-action:active {
+            transform: scale(0.92);
+        }
+
+        .btn-car {
+            border-color: var(--vice-yellow);
+            color: var(--vice-yellow);
+            box-shadow: 0 0 18px rgba(255, 208, 0, 0.4);
+        }
+
+        .btn-car:active {
+            background: rgba(255, 208, 0, 0.35);
+        }
+
+        .btn-shoot {
+            border-color: var(--vice-pink);
+            color: var(--vice-pink);
+            box-shadow: 0 0 18px rgba(255, 42, 141, 0.4);
+        }
+
+        .btn-shoot:active {
+            background: rgba(255, 42, 141, 0.35);
+        }
+
+        .btn-radio {
+            width: 48px;
+            height: 48px;
+            font-size: 10px;
+            align-self: flex-end;
+            border-color: var(--vice-cyan);
+            color: var(--vice-cyan);
+        }
+
+        /* Virtual Steering D-Pad */
+        #virtual-dpad {
+            position: absolute;
+            bottom: 145px;
+            left: 25px;
+            width: 120px;
+            height: 120px;
+            z-index: 25;
+            display: none;
+            touch-action: none;
+        }
+
+        .dpad-btn {
+            position: absolute;
+            width: 44px;
+            height: 44px;
+            background: rgba(255, 42, 141, 0.2);
+            border: 2px solid var(--vice-pink);
+            border-radius: 10px;
+            color: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            font-weight: bold;
+            backdrop-filter: blur(5px);
+        }
+
+        .dpad-btn:active {
+            background: rgba(255, 42, 141, 0.5);
+        }
+
+        #dpad-up { top: 0; left: 38px; }
+        #dpad-down { bottom: 0; left: 38px; }
+        #dpad-left { top: 38px; left: 0; }
+        #dpad-right { top: 38px; right: 0; }
+
+        /* Mission Notification Banner */
+        #mission-banner {
+            position: absolute;
+            top: 130px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(14, 8, 30, 0.95);
+            border: 2px solid var(--vice-yellow);
+            border-radius: 12px;
+            padding: 10px 24px;
+            text-align: center;
+            box-shadow: 0 0 25px rgba(255, 208, 0, 0.4);
+            backdrop-filter: blur(10px);
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+            z-index: 40;
+            max-width: 380px;
+            width: 90%;
+        }
+
+        #mission-banner.show { opacity: 1; }
+        #mission-banner h3 {
+            font-family: 'Orbitron', sans-serif;
+            color: var(--vice-yellow);
+            font-size: 15px;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+        #mission-banner p {
+            font-size: 13px;
+            color: #e2e8f0;
+            margin-top: 4px;
+        }
+
+        /* Wasted / Busted Screen */
+        #wasted-screen {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(14, 2, 8, 0.9);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.6s ease;
+            z-index: 100;
+        }
+
+        #wasted-screen.show {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .wasted-text {
+            font-family: 'Press Start 2P', monospace;
+            font-size: 46px;
+            color: #ff0055;
+            text-shadow: 0 0 30px #ff0055, 4px 4px 0 #000;
+            letter-spacing: 6px;
+            margin-bottom: 20px;
+        }
+
+        .respawn-btn {
+            background: linear-gradient(135deg, var(--vice-pink), var(--vice-purple));
+            color: #fff;
+            border: 2px solid var(--vice-cyan);
+            border-radius: 12px;
+            padding: 12px 30px;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 15px;
+            font-weight: 900;
+            cursor: pointer;
+            letter-spacing: 2px;
+            box-shadow: 0 0 25px rgba(255, 42, 141, 0.6);
+            text-transform: uppercase;
         }
     </style>
 </head>
 <body>
-    <a href="index.html" class="game-nav">← ESC</a>
 
+<div id="game-container">
     <div class="scanlines"></div>
+    <canvas id="game-canvas"></canvas>
+    <canvas id="radar-canvas" width="110" height="110"></canvas>
 
-    <div id="ui">
-        <div id="hud-top">
-            <div class="hud-stat" id="fps-counter">FPS: 60</div>
-            <div class="hud-stat" style="color: #fff">HP: 100</div>
+    <!-- Top HUD -->
+    <div class="hud-top">
+        <div class="hud-left">
+            <a href="index.html" class="game-nav">← Microverse</a>
+            <div class="cash-display" id="cash-val">$00025000</div>
+            <div class="stat-bars">
+                <div class="bar-wrap">
+                    <span class="bar-icon">❤️</span>
+                    <div class="bar-outer"><div id="hp-bar" class="bar-inner bar-hp"></div></div>
+                </div>
+                <div class="bar-wrap">
+                    <span class="bar-icon">🛡️</span>
+                    <div class="bar-outer"><div id="armor-bar" class="bar-inner bar-armor"></div></div>
+                </div>
+            </div>
         </div>
-        
-        <div id="debug">Pos: 0,0</div>
-        
-        <div id="crosshair">
-            <div class="ch-line" style="width: 4px; height: 10px; left: 10px; top: 0;"></div>
-            <div class="ch-line" style="width: 4px; height: 10px; left: 10px; bottom: 0;"></div>
-            <div class="ch-line" style="width: 10px; height: 4px; top: 10px; left: 0;"></div>
-            <div class="ch-line" style="width: 10px; height: 4px; top: 10px; right: 0;"></div>
-            <div class="ch-line" style="width: 4px; height: 4px; top: 10px; left: 10px; background: var(--primary);"></div>
-        </div>
-        
-        <div id="stick-left" class="control-zone">
-            <div class="knob" id="knob-l"></div>
-        </div>
-        
-        <div id="stick-right" class="control-zone">
-            <div class="knob" id="knob-r"></div>
+
+        <div class="hud-right">
+            <div class="wanted-stars" id="wanted-container">
+                <span class="wanted-star">★</span>
+                <span class="wanted-star">★</span>
+                <span class="wanted-star">★</span>
+                <span class="wanted-star">★</span>
+                <span class="wanted-star">★</span>
+            </div>
+            <div style="font-family:'Press Start 2P', monospace; font-size:12px; color:var(--vice-cyan); margin-top:6px;" id="weapon-display">UZI 9MM</div>
         </div>
     </div>
 
-    <canvas id="screen"></canvas>
+    <!-- Radio Station Popup -->
+    <div id="radio-banner">📻 FLASH FM 102.5</div>
+
+    <!-- Mission Announcement -->
+    <div id="mission-banner">
+        <h3 id="mission-title">CONTRACT AVAILABLE</h3>
+        <p id="mission-desc">Drive to the Ocean Drive hotel and collect the payout.</p>
+    </div>
+
+    <!-- Mobile Virtual Action Controls -->
+    <div class="action-controls">
+        <button id="btn-radio-toggle" class="btn-action btn-radio">📻 FM</button>
+        <button id="btn-car-enter" class="btn-action btn-car">
+            <span>🚗</span>
+            <span>ENTER</span>
+        </button>
+        <button id="btn-shoot-action" class="btn-action btn-shoot">
+            <span>💥</span>
+            <span>FIRE</span>
+        </button>
+    </div>
+
+    <!-- Mobile Touch D-Pad for Driving/Walking -->
+    <div id="virtual-dpad">
+        <div id="dpad-up" class="dpad-btn">▲</div>
+        <div id="dpad-down" class="dpad-btn">▼</div>
+        <div id="dpad-left" class="dpad-btn">◀</div>
+        <div id="dpad-right" class="dpad-btn">▶</div>
+    </div>
+
+    <!-- Wasted / Mission Failed Screen -->
+    <div id="wasted-screen">
+        <div class="wasted-text">WASTED</div>
+        <button id="btn-respawn" class="respawn-btn">Respawn at Ocean View</button>
+    </div>
+</div>
 
 <script>
-    const canvas = document.getElementById('screen');
-    const ctx = canvas.getContext('2d', { alpha: false, willReadFrequently: false }); 
-    
-    // Resolution (Low res for retro feel & performance)
-    const SCREEN_W = 320;
-    const SCREEN_H = 200;
-    canvas.width = SCREEN_W;
-    canvas.height = SCREEN_H;
-    
-    // Disable smoothing for pixelated look
-    ctx.imageSmoothingEnabled = false;
+/**
+ * GTA: VICE CITY - 80s NEON DRIVE & HEIST
+ * Built for RashTek MicroVerse
+ * Top-down open-world driving, car jacking, cops & 80s synthwave radio
+ */
 
-    // --- GAME STATE ---
-    const mapWidth = 24;
-    const mapHeight = 24;
-    let map = []; 
+// --- 80s SYNTHWAVE AUDIO ENGINE (Web Audio API) ---
+class SynthwaveAudio {
+    constructor() {
+        this.ctx = null;
+        this.enabled = true;
+        this.radioStation = 0; // 0: Flash FM, 1: Wave 103, 2: Radio Off
+        this.stations = ['FLASH FM 102.5', 'WAVE 103 SYNTH', 'RADIO OFF'];
+        this.timer = null;
+        this.step = 0;
+        this.bassNotes = [65.41, 73.42, 82.41, 98.00]; // C2, D2, E2, G2
+        this.sirenOsc = null;
+    }
 
-    let player = {
-        x: 12.5, y: 12.5,
-        dir: 0,
-        moveSpeed: 0
-    };
-
-    function initMap() {
-        for (let y = 0; y < mapHeight; y++) {
-            let row = [];
-            for (let x = 0; x < mapWidth; x++) {
-                if (x === 0 || x === mapWidth - 1 || y === 0 || y === mapHeight - 1) {
-                    row.push(1); // Border wall
-                } else {
-                    // Random blocks
-                    if (Math.random() < 0.2) row.push(Math.floor(Math.random() * 4) + 1);
-                    else row.push(0);
-                }
-            }
-            map.push(row);
+    init() {
+        if (!this.ctx) {
+            const AudioContext = window.AudioContext || window.webkitAudioContext;
+            this.ctx = new AudioContext();
+            this.startRadio();
         }
-        // Clear spawn area
-        map[12][12] = 0; map[11][12] = 0; map[13][12] = 0;
-        map[12][11] = 0; map[12][13] = 0;
+        if (this.ctx && this.ctx.state === 'suspended') {
+            this.ctx.resume();
+        }
     }
 
-    // --- INPUT HANDLING ---
-    let input = { fwd: 0, strafe: 0, rot: 0 };
-    
-    function setupJoystick(id, knobId, callback) {
-        const zone = document.getElementById(id);
-        const knob = document.getElementById(knobId);
-        let startX, startY;
-        let active = false;
-        
-        const handleStart = (e) => {
-            e.preventDefault();
-            active = true;
-            let touch = e.touches ? e.touches[0] : e;
-            startX = touch.clientX;
-            startY = touch.clientY;
-            knob.style.transform = `translate(-50%, -50%) scale(1.2)`;
-        };
-        
-        const handleMove = (e) => {
-            if(!active) return;
-            e.preventDefault();
-            let touch = e.touches ? e.touches[0] : e;
-            
-            let dx = touch.clientX - startX;
-            let dy = touch.clientY - startY;
-            
-            const max = 40;
-            const dist = Math.sqrt(dx*dx + dy*dy);
-            if(dist > max) { dx = (dx/dist)*max; dy = (dy/dist)*max; }
-            
-            knob.style.transform = `translate(-50%, -50%) translate(${dx}px, ${dy}px) scale(1.2)`;
-            callback(dx / max, dy / max);
-        };
-        
-        const handleEnd = (e) => {
-            active = false;
-            knob.style.transform = `translate(-50%, -50%) scale(1)`;
-            callback(0, 0);
-        };
-
-        zone.addEventListener('touchstart', handleStart, {passive: false});
-        zone.addEventListener('touchmove', handleMove, {passive: false});
-        zone.addEventListener('touchend', handleEnd);
-        zone.addEventListener('touchcancel', handleEnd);
-        
-        // Mouse fallback for desktop testing
-        zone.addEventListener('mousedown', handleStart);
-        window.addEventListener('mousemove', handleMove);
-        window.addEventListener('mouseup', handleEnd);
+    startRadio() {
+        if (this.timer) clearInterval(this.timer);
+        this.timer = setInterval(() => {
+            if (!this.enabled || this.radioStation === 2 || !this.ctx) return;
+            this.playSynthBeat();
+        }, 150);
     }
 
-    setupJoystick('stick-left', 'knob-l', (x, y) => {
-        input.fwd = -y; 
-        input.strafe = x;
-    });
+    playSynthBeat() {
+        const now = this.ctx.currentTime;
+        const noteIdx = Math.floor(this.step / 8) % this.bassNotes.length;
+        const freq = this.bassNotes[noteIdx];
 
-    setupJoystick('stick-right', 'knob-r', (x, y) => {
-        input.rot = x;
-    });
+        // 80s Rolling Bassline
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+        const filter = this.ctx.createBiquadFilter();
 
-    // Keyboard fallback
-    document.addEventListener('keydown', e => {
-        if(e.key==='w'||e.key==='ArrowUp') input.fwd = 1;
-        if(e.key==='s'||e.key==='ArrowDown') input.fwd = -1;
-        if(e.key==='a') input.strafe = -1;
-        if(e.key==='d') input.strafe = 1;
-        if(e.key==='ArrowLeft') input.rot = -1;
-        if(e.key==='ArrowRight') input.rot = 1;
-    });
-    document.addEventListener('keyup', e => {
-        if(e.key==='w'||e.key==='s'||e.key==='ArrowUp'||e.key==='ArrowDown') input.fwd = 0;
-        if(e.key==='a'||e.key==='d') input.strafe = 0;
-        if(e.key==='ArrowLeft'||e.key==='ArrowRight') input.rot = 0;
-    });
+        osc.type = 'sawtooth';
+        osc.frequency.setValueAtTime(freq, now);
 
-    // --- RAYCASTING ---
-    // Pre-calculate gradient for synthwave sky
-    const skyGradient = ctx.createLinearGradient(0, 0, 0, SCREEN_H/2);
-    skyGradient.addColorStop(0, "#000022");
-    skyGradient.addColorStop(0.5, "#4a004a");
-    skyGradient.addColorStop(1, "#ff0055");
+        filter.type = 'lowpass';
+        filter.frequency.setValueAtTime(450 + (this.step % 4) * 80, now);
+        filter.Q.value = 4.0;
 
-    // Floor grid styling
-    function drawBackground(pitch) {
-        // Sky
-        ctx.fillStyle = skyGradient;
-        ctx.fillRect(0, 0, SCREEN_W, SCREEN_H/2 + pitch);
-        
-        // Floor
-        ctx.fillStyle = '#0a0a0a';
-        ctx.fillRect(0, SCREEN_H/2 + pitch, SCREEN_W, SCREEN_H);
-        
-        // Horizon line glow
-        ctx.fillStyle = 'rgba(0, 240, 255, 0.5)';
-        ctx.fillRect(0, SCREEN_H/2 + pitch, SCREEN_W, 2);
+        gain.gain.setValueAtTime(0.08, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.12);
+
+        osc.connect(filter);
+        filter.connect(gain);
+        gain.connect(this.ctx.destination);
+
+        osc.start(now);
+        osc.stop(now + 0.12);
+
+        // Snare on beat 4 and 12
+        if (this.step % 8 === 4) {
+            this.playSynthSnare();
+        }
+
+        this.step = (this.step + 1) % 32;
     }
 
-    function castRays() {
-        const pitch = 0; // Look up/down (can add later)
-        
-        drawBackground(pitch);
+    playSynthSnare() {
+        const now = this.ctx.currentTime;
+        const bufferSize = this.ctx.sampleRate * 0.12;
+        const buffer = this.ctx.createBuffer(1, bufferSize, this.ctx.sampleRate);
+        const data = buffer.getChannelData(0);
+        for (let i = 0; i < bufferSize; i++) {
+            data[i] = (Math.random() * 2 - 1) * Math.exp(-i / (bufferSize * 0.2));
+        }
+        const noise = this.ctx.createBufferSource();
+        noise.buffer = buffer;
+        const filter = this.ctx.createBiquadFilter();
+        filter.type = 'highpass';
+        filter.frequency.value = 1000;
+        const gain = this.ctx.createGain();
+        gain.gain.setValueAtTime(0.09, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.12);
 
-        const zBuffer = new Float32Array(SCREEN_W);
+        noise.connect(filter);
+        filter.connect(gain);
+        gain.connect(this.ctx.destination);
+        noise.start(now);
+    }
 
-        for (let x = 0; x < SCREEN_W; x++) { 
-            const cameraX = 2 * x / SCREEN_W - 1; 
-            const rayDirX = Math.cos(player.dir) + Math.cos(player.dir + Math.PI/2) * cameraX * 0.7; // Wider FOV
-            const rayDirY = Math.sin(player.dir) + Math.sin(player.dir + Math.PI/2) * cameraX * 0.7;
+    nextRadio() {
+        this.radioStation = (this.radioStation + 1) % this.stations.length;
+        return this.stations[this.radioStation];
+    }
 
-            let mapX = Math.floor(player.x);
-            let mapY = Math.floor(player.y);
+    playGunshot() {
+        if (!this.enabled || !this.ctx) return;
+        const now = this.ctx.currentTime;
+        const bufferSize = this.ctx.sampleRate * 0.1;
+        const buffer = this.ctx.createBuffer(1, bufferSize, this.ctx.sampleRate);
+        const data = buffer.getChannelData(0);
+        for (let i = 0; i < bufferSize; i++) {
+            data[i] = (Math.random() * 2 - 1) * Math.exp(-i / (bufferSize * 0.1));
+        }
+        const noise = this.ctx.createBufferSource();
+        noise.buffer = buffer;
+        const gain = this.ctx.createGain();
+        gain.gain.setValueAtTime(0.4, now);
+        gain.gain.exponentialRampToValueAtTime(0.01, now + 0.1);
+        noise.connect(gain);
+        gain.connect(this.ctx.destination);
+        noise.start(now);
+    }
 
-            let sideDistX, sideDistY;
-            const deltaDistX = Math.abs(1 / rayDirX);
-            const deltaDistY = Math.abs(1 / rayDirY);
-            let perpWallDist;
+    playCrash() {
+        if (!this.enabled || !this.ctx) return;
+        const now = this.ctx.currentTime;
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+        osc.type = 'sawtooth';
+        osc.frequency.setValueAtTime(140, now);
+        osc.frequency.exponentialRampToValueAtTime(30, now + 0.25);
+        gain.gain.setValueAtTime(0.45, now);
+        gain.gain.exponentialRampToValueAtTime(0.01, now + 0.25);
+        osc.connect(gain);
+        gain.connect(this.ctx.destination);
+        osc.start(now);
+        osc.stop(now + 0.25);
+    }
 
-            let stepX, stepY;
-            let hit = 0; 
-            let side; 
-            let wallType = 1;
+    playSiren(active) {
+        if (!this.enabled || !this.ctx) return;
+        if (active && !this.sirenOsc) {
+            this.sirenOsc = this.ctx.createOscillator();
+            this.sirenGain = this.ctx.createGain();
+            this.sirenOsc.type = 'sine';
+            this.sirenOsc.frequency.setValueAtTime(600, this.ctx.currentTime);
+            this.sirenGain.gain.setValueAtTime(0.08, this.ctx.currentTime);
+            this.sirenOsc.connect(this.sirenGain);
+            this.sirenGain.connect(this.ctx.destination);
+            this.sirenOsc.start();
 
-            if (rayDirX < 0) {
-                stepX = -1; sideDistX = (player.x - mapX) * deltaDistX;
-            } else {
-                stepX = 1; sideDistX = (mapX + 1.0 - player.x) * deltaDistX;
-            }
-            if (rayDirY < 0) {
-                stepY = -1; sideDistY = (player.y - mapY) * deltaDistY;
-            } else {
-                stepY = 1; sideDistY = (mapY + 1.0 - player.y) * deltaDistY;
-            }
-
-            let depth = 0;
-            while (hit === 0 && depth < 24) { 
-                if (sideDistX < sideDistY) {
-                    sideDistX += deltaDistX;
-                    mapX += stepX;
-                    side = 0;
-                } else {
-                    sideDistY += deltaDistY;
-                    mapY += stepY;
-                    side = 1;
+            // Modulate siren
+            this.sirenInterval = setInterval(() => {
+                if (this.sirenOsc && this.ctx) {
+                    const f = (this.sirenOsc.frequency.value > 750) ? 550 : 900;
+                    this.sirenOsc.frequency.linearRampToValueAtTime(f, this.ctx.currentTime + 0.35);
                 }
-                
-                // Bounds check
-                if(mapY >= 0 && mapY < mapHeight && mapX >= 0 && mapX < mapWidth) {
-                    if (map[mapY][mapX] > 0) {
-                        hit = 1;
-                        wallType = map[mapY][mapX];
+            }, 400);
+        } else if (!active && this.sirenOsc) {
+            clearInterval(this.sirenInterval);
+            try { this.sirenOsc.stop(); } catch(e) {}
+            this.sirenOsc = null;
+        }
+    }
+
+    playCashChime() {
+        if (!this.enabled || !this.ctx) return;
+        [587.33, 880.00, 1174.66].forEach((f, i) => {
+            const osc = this.ctx.createOscillator();
+            const gain = this.ctx.createGain();
+            const t = this.ctx.currentTime + i * 0.06;
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(f, t);
+            gain.gain.setValueAtTime(0.2, t);
+            gain.gain.exponentialRampToValueAtTime(0.001, t + 0.2);
+            osc.connect(gain);
+            gain.connect(this.ctx.destination);
+            osc.start(t);
+            osc.stop(t + 0.2);
+        });
+    }
+}
+
+const synthAudio = new SynthwaveAudio();
+
+// --- GAME LOGIC & ENGINE ---
+class ViceCityGame {
+    constructor() {
+        this.canvas = document.getElementById('game-canvas');
+        this.ctx = this.canvas.getContext('2d');
+        this.radarCanvas = document.getElementById('radar-canvas');
+        this.radarCtx = this.radarCanvas.getContext('2d');
+
+        this.width = window.innerWidth;
+        this.height = window.innerHeight;
+
+        this.worldWidth = 3200;
+        this.worldHeight = 2400;
+
+        // Player (Tommy Vercetti)
+        this.player = {
+            x: 500,
+            y: 800,
+            vx: 0,
+            vy: 0,
+            angle: 0,
+            speed: 3.2,
+            hp: 100,
+            maxHp: 100,
+            armor: 100,
+            inVehicle: null,
+            animTimer: 0,
+            weapon: 'UZI',
+            ammo: 150
+        };
+
+        this.cash = 25000;
+        this.wantedLevel = 0; // 0 to 5
+        this.camera = { x: 500, y: 800 };
+        this.shake = 0;
+
+        // Open World Entities
+        this.vehicles = [];
+        this.pedestrians = [];
+        this.policeUnits = [];
+        this.buildings = [];
+        this.palmTrees = [];
+        this.bullets = [];
+        this.tireMarks = [];
+        this.particles = [];
+        this.pickups = [];
+
+        this.keys = {};
+        this.lastTime = performance.now();
+        this.missionActive = null;
+
+        this.initWorld();
+        this.initDOM();
+        this.initEvents();
+        this.resize();
+        this.loop();
+    }
+
+    initWorld() {
+        // Build Ocean Beach / Vice City Layout
+        // Ocean Drive Avenue runs vertically at x = 700 to 1100
+        // Sandy beach is at x < 400 with blue ocean at x < 150!
+
+        // Neon Art-Deco Hotels along Ocean Drive
+        this.buildings.push({ x: 1200, y: 200, w: 450, h: 280, name: 'OCEAN VIEW HOTEL', color: '#ff2a8d' });
+        this.buildings.push({ x: 1200, y: 540, w: 450, h: 280, name: 'MALIBU CLUB', color: '#00f0ff' });
+        this.buildings.push({ x: 1200, y: 880, w: 450, h: 280, name: 'VERCETTI ESTATE HQ', color: '#ffd000' });
+        this.buildings.push({ x: 1200, y: 1220, w: 450, h: 280, name: 'COLONEL SUITE', color: '#7a1fd6' });
+        this.buildings.push({ x: 1200, y: 1560, w: 450, h: 280, name: 'DOWNTOWN BANK', color: '#38ef7d' });
+
+        this.buildings.push({ x: 1800, y: 200, w: 600, h: 400, name: 'VICE POINT MALL', color: '#ff007f' });
+        this.buildings.push({ x: 1800, y: 700, w: 600, h: 450, name: 'STARFISH MANSION', color: '#ffb703' });
+        this.buildings.push({ x: 1800, y: 1250, w: 600, h: 450, name: 'CAR SHOWROOM', color: '#06d6a0' });
+
+        // Palm trees along Ocean Drive boardwalk
+        for (let y = 100; y < this.worldHeight; y += 120) {
+            this.palmTrees.push({ x: 580, y, radius: 24 });
+            this.palmTrees.push({ x: 1140, y, radius: 24 });
+        }
+
+        // Spawn iconic Vice City Vehicles
+        const spawnVehicle = (x, y, model, color, angle = 0) => {
+            this.vehicles.push({
+                x, y,
+                vx: 0, vy: 0,
+                speed: 0,
+                maxSpeed: model === 'infernus' ? 9.5 : (model === 'cop' ? 8.2 : 6.8),
+                accel: 0.24,
+                handling: 0.052,
+                friction: 0.94,
+                angle,
+                model,
+                color,
+                hp: 100,
+                w: 62,
+                h: 30,
+                driver: null,
+                isPolice: model === 'cop',
+                siren: false
+            });
+        };
+
+        spawnVehicle(750, 600, 'infernus', '#ff2a8d'); // Neon pink Infernus
+        spawnVehicle(750, 1100, 'cheetah', '#00f0ff'); // Turquoise Cheetah
+        spawnVehicle(950, 400, 'cop', '#1b4332');     // VCPD Cruiser
+        spawnVehicle(950, 1400, 'infernus', '#ffd000');
+        spawnVehicle(750, 1800, 'cheetah', '#ffffff');
+
+        // Spawn Pedestrians
+        for (let i = 0; i < 28; i++) {
+            this.pedestrians.push({
+                x: 600 + Math.random() * 500,
+                y: 200 + Math.random() * 1800,
+                vx: (Math.random() - 0.5) * 1.5,
+                vy: (Math.random() - 0.5) * 1.5,
+                angle: Math.random() * Math.PI * 2,
+                hp: 30,
+                color: ['#ff85a1', '#72efdd', '#ffd166', '#a2d2ff'][Math.floor(Math.random() * 4)],
+                animTimer: Math.random() * 10
+            });
+        }
+
+        // Cash & Bribe Pickups
+        this.pickups.push({ x: 750, y: 300, type: 'cash', val: 5000 });
+        this.pickups.push({ x: 1150, y: 750, type: 'bribe', val: 1 });
+        this.pickups.push({ x: 1150, y: 1400, type: 'cash', val: 10000 });
+    }
+
+    initDOM() {
+        this.cashEl = document.getElementById('cash-val');
+        this.hpBar = document.getElementById('hp-bar');
+        this.armorBar = document.getElementById('armor-bar');
+        this.radioBanner = document.getElementById('radio-banner');
+        this.missionBanner = document.getElementById('mission-banner');
+        this.wastedScreen = document.getElementById('wasted-screen');
+        this.dpadEl = document.getElementById('virtual-dpad');
+
+        // Show D-pad on touch screens
+        if ('ontouchstart' in window || navigator.maxTouchPoints > 0) {
+            this.dpadEl.style.display = 'block';
+        }
+
+        document.getElementById('btn-radio-toggle').addEventListener('click', () => {
+            synthAudio.init();
+            const station = synthAudio.nextRadio();
+            this.showBanner(this.radioBanner, `📻 ${station}`);
+        });
+
+        document.getElementById('btn-car-enter').addEventListener('click', () => {
+            synthAudio.init();
+            this.toggleVehicle();
+        });
+
+        document.getElementById('btn-shoot-action').addEventListener('click', () => {
+            synthAudio.init();
+            this.shoot();
+        });
+
+        document.getElementById('btn-respawn').addEventListener('click', () => {
+            this.respawn();
+        });
+
+        // Touch D-Pad Events
+        const bindDpad = (id, key) => {
+            const el = document.getElementById(id);
+            const start = (e) => { e.preventDefault(); synthAudio.init(); this.keys[key] = true; };
+            const end = (e) => { e.preventDefault(); this.keys[key] = false; };
+            el.addEventListener('touchstart', start);
+            el.addEventListener('touchend', end);
+            el.addEventListener('mousedown', start);
+            el.addEventListener('mouseup', end);
+        };
+
+        bindDpad('dpad-up', 'w');
+        bindDpad('dpad-down', 's');
+        bindDpad('dpad-left', 'a');
+        bindDpad('dpad-right', 'd');
+    }
+
+    initEvents() {
+        window.addEventListener('resize', () => this.resize());
+
+        window.addEventListener('keydown', (e) => {
+            synthAudio.init();
+            const k = e.key.toLowerCase();
+            this.keys[k] = true;
+
+            if (k === 'f' || e.code === 'Enter') {
+                this.toggleVehicle();
+            }
+            if (e.code === 'Space') {
+                e.preventDefault();
+                this.shoot();
+            }
+            if (k === 'r') {
+                const station = synthAudio.nextRadio();
+                this.showBanner(this.radioBanner, `📻 ${station}`);
+            }
+        });
+
+        window.addEventListener('keyup', (e) => {
+            this.keys[e.key.toLowerCase()] = false;
+        });
+
+        // Tap on Canvas -> Walk to or Aim
+        this.canvas.addEventListener('pointerdown', (e) => {
+            synthAudio.init();
+            if (e.clientX > this.width - 140 && e.clientY > this.height - 180) return; // Action button area
+
+            const worldPos = {
+                x: e.clientX + this.camera.x,
+                y: e.clientY + this.camera.y
+            };
+
+            if (!this.player.inVehicle) {
+                this.player.targetPos = worldPos;
+            }
+        });
+    }
+
+    resize() {
+        this.width = window.innerWidth;
+        this.height = window.innerHeight;
+        this.canvas.width = this.width;
+        this.canvas.height = this.height;
+    }
+
+    showBanner(el, text) {
+        el.textContent = text;
+        el.classList.add('show');
+        clearTimeout(el.fadeTimer);
+        el.fadeTimer = setTimeout(() => el.classList.remove('show'), 2200);
+    }
+
+    toggleVehicle() {
+        if (this.player.inVehicle) {
+            // Exit Vehicle
+            const car = this.player.inVehicle;
+            car.driver = null;
+            this.player.inVehicle = null;
+            this.player.x = car.x + Math.sin(car.angle) * 36;
+            this.player.y = car.y - Math.cos(car.angle) * 36;
+            this.player.vx = 0;
+            this.player.vy = 0;
+            document.getElementById('btn-car-enter').innerHTML = '<span>🚗</span><span>ENTER</span>';
+        } else {
+            // Find nearest vehicle within 65px
+            let nearest = null;
+            let minDist = 75;
+            this.vehicles.forEach(v => {
+                const dist = Math.hypot(v.x - this.player.x, v.y - this.player.y);
+                if (dist < minDist) {
+                    minDist = dist;
+                    nearest = v;
+                }
+            });
+
+            if (nearest) {
+                this.player.inVehicle = nearest;
+                nearest.driver = this.player;
+                synthAudio.init();
+                this.showBanner(this.radioBanner, `🚗 JACKED: ${nearest.model.toUpperCase()}`);
+                document.getElementById('btn-car-enter').innerHTML = '<span>🚪</span><span>EXIT</span>';
+            }
+        }
+    }
+
+    shoot() {
+        synthAudio.playGunshot();
+        const p = this.player;
+        let shootX = p.x;
+        let shootY = p.y;
+        let shootAngle = p.angle;
+
+        if (p.inVehicle) {
+            // Drive-by shooting out the car window
+            shootX = p.inVehicle.x;
+            shootY = p.inVehicle.y;
+            shootAngle = p.inVehicle.angle;
+        }
+
+        this.bullets.push({
+            x: shootX + Math.cos(shootAngle) * 30,
+            y: shootY + Math.sin(shootAngle) * 30,
+            vx: Math.cos(shootAngle) * 18,
+            vy: Math.sin(shootAngle) * 18,
+            life: 45
+        });
+
+        // Shooting increases police awareness
+        if (this.wantedLevel === 0 && Math.random() < 0.35) {
+            this.setWanted(1);
+        }
+    }
+
+    setWanted(level) {
+        this.wantedLevel = Math.min(5, Math.max(0, level));
+        const stars = document.querySelectorAll('.wanted-star');
+        stars.forEach((s, idx) => {
+            if (idx < this.wantedLevel) s.classList.add('active');
+            else s.classList.remove('active');
+        });
+
+        synthAudio.playSiren(this.wantedLevel > 0);
+
+        if (this.wantedLevel > 0 && this.policeUnits.length < this.wantedLevel * 2) {
+            this.spawnPoliceCar();
+        }
+    }
+
+    spawnPoliceCar() {
+        const spawnY = this.player.y + (Math.random() < 0.5 ? -700 : 700);
+        this.policeUnits.push({
+            x: 850 + (Math.random() - 0.5) * 200,
+            y: spawnY,
+            vx: 0, vy: 0,
+            speed: 0,
+            maxSpeed: 8.5,
+            accel: 0.26,
+            handling: 0.05,
+            friction: 0.94,
+            angle: spawnY < this.player.y ? Math.PI / 2 : -Math.PI / 2,
+            model: 'cop',
+            color: '#1b4332',
+            hp: 100,
+            w: 62,
+            h: 30,
+            sirenFlash: 0
+        });
+    }
+
+    respawn() {
+        this.wastedScreen.classList.remove('show');
+        this.player.x = 500;
+        this.player.y = 800;
+        this.player.hp = 100;
+        this.player.armor = 100;
+        this.player.inVehicle = null;
+        this.setWanted(0);
+        this.cash = Math.max(0, this.cash - 2000);
+        this.updateHUD();
+    }
+
+    // --- MAIN GAME LOOP ---
+    loop() {
+        requestAnimationFrame(() => this.loop());
+        const now = performance.now();
+        const dt = Math.min((now - this.lastTime) / 1000, 0.05);
+        this.lastTime = now;
+
+        this.update(dt);
+        this.render();
+        this.renderRadar();
+    }
+
+    update(dt) {
+        const p = this.player;
+
+        // Screen shake decay
+        if (this.shake > 0) this.shake -= dt * 8;
+
+        // 1. VEHICLE DRIVING PHYSICS
+        if (p.inVehicle) {
+            const car = p.inVehicle;
+            const isAccelerating = this.keys['w'] || this.keys['arrowup'];
+            const isReversing = this.keys['s'] || this.keys['arrowdown'];
+            const isSteeringLeft = this.keys['a'] || this.keys['arrowleft'];
+            const isSteeringRight = this.keys['d'] || this.keys['arrowright'];
+
+            if (isAccelerating) car.speed = Math.min(car.maxSpeed, car.speed + car.accel);
+            else if (isReversing) car.speed = Math.max(-car.maxSpeed * 0.45, car.speed - car.accel);
+            else car.speed *= car.friction;
+
+            if (Math.abs(car.speed) > 0.4) {
+                const turnMult = car.speed > 0 ? 1 : -1;
+                if (isSteeringLeft) car.angle -= car.handling * turnMult;
+                if (isSteeringRight) car.angle += car.handling * turnMult;
+
+                // Tire skid marks at high velocity
+                if (Math.abs(car.speed) > 5.5 && Math.random() < 0.4) {
+                    this.tireMarks.push({
+                        x: car.x - Math.cos(car.angle) * 20,
+                        y: car.y - Math.sin(car.angle) * 20,
+                        alpha: 0.6
+                    });
+                }
+            }
+
+            car.vx = Math.cos(car.angle) * car.speed;
+            car.vy = Math.sin(car.angle) * car.speed;
+
+            car.x += car.vx;
+            car.y += car.vy;
+
+            // Clamp vehicle bounds
+            car.x = Math.max(60, Math.min(this.worldWidth - 60, car.x));
+            car.y = Math.max(60, Math.min(this.worldHeight - 60, car.y));
+
+            // Check Building Collisions
+            this.buildings.forEach(b => {
+                if (car.x > b.x - car.w/2 && car.x < b.x + b.w + car.w/2 &&
+                    car.y > b.y - car.h/2 && car.y < b.y + b.h + car.h/2) {
+                    car.speed = -car.speed * 0.4;
+                    synthAudio.playCrash();
+                    this.shake = 0.3;
+                }
+            });
+
+            // Vehicle runs over pedestrians!
+            for (let i = this.pedestrians.length - 1; i >= 0; i--) {
+                const ped = this.pedestrians[i];
+                if (Math.hypot(car.x - ped.x, car.y - ped.y) < 28 && Math.abs(car.speed) > 2.5) {
+                    this.pedestrians.splice(i, 1);
+                    this.cash += 500;
+                    this.setWanted(this.wantedLevel + 1);
+                    this.particles.push({ x: ped.x, y: ped.y, color: '#ff2a5f', radius: 12, alpha: 1.0 });
+                }
+            }
+
+            p.x = car.x;
+            p.y = car.y;
+            p.angle = car.angle;
+
+        } else {
+            // 2. ON-FOOT WALKING PHYSICS
+            let moveX = 0;
+            let moveY = 0;
+
+            if (this.keys['w'] || this.keys['arrowup']) moveY -= 1;
+            if (this.keys['s'] || this.keys['arrowdown']) moveY += 1;
+            if (this.keys['a'] || this.keys['arrowleft']) moveX -= 1;
+            if (this.keys['d'] || this.keys['arrowright']) moveX += 1;
+
+            if (moveX !== 0 || moveY !== 0) {
+                p.targetPos = null;
+                const len = Math.hypot(moveX, moveY);
+                p.angle = Math.atan2(moveY, moveX);
+                p.x += (moveX / len) * p.speed * 60 * dt;
+                p.y += (moveY / len) * p.speed * 60 * dt;
+                p.animTimer += dt * 12;
+            } else if (p.targetPos) {
+                const dx = p.targetPos.x - p.x;
+                const dy = p.targetPos.y - p.y;
+                const dist = Math.hypot(dx, dy);
+                if (dist < 10) {
+                    p.targetPos = null;
+                } else {
+                    p.angle = Math.atan2(dy, dx);
+                    p.x += (dx / dist) * p.speed * 60 * dt;
+                    p.y += (dy / dist) * p.speed * 60 * dt;
+                    p.animTimer += dt * 12;
+                }
+            }
+        }
+
+        // 3. POLICE PURSUIT AI
+        if (this.wantedLevel > 0) {
+            this.policeUnits.forEach(cop => {
+                const dx = p.x - cop.x;
+                const dy = p.y - cop.y;
+                const targetAngle = Math.atan2(dy, dx);
+
+                // Smooth steer toward player
+                let diff = targetAngle - cop.angle;
+                while (diff < -Math.PI) diff += Math.PI * 2;
+                while (diff > Math.PI) diff -= Math.PI * 2;
+                cop.angle += Math.sign(diff) * Math.min(Math.abs(diff), cop.handling * 1.5);
+
+                cop.speed = Math.min(cop.maxSpeed, cop.speed + cop.accel);
+                cop.vx = Math.cos(cop.angle) * cop.speed;
+                cop.vy = Math.sin(cop.angle) * cop.speed;
+                cop.x += cop.vx;
+                cop.y += cop.vy;
+                cop.sirenFlash += dt * 10;
+
+                // Ramming player
+                if (Math.hypot(cop.x - p.x, cop.y - p.y) < 36) {
+                    synthAudio.playCrash();
+                    this.shake = 0.4;
+                    p.hp -= 15;
+                    this.updateHUD();
+                    if (p.hp <= 0) this.onWasted();
+                }
+            });
+        }
+
+        // 4. BULLETS & COLLISION
+        for (let i = this.bullets.length - 1; i >= 0; i--) {
+            const b = this.bullets[i];
+            b.x += b.vx;
+            b.y += b.vy;
+            b.life--;
+
+            // Hit police
+            for (let j = this.policeUnits.length - 1; j >= 0; j--) {
+                const cop = this.policeUnits[j];
+                if (Math.hypot(b.x - cop.x, b.y - cop.y) < 26) {
+                    cop.hp -= 40;
+                    this.bullets.splice(i, 1);
+                    if (cop.hp <= 0) {
+                        this.policeUnits.splice(j, 1);
+                        this.cash += 2000;
+                        this.updateHUD();
                     }
-                } else {
-                    hit = 1; // Hit outer bounds
+                    break;
                 }
-                depth++;
             }
+            if (i >= this.bullets.length) continue;
 
-            if (side === 0) perpWallDist = (mapX - player.x + (1 - stepX) / 2) / rayDirX;
-            else            perpWallDist = (mapY - player.y + (1 - stepY) / 2) / rayDirY;
+            if (b.life <= 0) this.bullets.splice(i, 1);
+        }
 
-            zBuffer[x] = perpWallDist;
-
-            const lineHeight = Math.floor(SCREEN_H / perpWallDist);
-
-            let drawStart = -lineHeight / 2 + SCREEN_H / 2 + pitch;
-            if (drawStart < 0) drawStart = 0;
-            let drawEnd = lineHeight / 2 + SCREEN_H / 2 + pitch;
-            if (drawEnd >= SCREEN_H) drawEnd = SCREEN_H - 1;
-
-            // Retro neon colors based on wall type
-            let baseR, baseG, baseB;
-            switch(wallType) {
-                case 1: baseR = 255; baseG = 0; baseB = 85; break;   // Neon Pink
-                case 2: baseR = 0; baseG = 240; baseB = 255; break;  // Neon Cyan
-                case 3: baseR = 170; baseG = 0; baseB = 255; break;  // Purple
-                case 4: baseR = 255; baseG = 255; baseB = 0; break;  // Yellow
-                default: baseR = 200; baseG = 200; baseB = 200;
-            }
-
-            // Darken sides for depth
-            if (side === 1) {
-                baseR *= 0.6; baseG *= 0.6; baseB *= 0.6;
-            }
-
-            // Distance fog (fade to black)
-            const maxDepth = 15;
-            let fogFactor = Math.max(0, 1 - (perpWallDist / maxDepth));
-            
-            baseR = Math.floor(baseR * fogFactor);
-            baseG = Math.floor(baseG * fogFactor);
-            baseB = Math.floor(baseB * fogFactor);
-
-            ctx.fillStyle = `rgb(${baseR}, ${baseG}, ${baseB})`;
-            ctx.fillRect(x, drawStart, 1, drawEnd - drawStart);
-            
-            // Wall wireframe / grid line effect (every block boundary)
-            let wallX = side === 0 ? player.y + perpWallDist * rayDirY : player.x + perpWallDist * rayDirX;
-            wallX -= Math.floor(wallX);
-            
-            // Draw block borders
-            if (wallX < 0.05 || wallX > 0.95 || drawStart > (SCREEN_H/2-10) && (drawStart%10 < 1)) {
-                ctx.fillStyle = 'rgba(0,0,0,0.5)';
-                ctx.fillRect(x, drawStart, 1, drawEnd - drawStart);
+        // 5. PICKUPS (Cash & Bribes)
+        for (let i = this.pickups.length - 1; i >= 0; i--) {
+            const pk = this.pickups[i];
+            if (Math.hypot(p.x - pk.x, p.y - pk.y) < 32) {
+                if (pk.type === 'cash') {
+                    this.cash += pk.val;
+                    synthAudio.playCashChime();
+                    this.showBanner(this.radioBanner, `💰 COLLECTED +$${pk.val}`);
+                } else if (pk.type === 'bribe') {
+                    this.setWanted(Math.max(0, this.wantedLevel - 1));
+                    synthAudio.playCashChime();
+                    this.showBanner(this.radioBanner, `⭐ POLICE BRIBE SECURED`);
+                }
+                this.pickups.splice(i, 1);
+                this.updateHUD();
             }
         }
+
+        // Camera smoothly follows player
+        this.camera.x += (p.x - this.width / 2 - this.camera.x) * 0.12;
+        this.camera.y += (p.y - this.height / 2 - this.camera.y) * 0.12;
     }
 
-    // --- GAME LOOP ---
-    let lastTime = 0;
-    let frames = 0;
-    let lastFpsTime = 0;
-
-    const debugEl = document.getElementById('debug');
-    const fpsEl = document.getElementById('fps-counter');
-
-    function gameLoop(timestamp) {
-        if(!lastTime) lastTime = timestamp;
-        const dt = Math.min((timestamp - lastTime) / 1000, 0.1); // Cap dt
-        lastTime = timestamp;
-
-        frames++;
-        if(timestamp - lastFpsTime >= 1000) {
-            fpsEl.textContent = `FPS: ${frames}`;
-            frames = 0;
-            lastFpsTime = timestamp;
-        }
-
-        // 1. Update Player
-        const moveSpeed = 4.0 * dt; 
-        const rotSpeed = 3.0 * dt;
-
-        if (input.rot !== 0) {
-            player.dir += input.rot * rotSpeed;
-        }
-
-        if (input.fwd !== 0 || input.strafe !== 0) {
-            // Forward movement
-            let dx = Math.cos(player.dir) * input.fwd * moveSpeed;
-            let dy = Math.sin(player.dir) * input.fwd * moveSpeed;
-            
-            // Strafing
-            dx += Math.cos(player.dir + Math.PI/2) * input.strafe * moveSpeed;
-            dy += Math.sin(player.dir + Math.PI/2) * input.strafe * moveSpeed;
-
-            const newX = player.x + dx;
-            const newY = player.y + dy;
-            
-            const buffer = 0.2; // wall collision padding
-
-            if (map[Math.floor(player.y)][Math.floor(newX + Math.sign(dx)*buffer)] === 0) {
-                player.x = newX;
-            }
-            if (map[Math.floor(newY + Math.sign(dy)*buffer)][Math.floor(player.x)] === 0) {
-                player.y = newY;
-            }
-        }
-
-        // 2. Render
-        castRays();
-        
-        debugEl.innerText = `POS: ${player.x.toFixed(1)}, ${player.y.toFixed(1)}`;
-
-        requestAnimationFrame(gameLoop);
+    onWasted() {
+        this.wastedScreen.classList.add('show');
     }
 
-    // Initialize
-    initMap();
-    requestAnimationFrame(gameLoop);
+    updateHUD() {
+        this.cashEl.textContent = `$${this.cash.toString().padStart(8, '0')}`;
+        this.hpBar.style.width = `${Math.max(0, this.player.hp)}%`;
+        this.armorBar.style.width = `${Math.max(0, this.player.armor)}%`;
+    }
 
+    // --- 80s MIAMI VICE CITY RENDERER ---
+    render() {
+        this.ctx.clearRect(0, 0, this.width, this.height);
+
+        let camX = this.camera.x;
+        let camY = this.camera.y;
+        if (this.shake > 0) {
+            camX += (Math.random() - 0.5) * this.shake * 30;
+            camY += (Math.random() - 0.5) * this.shake * 30;
+        }
+
+        this.ctx.save();
+        this.ctx.translate(-camX, -camY);
+
+        // 1. Ocean Beach & Sand (West Side)
+        this.drawBeachAndOcean();
+
+        // 2. City Asphalt Avenues & Sidewalks
+        this.drawRoadways();
+
+        // 3. Tire Skid Marks
+        this.drawTireMarks();
+
+        // 4. Palm Trees (Boardwalk Row)
+        this.drawPalmTrees();
+
+        // 5. Art Deco Neon Hotels & Buildings
+        this.drawBuildings();
+
+        // 6. Cash & Bribe Pickups
+        this.drawPickups();
+
+        // 7. Pedestrians
+        this.drawPedestrians();
+
+        // 8. Vehicles (Sports Cars & Cruisers)
+        this.vehicles.forEach(v => this.drawVehicle(v));
+        this.policeUnits.forEach(cop => this.drawVehicle(cop));
+
+        // 9. Tommy Vercetti (Player)
+        if (!this.player.inVehicle) {
+            this.drawTommy(this.player);
+        }
+
+        // 10. Bullets & FX
+        this.drawBulletsAndParticles();
+
+        this.ctx.restore();
+    }
+
+    drawBeachAndOcean() {
+        // Sparkling blue ocean water
+        this.ctx.fillStyle = '#0a2540';
+        this.ctx.fillRect(0, 0, 240, this.worldHeight);
+
+        // Water wave foam
+        this.ctx.fillStyle = '#14b8a6';
+        this.ctx.fillRect(235, 0, 15, this.worldHeight);
+
+        // Golden Miami Sandy Beach
+        this.ctx.fillStyle = '#f6d365';
+        this.ctx.fillRect(250, 0, 320, this.worldHeight);
+
+        // Boardwalk Pavement
+        this.ctx.fillStyle = '#e5b882';
+        this.ctx.fillRect(570, 0, 70, this.worldHeight);
+    }
+
+    drawRoadways() {
+        // Ocean Drive Avenue (Asphalt)
+        this.ctx.fillStyle = '#17171e';
+        this.ctx.fillRect(640, 0, 520, this.worldHeight);
+
+        // White Road Border Lines
+        this.ctx.strokeStyle = '#ffffff';
+        this.ctx.lineWidth = 3;
+        this.ctx.beginPath();
+        this.ctx.moveTo(645, 0); this.ctx.lineTo(645, this.worldHeight);
+        this.ctx.moveTo(1155, 0); this.ctx.lineTo(1155, this.worldHeight);
+        this.ctx.stroke();
+
+        // Yellow Dashed Centerlines
+        this.ctx.strokeStyle = '#ffd000';
+        this.ctx.lineWidth = 4;
+        this.ctx.setLineDash([30, 25]);
+        this.ctx.beginPath();
+        this.ctx.moveTo(900, 0);
+        this.ctx.lineTo(900, this.worldHeight);
+        this.ctx.stroke();
+        this.ctx.setLineDash([]);
+
+        // East Sidewalk
+        this.ctx.fillStyle = '#262633';
+        this.ctx.fillRect(1160, 0, 40, this.worldHeight);
+    }
+
+    drawTireMarks() {
+        this.ctx.save();
+        this.tireMarks.forEach(tm => {
+            this.ctx.fillStyle = `rgba(0, 0, 0, ${tm.alpha})`;
+            this.ctx.fillRect(tm.x - 3, tm.y - 3, 6, 6);
+            tm.alpha -= 0.001;
+        });
+        this.tireMarks = this.tireMarks.filter(tm => tm.alpha > 0.05);
+        this.ctx.restore();
+    }
+
+    drawPalmTrees() {
+        this.palmTrees.forEach(pt => {
+            this.ctx.save();
+            this.ctx.translate(pt.x, pt.y);
+
+            // Shadow
+            this.ctx.fillStyle = 'rgba(0,0,0,0.4)';
+            this.ctx.beginPath();
+            this.ctx.ellipse(8, 12, 22, 12, 0, 0, Math.PI * 2);
+            this.ctx.fill();
+
+            // Palm Fronds
+            for (let i = 0; i < 6; i++) {
+                this.ctx.rotate(Math.PI / 3);
+                this.ctx.fillStyle = '#059669';
+                this.ctx.beginPath();
+                this.ctx.ellipse(14, 0, 18, 5, 0, 0, Math.PI * 2);
+                this.ctx.fill();
+            }
+
+            // Trunk Center
+            this.ctx.beginPath();
+            this.ctx.arc(0, 0, 6, 0, Math.PI * 2);
+            this.ctx.fillStyle = '#78350f';
+            this.ctx.fill();
+
+            this.ctx.restore();
+        });
+    }
+
+    drawBuildings() {
+        this.buildings.forEach(b => {
+            this.ctx.save();
+
+            // 3D Oblique Drop Shadow
+            this.ctx.fillStyle = 'rgba(0, 0, 0, 0.55)';
+            this.ctx.fillRect(b.x + 14, b.y + 14, b.w, b.h);
+
+            // Building Roof
+            this.ctx.fillStyle = '#1c1b29';
+            this.ctx.fillRect(b.x, b.y, b.w, b.h);
+
+            // Glowing Neon Art Deco Border
+            this.ctx.strokeStyle = b.color;
+            this.ctx.lineWidth = 4;
+            this.ctx.shadowColor = b.color;
+            this.ctx.shadowBlur = 18;
+            this.ctx.strokeRect(b.x, b.y, b.w, b.h);
+
+            // Hotel / Club Title in Neon
+            this.ctx.font = '900 16px Orbitron, sans-serif';
+            this.ctx.fillStyle = b.color;
+            this.ctx.fillText(b.name, b.x + 20, b.y + 36);
+
+            this.ctx.restore();
+        });
+    }
+
+    drawPickups() {
+        this.pickups.forEach(pk => {
+            this.ctx.save();
+            this.ctx.translate(pk.x, pk.y);
+
+            if (pk.type === 'cash') {
+                this.ctx.fillStyle = '#38ef7d';
+                this.ctx.fillRect(-12, -7, 24, 14);
+                this.ctx.strokeStyle = '#ffffff';
+                this.ctx.strokeRect(-12, -7, 24, 14);
+                this.ctx.font = 'bold 9px monospace';
+                this.ctx.fillStyle = '#000';
+                this.ctx.fillText('$', -3, 3);
+            } else {
+                this.ctx.font = '24px sans-serif';
+                this.ctx.fillStyle = '#ffd000';
+                this.ctx.shadowColor = '#ffd000';
+                this.ctx.shadowBlur = 15;
+                this.ctx.fillText('⭐', -12, 8);
+            }
+            this.ctx.restore();
+        });
+    }
+
+    drawPedestrians() {
+        this.pedestrians.forEach(ped => {
+            this.ctx.save();
+            this.ctx.translate(ped.x, ped.y);
+            this.ctx.rotate(ped.angle);
+
+            this.ctx.fillStyle = 'rgba(0,0,0,0.35)';
+            this.ctx.beginPath();
+            this.ctx.ellipse(0, 2, 8, 4, 0, 0, Math.PI * 2);
+            this.ctx.fill();
+
+            // Head & Shoulders
+            this.ctx.beginPath();
+            this.ctx.arc(0, 0, 7, 0, Math.PI * 2);
+            this.ctx.fillStyle = ped.color;
+            this.ctx.fill();
+            this.ctx.restore();
+        });
+    }
+
+    drawVehicle(v) {
+        this.ctx.save();
+        this.ctx.translate(v.x, v.y);
+        this.ctx.rotate(v.angle);
+
+        // Ground Shadow
+        this.ctx.fillStyle = 'rgba(0,0,0,0.55)';
+        this.ctx.fillRect(-v.w/2 + 4, -v.h/2 + 6, v.w, v.h);
+
+        // Vehicle Chassis
+        this.ctx.fillStyle = v.color;
+        this.ctx.fillRect(-v.w/2, -v.h/2, v.w, v.h);
+
+        // Windshields & Roof (Cockpit)
+        this.ctx.fillStyle = '#0a0d14';
+        this.ctx.fillRect(-v.w * 0.15, -v.h * 0.35, v.w * 0.45, v.h * 0.7);
+
+        // Headlights (Glowing Yellow Beams)
+        this.ctx.fillStyle = '#ffd000';
+        this.ctx.fillRect(v.w/2 - 2, -v.h/2 + 3, 4, 6);
+        this.ctx.fillRect(v.w/2 - 2, v.h/2 - 9, 4, 6);
+
+        // Taillights
+        this.ctx.fillStyle = '#ff2a5f';
+        this.ctx.fillRect(-v.w/2 - 2, -v.h/2 + 3, 4, 6);
+        this.ctx.fillRect(-v.w/2 - 2, v.h/2 - 9, 4, 6);
+
+        // Police Siren Lightbar
+        if (v.isPolice) {
+            const isRed = Math.sin(v.sirenFlash) > 0;
+            this.ctx.fillStyle = isRed ? '#ff0055' : '#00f0ff';
+            this.ctx.shadowColor = this.ctx.fillStyle;
+            this.ctx.shadowBlur = 15;
+            this.ctx.fillRect(-4, -v.h/2 + 2, 8, v.h - 4);
+        }
+
+        this.ctx.restore();
+    }
+
+    // Tommy Vercetti Character Sprite
+    drawTommy(p) {
+        this.ctx.save();
+        this.ctx.translate(p.x, p.y);
+
+        // Soft ground shadow
+        this.ctx.fillStyle = 'rgba(0,0,0,0.45)';
+        this.ctx.beginPath();
+        this.ctx.ellipse(0, 4, 12, 6, 0, 0, Math.PI * 2);
+        this.ctx.fill();
+
+        this.ctx.rotate(p.angle);
+
+        // Animated walking legs
+        const stride = Math.sin(p.animTimer) * 5;
+        this.ctx.fillStyle = '#1e3a8a'; // Blue jeans
+        this.ctx.fillRect(-6, 6 + stride, 4, 6);
+        this.ctx.fillRect(2, 6 - stride, 4, 6);
+
+        // Tommy's Iconic Turquoise Hawaiian Shirt & Shoulders
+        this.ctx.beginPath();
+        this.ctx.ellipse(0, 0, 14, 9, 0, 0, Math.PI * 2);
+        this.ctx.fillStyle = '#06b6d4'; // Hawaiian cyan
+        this.ctx.strokeStyle = '#0891b2';
+        this.ctx.lineWidth = 2;
+        this.ctx.fill();
+        this.ctx.stroke();
+
+        // Dark Brown Hair & Head
+        this.ctx.beginPath();
+        this.ctx.arc(0, 0, 6, 0, Math.PI * 2);
+        this.ctx.fillStyle = '#451a03';
+        this.ctx.fill();
+
+        // Uzi in hand
+        this.ctx.fillStyle = '#1e293b';
+        this.ctx.fillRect(8, 2, 10, 4);
+
+        this.ctx.restore();
+    }
+
+    drawBulletsAndParticles() {
+        this.bullets.forEach(b => {
+            this.ctx.fillStyle = '#ffd000';
+            this.ctx.beginPath();
+            this.ctx.arc(b.x, b.y, 3, 0, Math.PI * 2);
+            this.ctx.fill();
+        });
+
+        this.particles.forEach((p, idx) => {
+            this.ctx.fillStyle = p.color;
+            this.ctx.beginPath();
+            this.ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+            this.ctx.fill();
+            p.radius -= 0.15;
+            if (p.radius <= 0) this.particles.splice(idx, 1);
+        });
+    }
+
+    // --- CIRCULAR RADAR MINIMAP ---
+    renderRadar() {
+        const rCtx = this.radarCtx;
+        const rw = 110;
+        const rh = 110;
+        rCtx.clearRect(0, 0, rw, rh);
+
+        const scaleX = rw / this.worldWidth;
+        const scaleY = rh / this.worldHeight;
+
+        // Dark Radar Background
+        rCtx.fillStyle = 'rgba(12, 6, 26, 0.95)';
+        rCtx.beginPath();
+        rCtx.arc(rw/2, rh/2, rw/2 - 2, 0, Math.PI * 2);
+        rCtx.fill();
+
+        // Road lines on radar
+        rCtx.strokeStyle = 'rgba(255, 42, 141, 0.3)';
+        rCtx.lineWidth = 1;
+        rCtx.beginPath();
+        rCtx.moveTo(640 * scaleX, 0);
+        rCtx.lineTo(640 * scaleX, rh);
+        rCtx.stroke();
+
+        // Vehicles (Yellow blips)
+        rCtx.fillStyle = '#ffd000';
+        this.vehicles.forEach(v => {
+            rCtx.fillRect(v.x * scaleX - 1.5, v.y * scaleY - 1.5, 3, 3);
+        });
+
+        // Police (Flashing Red/Cyan blips)
+        this.policeUnits.forEach(cop => {
+            rCtx.fillStyle = '#ff0055';
+            rCtx.fillRect(cop.x * scaleX - 2, cop.y * scaleY - 2, 4, 4);
+        });
+
+        // Player (Green blip)
+        rCtx.fillStyle = '#00f0ff';
+        rCtx.beginPath();
+        rCtx.arc(this.player.x * scaleX, this.player.y * scaleY, 3, 0, Math.PI * 2);
+        rCtx.fill();
+
+        // Outer Neon Rim
+        rCtx.strokeStyle = '#ff2a8d';
+        rCtx.lineWidth = 2.5;
+        rCtx.beginPath();
+        rCtx.arc(rw/2, rh/2, rw/2 - 2, 0, Math.PI * 2);
+        rCtx.stroke();
+    }
+}
+
+// Start Game on load
+window.addEventListener('load', () => {
+    new ViceCityGame();
+});
 </script>
 </body>
 </html>
