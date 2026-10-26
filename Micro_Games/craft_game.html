@@ -162,6 +162,72 @@
     </div>
 
 <script>
+    
+    // --- CRAFT WEB AUDIO SYNTHESIZER ---
+    class CraftAudio {
+        constructor() {
+            this.ctx = null;
+        }
+        init() {
+            if (!this.ctx) {
+                const AC = window.AudioContext || window.webkitAudioContext;
+                this.ctx = new AC();
+            }
+            if (this.ctx && this.ctx.state === 'suspended') {
+                this.ctx.resume();
+            }
+        }
+        playDig(block) {
+            if (!this.ctx) return;
+            const now = this.ctx.currentTime;
+            const osc = this.ctx.createOscillator();
+            const gain = this.ctx.createGain();
+            const isStone = (block === 3 || block === 4 || block === 7);
+            const isWood = (block === 5 || block === 6);
+            osc.type = isStone ? 'square' : (isWood ? 'sawtooth' : 'triangle');
+            const freq = isStone ? 460 : (isWood ? 240 : 160);
+            osc.frequency.setValueAtTime(freq, now);
+            osc.frequency.exponentialRampToValueAtTime(50, now + 0.09);
+            gain.gain.setValueAtTime(0.2, now);
+            gain.gain.exponentialRampToValueAtTime(0.01, now + 0.09);
+            osc.connect(gain);
+            gain.connect(this.ctx.destination);
+            osc.start(now);
+            osc.stop(now + 0.09);
+        }
+        playPlace() {
+            if (!this.ctx) return;
+            const now = this.ctx.currentTime;
+            const osc = this.ctx.createOscillator();
+            const gain = this.ctx.createGain();
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(280, now);
+            osc.frequency.exponentialRampToValueAtTime(140, now + 0.08);
+            gain.gain.setValueAtTime(0.22, now);
+            gain.gain.exponentialRampToValueAtTime(0.01, now + 0.08);
+            osc.connect(gain);
+            gain.connect(this.ctx.destination);
+            osc.start(now);
+            osc.stop(now + 0.08);
+        }
+        playJump() {
+            if (!this.ctx) return;
+            const now = this.ctx.currentTime;
+            const osc = this.ctx.createOscillator();
+            const gain = this.ctx.createGain();
+            osc.type = 'triangle';
+            osc.frequency.setValueAtTime(190, now);
+            osc.frequency.exponentialRampToValueAtTime(360, now + 0.12);
+            gain.gain.setValueAtTime(0.18, now);
+            gain.gain.exponentialRampToValueAtTime(0.01, now + 0.12);
+            osc.connect(gain);
+            gain.connect(this.ctx.destination);
+            osc.start(now);
+            osc.stop(now + 0.12);
+        }
+    }
+    const craftAudio = new CraftAudio();
+
     const canvas = document.getElementById('gameCanvas');
     const ctx = canvas.getContext('2d', { alpha: false });
     
@@ -282,6 +348,8 @@
         handleCollisions(false);
 
         if (keys.up && player.grounded) {
+            craftAudio.init();
+            craftAudio.playJump();
             player.vy = -JUMP_POWER;
             spawnParticles(player.x + player.w/2, player.y + player.h, '#fff', 3);
         }
@@ -358,11 +426,13 @@
         let {tx, ty} = getTargetTile();
         let currentBlock = getBlock(tx, ty);
 
+        craftAudio.init();
         if (selectedBlock === 0) { 
             if (currentBlock != BLOCKS.AIR && currentBlock != BLOCKS.BEDROCK) {
                 if (!inventory[currentBlock]) inventory[currentBlock] = 0;
                 inventory[currentBlock]++;
-                spawnParticles(tx * TILE_SIZE + TILE_SIZE/2, ty * TILE_SIZE + TILE_SIZE/2, COLORS[currentBlock], 8);
+                craftAudio.playDig(currentBlock);
+                spawnParticles(tx * TILE_SIZE + TILE_SIZE/2, ty * TILE_SIZE + TILE_SIZE/2, COLORS[currentBlock] || '#888', 8);
                 setBlock(tx, ty, BLOCKS.AIR);
                 updateInventoryUI();
             }
@@ -370,6 +440,7 @@
             if ((currentBlock == BLOCKS.AIR || currentBlock == BLOCKS.LEAVES) && inventory[selectedBlock] > 0) {
                 if (!(tx * TILE_SIZE < player.x + player.w && (tx+1)*TILE_SIZE > player.x &&
                       ty * TILE_SIZE < player.y + player.h && (ty+1)*TILE_SIZE > player.y)) {
+                    craftAudio.playPlace();
                     setBlock(tx, ty, selectedBlock);
                     inventory[selectedBlock]--;
                     spawnParticles(tx * TILE_SIZE + TILE_SIZE/2, ty * TILE_SIZE + TILE_SIZE/2, '#fff', 4);
@@ -430,32 +501,100 @@
             for (let x = startCol; x <= endCol; x++) {
                 let block = getBlock(x, y);
                 if (block !== BLOCKS.AIR) {
-                    ctx.fillStyle = COLORS[block];
-                    ctx.fillRect(x * TILE_SIZE, y * TILE_SIZE, TILE_SIZE, TILE_SIZE);
+                    const bx = x * TILE_SIZE;
+                    const by = y * TILE_SIZE;
                     
-                    // Highlight top edge
-                    ctx.fillStyle = "rgba(255,255,255,0.15)";
-                    ctx.fillRect(x * TILE_SIZE, y * TILE_SIZE, TILE_SIZE, 3);
-                    // Shadow bottom/right edge
-                    ctx.fillStyle = "rgba(0,0,0,0.2)";
-                    ctx.fillRect(x * TILE_SIZE + TILE_SIZE - 3, y * TILE_SIZE, 3, TILE_SIZE);
-                    ctx.fillRect(x * TILE_SIZE, y * TILE_SIZE + TILE_SIZE - 3, TILE_SIZE, 3);
+                    if (block === BLOCKS.GRASS) {
+                        // Grass Top with Dirt Body
+                        ctx.fillStyle = '#795548'; // Dirt base
+                        ctx.fillRect(bx, by, TILE_SIZE, TILE_SIZE);
+                        ctx.fillStyle = '#4CAF50'; // Lush grass cap
+                        ctx.fillRect(bx, by, TILE_SIZE, 10);
+                        // Hanging roots
+                        ctx.fillRect(bx + 4, by + 10, 4, 4);
+                        ctx.fillRect(bx + 14, by + 10, 5, 6);
+                        ctx.fillRect(bx + 26, by + 10, 6, 4);
+                    } else if (block === BLOCKS.DIRT) {
+                        ctx.fillStyle = '#795548';
+                        ctx.fillRect(bx, by, TILE_SIZE, TILE_SIZE);
+                        ctx.fillStyle = '#5d4037';
+                        ctx.fillRect(bx + 6, by + 6, 6, 6);
+                        ctx.fillRect(bx + 22, by + 18, 8, 8);
+                        ctx.fillRect(bx + 12, by + 28, 6, 6);
+                    } else if (block === BLOCKS.STONE) {
+                        ctx.fillStyle = '#8e8e93';
+                        ctx.fillRect(bx, by, TILE_SIZE, TILE_SIZE);
+                        ctx.fillStyle = '#636366';
+                        ctx.fillRect(bx + 4, by + 8, 8, 4);
+                        ctx.fillRect(bx + 20, by + 14, 10, 5);
+                        ctx.fillRect(bx + 8, by + 24, 12, 4);
+                    } else if (block === BLOCKS.COAL) {
+                        ctx.fillStyle = '#636366';
+                        ctx.fillRect(bx, by, TILE_SIZE, TILE_SIZE);
+                        ctx.fillStyle = '#1c1c1e';
+                        ctx.fillRect(bx + 6, by + 8, 10, 8);
+                        ctx.fillRect(bx + 22, by + 16, 12, 10);
+                        ctx.fillRect(bx + 10, by + 24, 8, 8);
+                    } else if (block === BLOCKS.WOOD) {
+                        ctx.fillStyle = '#5d4037';
+                        ctx.fillRect(bx, by, TILE_SIZE, TILE_SIZE);
+                        ctx.fillStyle = '#3e2723';
+                        ctx.fillRect(bx + 4, by, 6, TILE_SIZE);
+                        ctx.fillRect(bx + 18, by, 5, TILE_SIZE);
+                        ctx.fillRect(bx + 30, by, 4, TILE_SIZE);
+                    } else if (block === BLOCKS.LEAVES) {
+                        ctx.fillStyle = '#2e7d32';
+                        ctx.fillRect(bx, by, TILE_SIZE, TILE_SIZE);
+                        ctx.fillStyle = '#43a047';
+                        ctx.fillRect(bx + 4, by + 4, 12, 12);
+                        ctx.fillRect(bx + 20, by + 18, 14, 14);
+                    } else {
+                        ctx.fillStyle = COLORS[block] || '#212121';
+                        ctx.fillRect(bx, by, TILE_SIZE, TILE_SIZE);
+                    }
+
+                    // 3D Bevel highlight & shadow
+                    ctx.fillStyle = "rgba(255,255,255,0.18)";
+                    ctx.fillRect(bx, by, TILE_SIZE, 2);
+                    ctx.fillStyle = "rgba(0,0,0,0.22)";
+                    ctx.fillRect(bx + TILE_SIZE - 2, by, 2, TILE_SIZE);
+                    ctx.fillRect(bx, by + TILE_SIZE - 2, TILE_SIZE, 2);
                 }
             }
         }
 
-        // Draw Player (Modernized slightly)
-        ctx.fillStyle = '#e74c3c';
-        ctx.beginPath();
-        ctx.roundRect(player.x, player.y, player.w, player.h, 4);
-        ctx.fill();
-        
-        // Eyes/Visor
+        // Draw Steve-Style Pixel Player
+        const px = player.x;
+        const py = player.y;
+        const pw = player.w;
+        const ph = player.h;
+        const isRight = player.facingRight;
+
+        // Head (14x12)
+        ctx.fillStyle = '#4e342e'; // Hair
+        ctx.fillRect(px + 4, py, 16, 4);
+        ctx.fillStyle = '#d7ccc8'; // Face skin
+        ctx.fillRect(px + 4, py + 4, 16, 9);
+        // Eyes
         ctx.fillStyle = '#fff';
-        let eyeX = player.facingRight ? player.x + 12 : player.x + 4;
-        ctx.fillRect(eyeX, player.y + 6, 8, 4);
-        ctx.fillStyle = '#3498db'; // pupil
-        ctx.fillRect(player.facingRight ? eyeX + 4 : eyeX, player.y + 6, 4, 4);
+        const eyeOffset = isRight ? px + 12 : px + 6;
+        ctx.fillRect(eyeOffset, py + 6, 5, 3);
+        ctx.fillStyle = '#1e88e5'; // Blue iris
+        ctx.fillRect(isRight ? eyeOffset + 2 : eyeOffset, py + 6, 3, 3);
+
+        // Torso: Classic Cyan Shirt
+        ctx.fillStyle = '#00acc1';
+        ctx.fillRect(px + 3, py + 13, 18, 12);
+
+        // Legs: Blue Jeans
+        ctx.fillStyle = '#1565c0';
+        ctx.fillRect(px + 4, py + 25, 7, 8);
+        ctx.fillRect(px + 13, py + 25, 7, 8);
+
+        // Shoes: Grey
+        ctx.fillStyle = '#424242';
+        ctx.fillRect(px + 3, py + 33, 8, 3);
+        ctx.fillRect(px + 13, py + 33, 8, 3);
 
         // Particles
         for (let p of particles) {

@@ -277,6 +277,7 @@
     const keys = { left: false, right: false, shoot: false };
 
     // Keyboard support
+    window.addEventListener('pointerdown', () => shooterAudio.init(), { once: true });
     window.addEventListener('keydown', e => {
         if(e.code === 'ArrowLeft' || e.code === 'KeyA') keys.left = true;
         if(e.code === 'ArrowRight' || e.code === 'KeyD') keys.right = true;
@@ -372,6 +373,8 @@
 
         // Shoot (Auto-repeat limiter)
         if (keys.shoot && frame % 8 === 0) {
+            shooterAudio.init();
+            shooterAudio.playLaser();
             // Dual blasters
             bullets.push({ x: player.x + 5, y: player.y, width: 4, height: 15, speed: 15, color: '#f3e600' });
             bullets.push({ x: player.x + player.width - 9, y: player.y, width: 4, height: 15, speed: 15, color: '#f3e600' });
@@ -414,6 +417,7 @@
 
             // Player Collision
             if (rectIntersect(player, e)) {
+                shooterAudio.playPlayerHit();
                 shakeAmount = 15;
                 player.hp -= e.isTank ? 40 : 20;
                 createExplosion(player.x + player.width/2, player.y, '#ff0055', 30);
@@ -422,6 +426,7 @@
                 
                 if (player.hp <= 0) {
                     player.hp = 0;
+                    shooterAudio.playGameOver();
                     endGame();
                 }
                 continue;
@@ -437,6 +442,7 @@
                     bullets.splice(j, 1);
                     
                     if(e.hp <= 0) {
+                        shooterAudio.playExplosion(e.isTank);
                         createExplosion(e.x + e.width/2, e.y + e.height/2, e.color, 20);
                         score += e.isTank ? 500 : 100;
                         shakeAmount = e.isTank ? 8 : 2;

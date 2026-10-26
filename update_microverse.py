@@ -38,14 +38,14 @@ NAME_OVERRIDES = {
 DESCRIPTIONS = {
     "2048_game": "Slide tiles and reach 2048",
     "chess_p2p": "Real-time chess with a friend, no server needed",
-    "craft_game": "2D sandbox mining and building",
+    "craft_game": "2D sandbox mining and building with retro pixel audio",
     "mario_game": "Classic platformer with authentic sprites & retro audio",
     "Temple_Run": "Endless runner over temple ruins",
-    "vice_city_game": "Real 3D Miami open-world drive, sports cars & synthwave",
+    "vice_city_game": "Real 3D Miami open-world: driving, on-foot carjacking, police chases & synthwave",
     "hunter_assassin": "Tactical 2.5D stealth operative missions",
     "save_the_dog": "Draw shields to protect the dog",
-    "shooting_game": "Aim fast, shoot faster",
-    "snake_game": "The classic snake, in your browser",
+    "shooting_game": "Neon space arcade shooter with retro blaster synth audio",
+    "snake_game": "Neon grid snake with retro synth chimes",
     "musical_chairs": "Dodge the moving chairs",
     "hunger_box": "Generate QR order cards for your store",
 }
