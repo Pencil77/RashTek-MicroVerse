@@ -6,51 +6,196 @@
     <title>Microverse by RashTek</title>
     <meta name="description" content="RashTek Microverse with micro apps and games.">
     <style>
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #1a1a1a; color: #fff; text-align: center; padding: 40px 20px; margin: 0; }
-        .brand { margin-bottom: 40px; }
-        h1 { font-size: 3rem; margin: 0; color: #fff; letter-spacing: 2px; }
-        h3 { font-size: 1.2rem; margin-top: 5px; color: #f1c40f; font-weight: 300; text-transform: uppercase; letter-spacing: 4px; }
-        
-        .container { display: flex; flex-wrap: wrap; justify-content: center; gap: 30px; max-width: 800px; margin: 0 auto; }
-        
-        .card {
-            background: #2a2a2a; width: 300px; padding: 40px; border-radius: 15px;
-            text-decoration: none; color: white; transition: 0.3s;
-            border: 2px solid #333; display: flex; flex-direction: column; align-items: center;
-        }
-        .card:hover { transform: translateY(-10px); border-color: #f1c40f; box-shadow: 0 10px 20px rgba(0,0,0,0.5); }
-        .card:focus-visible { outline: 3px solid #f1c40f; outline-offset: 3px; }
 
-        @media (prefers-reduced-motion: reduce) {
-            .card { transition: none; }
-            .card:hover { transform: none; }
+        body {
+            font-family: 'Segoe UI', Tahoma, sans-serif;
+            background: radial-gradient(1200px 600px at 50% -10%, #2b2b40, #191922 60%, #101014);
+            color: #fff; text-align: center; padding: 24px 16px; min-height: 100vh; margin: 0;
         }
-        .icon { font-size: 50px; margin-bottom: 20px; }
-        .card-title { font-size: 24px; font-weight: bold; }
-        .card-desc { color: #888; margin-top: 10px; font-size: 14px; }
+        h1 { color: #f1c40f; margin-bottom: 10px; }
+
+        .grid {{
+            max-width: 780px; margin: 0 auto;
+            display: grid; gap: 22px 14px;
+            grid-template-columns: repeat(auto-fill, minmax(96px, 1fr));
+        }}
+
+        .app-card {{
+            text-decoration: none; color: #eee;
+            display: flex; flex-direction: column; align-items: center; gap: 10px;
+        }}
+        .app-icon {{
+            width: 92px; height: 92px; border-radius: 23%;
+            overflow: hidden;
+            background: linear-gradient(145deg, #33334a, #171722);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.45), inset 0 0 0 1px rgba(255, 255, 255, 0.09);
+            display: flex; align-items: center; justify-content: center;
+            transition: transform 0.25s ease, box-shadow 0.25s ease;
+        }}
+        .app-icon img {{ width: 100%; height: 100%; object-fit: cover; display: block; }}
+        .app-icon .emoji {{ font-size: 44px; line-height: 1; }}
+        .app-card:hover .app-icon, .app-card:focus-visible .app-icon {{
+            transform: translateY(-5px) scale(1.05);
+            box-shadow: 0 14px 28px rgba(0, 0, 0, 0.55), 0 0 24px rgba(46, 204, 113, 0.28);
+        }}
+        .app-card:focus-visible {{ outline: 3px solid #f1c40f; outline-offset: 4px; border-radius: 8px; }}
+        .app-name {{
+            font-size: 12.5px; font-weight: 600; color: #ddd;
+            max-width: 102px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+        }}
+        .app-card:hover .app-name {{ color: #fff; }}
+
+        @media (prefers-reduced-motion: reduce) {{
+            .app-card:hover .app-icon, .app-icon {{ transition: none; transform: none; }}
+        }}
+
+        .brand { margin: 6px 0 18px; }
+        .brand h1 { font-size: 2.6rem; margin: 0; letter-spacing: 3px; }
+        .brand h3 {
+            font-size: 0.95rem; margin-top: 4px; color: #888; font-weight: 300;
+            text-transform: uppercase; letter-spacing: 5px;
+        }
+
+        .tabs {
+            position: sticky; top: 12px; z-index: 10;
+            display: inline-flex; gap: 6px; margin-bottom: 30px;
+            background: rgba(18, 18, 28, 0.85); backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            border-radius: 999px; padding: 6px;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.45);
+        }
+        .tab {
+            display: inline-flex; align-items: center; gap: 8px;
+            padding: 10px 26px; border: none; border-radius: 999px;
+            background: transparent; color: #9aa; cursor: pointer;
+            font-family: inherit; font-size: 15px; font-weight: 600;
+            transition: all 0.25s ease;
+        }
+        .tab:hover { color: #fff; }
+        .tab.active {
+            background: linear-gradient(45deg, #f1c40f, #f7ca4a);
+            color: #222; box-shadow: 0 4px 14px rgba(241, 196, 15, 0.35);
+        }
+        .tab .count { font-size: 11px; opacity: 0.65; font-weight: 400; }
+
+        section { display: none; }
+        section.active { display: block; }
+        .tagline { color: #888; font-weight: 300; margin: 0 0 26px; }
+        footer { margin-top: 50px; font-size: 12px; color: #666; }
+
+        @media (prefers-reduced-motion: reduce) { .tab { transition: none; } }
     </style>
 </head>
 <body>
-
     <div class="brand">
         <h1>MICROVERSE</h1>
         <h3>by RashTek</h3>
     </div>
 
-    <div class="container">
-        <a href="Micro_Apps/index.html" class="card">
-            <div class="icon">🚀</div>
-            <div class="card-title">Micro Apps</div>
-            <div class="card-desc">Utilities, Calculators & Tools</div>
-        </a>
-
-        <a href="Micro_Games/index.html" class="card">
-            <div class="icon">🎮</div>
-            <div class="card-title">Micro Games</div>
-            <div class="card-desc">Arcade, Logic & Fun</div>
-        </a>
+    <div class="tabs" role="tablist">
+        <button class="tab" data-tab="apps" role="tab">🚀 Micro Apps <span class="count">1</span></button>
+        <button class="tab" data-tab="games" role="tab">🎮 Micro Games <span class="count">13</span></button>
     </div>
 
+<section data-tab="apps" class="" id="apps">
+        <p class="tagline">1 item(s) · Utilities, Calculators &amp; Tools</p>
+        <div class="grid">
+            <a href="Micro_Apps/hunger_box.html" class="app-card" title="Generate QR order cards for your store">
+                <span class="app-icon"><img src="Micro_Apps/icons/hunger_box.svg" alt="Hunger Box" loading="lazy" data-emoji="🍔"></span>
+                <span class="app-name">Hunger Box</span>
+            </a>
+        </div>
+    </section>
+
+<section data-tab="games" class="active" id="games">
+        <p class="tagline">13 item(s) · Arcade, Logic &amp; Fun</p>
+        <div class="grid">
+            <a href="Micro_Games/2048_game.html" class="app-card" title="Slide tiles and reach 2048">
+                <span class="app-icon"><img src="Micro_Games/icons/2048_game.png" alt="2048" loading="lazy" data-emoji="🔢"></span>
+                <span class="app-name">2048</span>
+            </a>
+            <a href="Micro_Games/Temple_Run.html" class="app-card" title="Endless runner over temple ruins">
+                <span class="app-icon"><img src="Micro_Games/icons/Temple_Run.png" alt="Temple Run" loading="lazy" data-emoji="🏃"></span>
+                <span class="app-name">Temple Run</span>
+            </a>
+            <a href="Micro_Games/chess_p2p.html" class="app-card" title="Real-time chess with a friend, no server needed">
+                <span class="app-icon"><img src="Micro_Games/icons/chess_p2p.png" alt="Chess Online" loading="lazy" data-emoji="♞"></span>
+                <span class="app-name">Chess Online</span>
+            </a>
+            <a href="Micro_Games/craft_game.html" class="app-card" title="2D sandbox mining and building with retro pixel audio">
+                <span class="app-icon"><img src="Micro_Games/icons/craft_game.png" alt="Craft World" loading="lazy" data-emoji="⛏️"></span>
+                <span class="app-name">Craft World</span>
+            </a>
+            <a href="Micro_Games/hunter_assassin.html" class="app-card" title="Tactical 2.5D stealth operative missions">
+                <span class="app-icon"><img src="Micro_Games/icons/hunter_assassin.png" alt="Hunter Assassin" loading="lazy" data-emoji="🗡️"></span>
+                <span class="app-name">Hunter Assassin</span>
+            </a>
+            <a href="Micro_Games/kombat_arena.html" class="app-card" title="Tekken-style 1v1 arcade fighter · 4 fighters, combos, specials &amp; AI — best of 3">
+                <span class="app-icon"><img src="Micro_Games/icons/kombat_arena.svg" alt="Kombat Arena" loading="lazy" data-emoji="🥊"></span>
+                <span class="app-name">Kombat Arena</span>
+            </a>
+            <a href="Micro_Games/mario_game.html" class="app-card" title="Classic platformer with authentic sprites &amp; retro audio">
+                <span class="app-icon"><img src="Micro_Games/icons/mario_game.png" alt="Mario Run" loading="lazy" data-emoji="🍄"></span>
+                <span class="app-name">Mario Run</span>
+            </a>
+            <a href="Micro_Games/mili_militia.html" class="app-card" title="Explosive 2D jetpack deathmatch — fly, aim &amp; blast 3 AI soldiers">
+                <span class="app-icon"><img src="Micro_Games/icons/mili_militia.png" alt="Mili Militia" loading="lazy" data-emoji="🚁"></span>
+                <span class="app-name">Mili Militia</span>
+            </a>
+            <a href="Micro_Games/musical_chairs.html" class="app-card" title="Dodge the moving chairs">
+                <span class="app-icon"><img src="Micro_Games/icons/musical_chairs.svg" alt="Musical Chairs" loading="lazy" data-emoji="🎵"></span>
+                <span class="app-name">Musical Chairs</span>
+            </a>
+            <a href="Micro_Games/save_the_dog.html" class="app-card" title="Draw shields to protect the dog">
+                <span class="app-icon"><img src="Micro_Games/icons/save_the_dog.svg" alt="Save the Dog" loading="lazy" data-emoji="🐶"></span>
+                <span class="app-name">Save the Dog</span>
+            </a>
+            <a href="Micro_Games/shooting_game.html" class="app-card" title="Neon space arcade shooter with retro blaster synth audio">
+                <span class="app-icon"><img src="Micro_Games/icons/shooting_game.svg" alt="Shooting Game" loading="lazy" data-emoji="🔫"></span>
+                <span class="app-name">Shooting Game</span>
+            </a>
+            <a href="Micro_Games/snake_game.html" class="app-card" title="Neon grid snake with retro synth chimes">
+                <span class="app-icon"><img src="Micro_Games/icons/snake_game.svg" alt="Snake" loading="lazy" data-emoji="🐍"></span>
+                <span class="app-name">Snake</span>
+            </a>
+            <a href="Micro_Games/vice_city_game.html" class="app-card" title="Real 3D Miami open-world: driving, on-foot carjacking, police chases &amp; synthwave">
+                <span class="app-icon"><img src="Micro_Games/icons/vice_city_game.png" alt="GTA Vice City" loading="lazy" data-emoji="🌆"></span>
+                <span class="app-name">GTA Vice City</span>
+            </a>
+        </div>
+    </section>
+
+    <footer>Hosted on GitHub Pages &middot; Auto-Generated</footer>
+    <script>
+        document.querySelectorAll('.app-icon img').forEach(function (img) {
+            img.addEventListener('error', function () {
+                var s = document.createElement('span');
+                s.className = 'emoji';
+                s.textContent = img.dataset.emoji || '🎮';
+                img.replaceWith(s);
+            }, { once: true });
+        });
+
+        // Tab switching, hash-routed — the site opens on the Games screen.
+        var tabs = document.querySelectorAll('.tab');
+        var sections = document.querySelectorAll('section');
+        function show(name) {
+            tabs.forEach(function (t) { t.classList.toggle('active', t.dataset.tab === name); });
+            sections.forEach(function (s) { s.classList.toggle('active', s.dataset.tab === name); });
+        }
+        function current() {
+            return (location.hash || '').replace('#', '') || 'games';
+        }
+        function apply() {
+            var name = current();
+            if (!document.querySelector('section[data-tab="' + name + '"]')) name = 'games';
+            show(name);
+        }
+        tabs.forEach(function (t) {
+            t.addEventListener('click', function () { location.hash = t.dataset.tab; });
+        });
+        addEventListener('hashchange', apply);
+        apply();
+    </script>
 </body>
 </html>
-
