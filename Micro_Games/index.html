@@ -6,87 +6,123 @@
     <meta name="description" content="🎮 Micro Games — a collection of browser apps and games from RashTek Microverse.">
     <title>🎮 Micro Games · Microverse</title>
     <style>
-        body { font-family: 'Segoe UI', Tahoma, sans-serif; background: #222; color: #fff; text-align: center; padding: 20px; }
+        body {
+            font-family: 'Segoe UI', Tahoma, sans-serif;
+            background: radial-gradient(1200px 600px at 50% -10%, #2b2b40, #191922 60%, #101014);
+            color: #fff; text-align: center; padding: 24px 16px; min-height: 100vh;
+        }
         h1 { color: #f1c40f; margin-bottom: 10px; }
         h3 { color: #888; font-weight: 300; margin-bottom: 40px; }
-        .container { max-width: 600px; margin: 0 auto; }
 
-        .link-item {
-            display: flex; justify-content: space-between; align-items: center;
-            background: #333; margin: 15px 0; padding: 20px;
-            text-decoration: none; color: white; border-radius: 10px;
-            border-left: 5px solid #2ecc71; transition: 0.3s;
-            font-size: 18px; font-weight: bold;
+        .container {
+            max-width: 780px; margin: 0 auto;
+            display: grid; gap: 22px 14px;
+            grid-template-columns: repeat(auto-fill, minmax(96px, 1fr));
         }
-        .link-item:hover { background: #444; border-left-color: #f1c40f; transform: translateX(5px); }
-        .link-item:focus-visible { outline: 3px solid #f1c40f; outline-offset: 3px; }
-        .link-item .desc { display: block; font-size: 13px; font-weight: 300; color: #999; margin-top: 4px; }
-        .link-item .arrow { color: #777; }
+
+        .app-card {
+            text-decoration: none; color: #eee;
+            display: flex; flex-direction: column; align-items: center; gap: 10px;
+        }
+        .app-icon {
+            width: 92px; height: 92px; border-radius: 23%;
+            overflow: hidden;
+            background: linear-gradient(145deg, #33334a, #171722);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.45), inset 0 0 0 1px rgba(255, 255, 255, 0.09);
+            display: flex; align-items: center; justify-content: center;
+            transition: transform 0.25s ease, box-shadow 0.25s ease;
+        }
+        .app-icon img { width: 100%; height: 100%; object-fit: cover; display: block; }
+        .app-icon .emoji { font-size: 44px; line-height: 1; }
+        .app-card:hover .app-icon, .app-card:focus-visible .app-icon {
+            transform: translateY(-5px) scale(1.05);
+            box-shadow: 0 14px 28px rgba(0, 0, 0, 0.55), 0 0 24px rgba(46, 204, 113, 0.28);
+        }
+        .app-card:focus-visible { outline: 3px solid #f1c40f; outline-offset: 4px; border-radius: 8px; }
+        .app-name {
+            font-size: 12.5px; font-weight: 600; color: #ddd;
+            max-width: 102px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+        }
+        .app-card:hover .app-name { color: #fff; }
+
         .back-btn { display: inline-block; margin-bottom: 20px; color: #888; text-decoration: none; font-size: 14px; }
         .back-btn:hover { color: #fff; }
         footer { margin-top: 50px; font-size: 12px; color: #666; }
 
         @media (prefers-reduced-motion: reduce) {
-            .link-item { transition: none; }
-            .link-item:hover { transform: none; }
+            .app-card:hover .app-icon, .app-icon { transition: none; transform: none; }
         }
     </style>
 </head>
 <body>
     <a href="../index.html" class="back-btn">&larr; Back to RashTek Microverse</a>
     <h1>🎮 Micro Games</h1>
-    <h3>12 item(s) &middot; tap to play</h3>
+    <h3>13 item(s) &middot; tap to play</h3>
     <div class="container">
-                    <a href="2048_game.html" class="link-item">
-                <span>2048<span class="desc">Slide tiles and reach 2048</span></span>
-                <span class="arrow">&#9654;</span>
+                    <a href="2048_game.html" class="app-card" title="Slide tiles and reach 2048">
+                <span class="app-icon"><img src="icons/2048_game.png" alt="2048" loading="lazy" data-emoji="🔢"></span>
+                <span class="app-name">2048</span>
             </a>
-            <a href="Temple_Run.html" class="link-item">
-                <span>Temple Run<span class="desc">Endless runner over temple ruins</span></span>
-                <span class="arrow">&#9654;</span>
+            <a href="Temple_Run.html" class="app-card" title="Endless runner over temple ruins">
+                <span class="app-icon"><img src="icons/Temple_Run.png" alt="Temple Run" loading="lazy" data-emoji="🏃"></span>
+                <span class="app-name">Temple Run</span>
             </a>
-            <a href="chess_p2p.html" class="link-item">
-                <span>P2P Online Chess<span class="desc">Real-time chess with a friend, no server needed</span></span>
-                <span class="arrow">&#9654;</span>
+            <a href="chess_p2p.html" class="app-card" title="Real-time chess with a friend, no server needed">
+                <span class="app-icon"><img src="icons/chess_p2p.png" alt="Chess Online" loading="lazy" data-emoji="♞"></span>
+                <span class="app-name">Chess Online</span>
             </a>
-            <a href="craft_game.html" class="link-item">
-                <span>Craft World<span class="desc">2D sandbox mining and building with retro pixel audio</span></span>
-                <span class="arrow">&#9654;</span>
+            <a href="craft_game.html" class="app-card" title="2D sandbox mining and building with retro pixel audio">
+                <span class="app-icon"><img src="icons/craft_game.png" alt="Craft World" loading="lazy" data-emoji="⛏️"></span>
+                <span class="app-name">Craft World</span>
             </a>
-            <a href="hunter_assassin.html" class="link-item">
-                <span>Hunter Assassin<span class="desc">Tactical 2.5D stealth operative missions</span></span>
-                <span class="arrow">&#9654;</span>
+            <a href="hunter_assassin.html" class="app-card" title="Tactical 2.5D stealth operative missions">
+                <span class="app-icon"><img src="icons/hunter_assassin.png" alt="Hunter Assassin" loading="lazy" data-emoji="🗡️"></span>
+                <span class="app-name">Hunter Assassin</span>
             </a>
-            <a href="kombat_arena.html" class="link-item">
-                <span>🥊 Kombat Arena — Tekken-style<span class="desc">Tekken-style 1v1 arcade fighter · 4 fighters, combos, specials &amp; AI — best of 3</span></span>
-                <span class="arrow">&#9654;</span>
+            <a href="kombat_arena.html" class="app-card" title="Tekken-style 1v1 arcade fighter · 4 fighters, combos, specials &amp; AI — best of 3">
+                <span class="app-icon"><img src="icons/kombat_arena.svg" alt="Kombat Arena" loading="lazy" data-emoji="🥊"></span>
+                <span class="app-name">Kombat Arena</span>
             </a>
-            <a href="mario_game.html" class="link-item">
-                <span>Super Mario Run<span class="desc">Classic platformer with authentic sprites &amp; retro audio</span></span>
-                <span class="arrow">&#9654;</span>
+            <a href="mario_game.html" class="app-card" title="Classic platformer with authentic sprites &amp; retro audio">
+                <span class="app-icon"><img src="icons/mario_game.png" alt="Mario Run" loading="lazy" data-emoji="🍄"></span>
+                <span class="app-name">Mario Run</span>
             </a>
-            <a href="musical_chairs.html" class="link-item">
-                <span>Musical Chairs<span class="desc">Dodge the moving chairs</span></span>
-                <span class="arrow">&#9654;</span>
+            <a href="mili_militia.html" class="app-card" title="Explosive 2D jetpack deathmatch — fly, aim &amp; blast 3 AI soldiers">
+                <span class="app-icon"><img src="icons/mili_militia.png" alt="Mili Militia" loading="lazy" data-emoji="🚁"></span>
+                <span class="app-name">Mili Militia</span>
             </a>
-            <a href="save_the_dog.html" class="link-item">
-                <span>Save the Dog<span class="desc">Draw shields to protect the dog</span></span>
-                <span class="arrow">&#9654;</span>
+            <a href="musical_chairs.html" class="app-card" title="Dodge the moving chairs">
+                <span class="app-icon"><img src="icons/musical_chairs.svg" alt="Musical Chairs" loading="lazy" data-emoji="🎵"></span>
+                <span class="app-name">Musical Chairs</span>
             </a>
-            <a href="shooting_game.html" class="link-item">
-                <span>Shooting Game<span class="desc">Neon space arcade shooter with retro blaster synth audio</span></span>
-                <span class="arrow">&#9654;</span>
+            <a href="save_the_dog.html" class="app-card" title="Draw shields to protect the dog">
+                <span class="app-icon"><img src="icons/save_the_dog.svg" alt="Save the Dog" loading="lazy" data-emoji="🐶"></span>
+                <span class="app-name">Save the Dog</span>
             </a>
-            <a href="snake_game.html" class="link-item">
-                <span>Snake<span class="desc">Neon grid snake with retro synth chimes</span></span>
-                <span class="arrow">&#9654;</span>
+            <a href="shooting_game.html" class="app-card" title="Neon space arcade shooter with retro blaster synth audio">
+                <span class="app-icon"><img src="icons/shooting_game.svg" alt="Shooting Game" loading="lazy" data-emoji="🔫"></span>
+                <span class="app-name">Shooting Game</span>
             </a>
-            <a href="vice_city_game.html" class="link-item">
-                <span>GTA: Vice City 3D<span class="desc">Real 3D Miami open-world: driving, on-foot carjacking, police chases &amp; synthwave</span></span>
-                <span class="arrow">&#9654;</span>
+            <a href="snake_game.html" class="app-card" title="Neon grid snake with retro synth chimes">
+                <span class="app-icon"><img src="icons/snake_game.svg" alt="Snake" loading="lazy" data-emoji="🐍"></span>
+                <span class="app-name">Snake</span>
+            </a>
+            <a href="vice_city_game.html" class="app-card" title="Real 3D Miami open-world: driving, on-foot carjacking, police chases &amp; synthwave">
+                <span class="app-icon"><img src="icons/vice_city_game.png" alt="GTA Vice City" loading="lazy" data-emoji="🌆"></span>
+                <span class="app-name">GTA Vice City</span>
             </a>
 
     </div>
     <footer>Hosted on GitHub Pages &middot; Auto-Generated</footer>
+    <script>
+        document.querySelectorAll('.app-icon img').forEach(function (img) {
+            img.addEventListener('error', function () {
+                var s = document.createElement('span');
+                s.className = 'emoji';
+                s.textContent = img.dataset.emoji || '🎮';
+                img.replaceWith(s);
+            }, { once: true });
+        });
+    </script>
 </body>
 </html>
