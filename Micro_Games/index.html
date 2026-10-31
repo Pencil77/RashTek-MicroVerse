@@ -15,17 +15,17 @@
         h1 { color: #f1c40f; margin-bottom: 10px; }
 
         .grid {{
-            max-width: 780px; margin: 0 auto;
-            display: grid; gap: 22px 14px;
-            grid-template-columns: repeat(auto-fill, minmax(96px, 1fr));
+            max-width: 720px; margin: 0 auto;
+            display: grid; gap: 20px 12px;
+            grid-template-columns: repeat(auto-fill, minmax(84px, 1fr));
         }}
 
         .app-card {{
             text-decoration: none; color: #eee;
-            display: flex; flex-direction: column; align-items: center; gap: 10px;
+            display: flex; flex-direction: column; align-items: center; gap: 9px;
         }}
         .app-icon {{
-            width: 92px; height: 92px; border-radius: 23%;
+            width: 72px; height: 72px; border-radius: 23%;
             overflow: hidden;
             background: linear-gradient(145deg, #33334a, #171722);
             box-shadow: 0 8px 20px rgba(0, 0, 0, 0.45), inset 0 0 0 1px rgba(255, 255, 255, 0.09);
@@ -33,15 +33,15 @@
             transition: transform 0.25s ease, box-shadow 0.25s ease;
         }}
         .app-icon img {{ width: 100%; height: 100%; object-fit: cover; display: block; }}
-        .app-icon .emoji {{ font-size: 44px; line-height: 1; }}
+        .app-icon .emoji {{ font-size: 34px; line-height: 1; }}
         .app-card:hover .app-icon, .app-card:focus-visible .app-icon {{
             transform: translateY(-5px) scale(1.05);
             box-shadow: 0 14px 28px rgba(0, 0, 0, 0.55), 0 0 24px rgba(46, 204, 113, 0.28);
         }}
         .app-card:focus-visible {{ outline: 3px solid #f1c40f; outline-offset: 4px; border-radius: 8px; }}
         .app-name {{
-            font-size: 12.5px; font-weight: 600; color: #ddd;
-            max-width: 102px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+            font-size: 12px; font-weight: 600; color: #ddd;
+            max-width: 92px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
         }}
         .app-card:hover .app-name {{ color: #fff; }}
 
