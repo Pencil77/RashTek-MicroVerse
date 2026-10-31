@@ -31,6 +31,7 @@ NAME_OVERRIDES = {
     "shooting_game": "Shooting Game",
     "snake_game": "Snake",
     "musical_chairs": "Musical Chairs",
+    "kombat_arena": "🥊 Kombat Arena — Tekken-style",
     "hunger_box": "Hunger Box · QR Order Cards",
 }
 
@@ -47,6 +48,7 @@ DESCRIPTIONS = {
     "shooting_game": "Neon space arcade shooter with retro blaster synth audio",
     "snake_game": "Neon grid snake with retro synth chimes",
     "musical_chairs": "Dodge the moving chairs",
+    "kombat_arena": "Tekken-style 1v1 arcade fighter · 4 fighters, combos, specials & AI — best of 3",
     "hunger_box": "Generate QR order cards for your store",
 }
 
