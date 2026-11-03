@@ -407,6 +407,7 @@
         <div class="hud-group">
             <a href="index.html" class="nav-btn">← Exit</a>
             <button id="btn-roster" class="nav-btn">👤 Operative</button>
+            <button id="btn-difficulty" class="nav-btn">⚙️ Level</button>
             <button id="btn-audio" class="nav-btn">🔊 Sound</button>
         </div>
 
@@ -488,6 +489,16 @@
             <p class="modal-subtitle">Select or unlock tactical stealth agents.</p>
             <div id="roster-container" class="roster-list"></div>
             <button id="btn-close-roster" class="action-btn">Return To Mission</button>
+        </div>
+    </div>
+
+    <!-- Difficulty / Threat Level Modal -->
+    <div id="modal-difficulty" class="modal-overlay">
+        <div class="modal-card">
+            <h2 class="modal-title title-gold">THREAT LEVEL</h2>
+            <p class="modal-subtitle">Higher threat = faster, sharper sentries &amp; extra roving patrols. Gem payouts scale. Switching restarts the current sector.</p>
+            <div id="difficulty-list" class="roster-list"></div>
+            <button id="btn-close-difficulty" class="action-btn">Close</button>
         </div>
     </div>
 </div>
@@ -737,6 +748,36 @@ const OPERATIVES = [
 ];
 
 // --- GAME ENGINE ---
+// --- DIFFICULTY SYSTEM -----------------------------------------------
+// Scales sentry lethality: patrol speed, vision cones, reaction time,
+// rein search persistence, plus extra roving patrols at high threat.
+const DIFFICULTIES = {
+    easy: {
+        key: 'easy', label: 'Cadet',
+        desc: 'Slow sentries, narrow vision cones. Learn the routes.',
+        speedMul: 0.8, fovDistMul: 0.8, fovAngleMul: 0.85, alertRate: 0.8,
+        shootRate: 1.35, searchTimeMul: 0.8, extraGuards: 0, rewardMul: 0.8
+    },
+    normal: {
+        key: 'normal', label: 'Operator',
+        desc: 'The baseline tour of duty. Balanced sentry force.',
+        speedMul: 1.0, fovDistMul: 1.0, fovAngleMul: 1.0, alertRate: 1.0,
+        shootRate: 1.0, searchTimeMul: 1.0, extraGuards: 0, rewardMul: 1.0
+    },
+    hard: {
+        key: 'hard', label: 'Veteran',
+        desc: 'Sharper senses, faster boots, +3 roving patrols.',
+        speedMul: 1.15, fovDistMul: 1.15, fovAngleMul: 1.1, alertRate: 1.3,
+        shootRate: 0.8, searchTimeMul: 1.25, extraGuards: 3, rewardMul: 1.4
+    },
+    nightmare: {
+        key: 'nightmare', label: 'Nightmare',
+        desc: 'Blazing reflexes, sweeping optics, +6 patrols. Good luck.',
+        speedMul: 1.3, fovDistMul: 1.3, fovAngleMul: 1.2, alertRate: 1.7,
+        shootRate: 0.6, searchTimeMul: 1.5, extraGuards: 6, rewardMul: 2.0
+    }
+};
+
 class Game {
     constructor() {
         this.canvas = document.getElementById('game-canvas');
@@ -749,6 +790,7 @@ class Game {
 
         this.gems = parseInt(localStorage.getItem('rtk_assassin_gems') || '0', 10);
         this.currentOperativeId = localStorage.getItem('rtk_assassin_op') || 'stalker';
+        this.difficulty = localStorage.getItem('rtk_assassin_difficulty') || 'normal';
         this.loadUnlockedOperatives();
 
         this.sectorIndex = 0;
@@ -832,6 +874,10 @@ class Game {
         return OPERATIVES.find(o => o.id === this.currentOperativeId) || OPERATIVES[0];
     }
 
+    getDiff() {
+        return DIFFICULTIES[this.difficulty] || DIFFICULTIES.normal;
+    }
+
     initDOM() {
         this.elGems = document.getElementById('gem-count');
         this.elTargets = document.getElementById('target-count');
@@ -865,6 +911,15 @@ class Game {
         });
         document.getElementById('btn-close-roster').addEventListener('click', () => {
             this.modalRoster.classList.remove('active');
+            this.isPaused = false;
+        });
+
+        this.modalDifficulty = document.getElementById('modal-difficulty');
+        this.elDifficulty = document.getElementById('btn-difficulty');
+        this.elDifficulty.textContent = `⚙️ ${this.getDiff().label}`;
+        document.getElementById('btn-difficulty').addEventListener('click', () => this.openDifficulty());
+        document.getElementById('btn-close-difficulty').addEventListener('click', () => {
+            this.modalDifficulty.classList.remove('active');
             this.isPaused = false;
         });
 
@@ -1061,14 +1116,92 @@ class Game {
 
         const sectorCycle = index % 5;
         this.buildLayout(sectorCycle);
+        this.spawnExtraGuards();
 
         this.updateHUD();
+    }
+
+    // --- EXTRA PATROLS FOR HIGHER THREAT LEVELS ---
+    findFreeSpot(minPlayerDist) {
+        for (let t = 0; t < 240; t++) {
+            const x = 60 + Math.random() * (this.worldWidth - 120);
+            const y = 60 + Math.random() * (this.worldHeight - 120);
+            if (Math.hypot(x - this.player.x, y - this.player.y) < minPlayerDist) continue;
+            if (this.checkPointObstacleCollision(x, y)) continue;
+            let marginFree = true;
+            for (const pair of [[26, 0], [-26, 0], [0, 26], [0, -26]]) {
+                if (this.checkPointObstacleCollision(x + pair[0], y + pair[1])) { marginFree = false; break; }
+            }
+            if (!marginFree) continue;
+            if (this.guards.some(g => Math.hypot(g.x - x, g.y - y) < 170)) continue;
+            if (this.barrels.some(b => Math.hypot(b.x - x, b.y - y) < 70)) continue;
+            return { x: Math.round(x), y: Math.round(y) };
+        }
+        return null;
+    }
+
+    linePathClear(x1, y1, x2, y2) {
+        const steps = Math.max(2, Math.ceil(Math.hypot(x2 - x1, y2 - y1) / 16));
+        for (let s = 0; s <= steps; s++) {
+            const px = x1 + (x2 - x1) * s / steps;
+            const py = y1 + (y2 - y1) * s / steps;
+            if (this.checkPointObstacleCollision(px, py)) return false;
+            if (this.checkPointObstacleCollision(px + 20, py) || this.checkPointObstacleCollision(px, py + 20)) return false;
+        }
+        return true;
+    }
+
+    spawnExtraGuards() {
+        const d = this.getDiff();
+        if (d.extraGuards <= 0) return;
+        const count = d.extraGuards + Math.floor(this.sectorIndex / 2);
+
+        for (let n = 0; n < count; n++) {
+            const spot = this.findFreeSpot(340);
+            if (!spot) continue;
+
+            // Build a two-way patrol beat with a clear straight path
+            let waypoints = [spot];
+            for (let t = 0; t < 30; t++) {
+                const ang = Math.random() * Math.PI * 2;
+                const len = 200 + Math.random() * 240;
+                const bx = spot.x + Math.cos(ang) * len;
+                const by = spot.y + Math.sin(ang) * len;
+                if (bx < 60 || by < 60 || bx > this.worldWidth - 60 || by > this.worldHeight - 60) continue;
+                if (this.checkPointObstacleCollision(bx, by)) continue;
+                if (this.checkPointObstacleCollision(bx + 26, by) || this.checkPointObstacleCollision(bx, by + 26)) continue;
+                if (!this.linePathClear(spot.x, spot.y, bx, by)) continue;
+                waypoints.push({ x: Math.round(bx), y: Math.round(by) });
+                break;
+            }
+
+            const gtype = (d.key === 'nightmare' && n % 2 === 0) ? 'heavy' : 'rifle';
+            this.guards.push({
+                x: spot.x, y: spot.y,
+                radius: 18,
+                angle: Math.random() * Math.PI * 2,
+                type: gtype,
+                walkCycle: Math.random() * 10,
+                hp: gtype === 'heavy' ? 2 : 1,
+                speed: (gtype === 'heavy' ? 1.4 : 1.9) * d.speedMul,
+                fovAngle: (gtype === 'heavy' ? 68 : 55) * d.fovAngleMul * (Math.PI / 180),
+                fovDist: (gtype === 'heavy' ? 245 : 215) * d.fovDistMul,
+                waypoints,
+                currentWp: 0,
+                state: 'patrol',
+                alertProgress: 0,
+                shootCooldown: 0,
+                searchTimer: 0,
+                lastSeenPos: null
+            });
+        }
     }
 
     buildLayout(type) {
         const addCrate = (x, y, w, h, ctype = 'metal') => this.obstacles.push({ x, y, w, h, type: ctype });
         const addBarrel = (x, y) => this.barrels.push({ x, y, radius: 16, hp: 1, exploded: false });
         const addGuard = (x, y, waypoints, gtype = 'rifle') => {
+            const d = this.getDiff();
             this.guards.push({
                 x, y,
                 radius: 18,
@@ -1076,9 +1209,9 @@ class Game {
                 type: gtype,
                 walkCycle: Math.random() * 10,
                 hp: gtype === 'heavy' ? 2 : 1,
-                speed: gtype === 'heavy' ? 1.4 : 1.9,
-                fovAngle: (gtype === 'heavy' ? 68 : 55) * (Math.PI / 180),
-                fovDist: gtype === 'heavy' ? 245 : 215,
+                speed: (gtype === 'heavy' ? 1.4 : 1.9) * d.speedMul,
+                fovAngle: (gtype === 'heavy' ? 68 : 55) * d.fovAngleMul * (Math.PI / 180),
+                fovDist: (gtype === 'heavy' ? 245 : 215) * d.fovDistMul,
                 waypoints,
                 currentWp: 0,
                 state: 'patrol',
@@ -1334,11 +1467,12 @@ class Game {
             const canSeePlayer = this.checkGuardLineOfSight(g, this.player.x, this.player.y);
 
             if (canSeePlayer) {
+                const d = this.getDiff();
                 g.angle = Math.atan2(this.player.y - g.y, this.player.x - g.x);
                 g.lastSeenPos = { x: this.player.x, y: this.player.y };
-                g.alertProgress += dt * 3.4 * playerInSightFactor;
+                g.alertProgress += dt * 3.4 * playerInSightFactor * d.alertRate;
 
-                if (g.state !== 'combat' && g.alertProgress >= 0.3) {
+                if (g.state !== 'combat' && g.alertProgress >= Math.max(0.1, 0.3 / d.alertRate)) {
                     if (g.state !== 'alerting') {
                         g.state = 'alerting';
                         sound.playAlert();
@@ -1355,13 +1489,13 @@ class Game {
                     g.shootCooldown -= dt;
                     if (g.shootCooldown <= 0) {
                         this.guardShoot(g);
-                        g.shootCooldown = (g.type === 'heavy') ? 0.35 : 0.65;
+                        g.shootCooldown = (g.type === 'heavy' ? 0.35 : 0.65) * d.shootRate;
                     }
                 }
             } else {
                 if (g.state === 'combat') {
                     g.state = 'search';
-                    g.searchTimer = 3.8;
+                    g.searchTimer = 3.8 * this.getDiff().searchTimeMul;
                 } else if (g.state === 'alerting') {
                     g.alertProgress = Math.max(0, g.alertProgress - dt * 1.5);
                     if (g.alertProgress === 0) g.state = 'patrol';
@@ -1623,7 +1757,7 @@ class Game {
                 if (dist <= 380) {
                     g.state = 'search';
                     g.lastSeenPos = { x: gx, y: gy };
-                    g.searchTimer = 4.2;
+                    g.searchTimer = 4.2 * this.getDiff().searchTimeMul;
                 }
             }
         });
@@ -1768,7 +1902,7 @@ class Game {
     onVictory() {
         this.isVictory = true;
         sound.playVictory();
-        const bonus = this.stealthAlarmTriggered ? 150 : 300;
+        const bonus = Math.round((this.stealthAlarmTriggered ? 150 : 300) * this.getDiff().rewardMul);
         this.gems += bonus;
         this.saveUnlockedOperatives();
 
@@ -1791,6 +1925,51 @@ class Game {
         } else {
             this.elHealth.style.background = 'linear-gradient(90deg, var(--neon-green), #88ff00)';
         }
+    }
+
+    // --- THREAT LEVEL SETTINGS ---
+    openDifficulty() {
+        this.isPaused = true;
+        const container = document.getElementById('difficulty-list');
+        container.innerHTML = '';
+
+        Object.values(DIFFICULTIES).forEach(dl => {
+            const card = document.createElement('div');
+            card.className = `roster-card ${dl.key === this.difficulty ? 'selected' : ''}`;
+
+            const info = document.createElement('div');
+            info.className = 'roster-info';
+            info.innerHTML = `<h4>${dl.label} · x${dl.rewardMul.toFixed(1)} gems</h4><p>${dl.desc}</p>`;
+
+            const btn = document.createElement('button');
+            btn.className = 'roster-btn';
+
+            if (dl.key === this.difficulty) {
+                btn.textContent = 'ACTIVE';
+                btn.style.background = 'var(--neon-cyan)';
+                btn.style.color = '#000';
+            } else {
+                btn.textContent = 'APPLY';
+                btn.style.background = 'rgba(255,255,255,0.15)';
+                btn.style.color = '#fff';
+                btn.onclick = (e) => {
+                    e.stopPropagation();
+                    this.difficulty = dl.key;
+                    localStorage.setItem('rtk_assassin_difficulty', dl.key);
+                    this.elDifficulty.textContent = `⚙️ ${dl.label}`;
+                    this.modalDifficulty.classList.remove('active');
+                    this.isPaused = false;
+                    // Fresh deployment at the chosen threat level
+                    this.loadSector(this.sectorIndex);
+                };
+            }
+
+            card.appendChild(info);
+            card.appendChild(btn);
+            container.appendChild(card);
+        });
+
+        this.modalDifficulty.classList.add('active');
     }
 
     // --- OPERATIVE ROSTER STORE ---
