@@ -497,6 +497,7 @@
         <div class="modal-card">
             <h2 class="modal-title title-gold">THREAT LEVEL</h2>
             <p class="modal-subtitle">Higher threat = faster, sharper sentries &amp; extra roving patrols. Gem payouts scale. Switching restarts the current sector.</p>
+            <p id="difficulty-ramp" class="modal-subtitle" style="margin-top:-12px; color: var(--neon-yellow); font-size: 12px;"></p>
             <div id="difficulty-list" class="roster-list"></div>
             <button id="btn-close-difficulty" class="action-btn">Close</button>
         </div>
@@ -875,7 +876,23 @@ class Game {
     }
 
     getDiff() {
-        return DIFFICULTIES[this.difficulty] || DIFFICULTIES.normal;
+        const base = DIFFICULTIES[this.difficulty] || DIFFICULTIES.normal;
+        // Escalation ramp: sentries sharpen every 2 sectors, all difficulties.
+        const ramps = Math.floor(this.sectorIndex / 2);
+        if (ramps <= 0) return { ...base, rampStep: 0 };
+        const capped = (v, cap) => Math.min(cap, v);
+        return {
+            ...base,
+            rampStep: ramps,
+            rampPct: ramps * 5,
+            speedMul: capped(base.speedMul * (1 + ramps * 0.02), 1.5),
+            fovDistMul: capped(base.fovDistMul * (1 + ramps * 0.03), 1.6),
+            fovAngleMul: capped(base.fovAngleMul * (1 + ramps * 0.02), 1.5),
+            alertRate: capped(base.alertRate * (1 + ramps * 0.05), 2.2),
+            shootRate: Math.max(0.5, base.shootRate * (1 - ramps * 0.02)),
+            searchTimeMul: capped(base.searchTimeMul * (1 + ramps * 0.03), 2.0),
+            extraGuards: base.extraGuards + ramps
+        };
     }
 
     initDOM() {
@@ -1154,7 +1171,8 @@ class Game {
     spawnExtraGuards() {
         const d = this.getDiff();
         if (d.extraGuards <= 0) return;
-        const count = d.extraGuards + Math.floor(this.sectorIndex / 2);
+        // extraGuards already includes the sector escalation ramp
+        const count = d.extraGuards;
 
         for (let n = 0; n < count; n++) {
             const spot = this.findFreeSpot(340);
@@ -1930,6 +1948,10 @@ class Game {
     // --- THREAT LEVEL SETTINGS ---
     openDifficulty() {
         this.isPaused = true;
+        const ramps = Math.floor(this.sectorIndex / 2);
+        document.getElementById('difficulty-ramp').textContent = ramps > 0
+            ? `Sector ${this.sectorIndex + 1}: escalation ramp ACTIVE (+${ramps * 5}% sentry lethality, +${ramps} patrol${ramps === 1 ? '' : 's'})`
+            : 'Sector 1: baseline sentry force — the escalation ramp kicks in every 2 sectors.';
         const container = document.getElementById('difficulty-list');
         container.innerHTML = '';
 

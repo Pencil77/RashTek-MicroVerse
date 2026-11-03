@@ -56,7 +56,7 @@ DESCRIPTIONS = {
     "mario_game": "Classic platformer with authentic sprites & retro audio",
     "Temple_Run": "Endless runner over temple ruins",
     "vice_city_game": "Real 3D Miami open-world: driving, on-foot carjacking, police chases & synthwave",
-    "hunter_assassin": "Tactical 2.5D stealth operative missions with 4 threat levels (Cadet → Nightmare)",
+    "hunter_assassin": "Tactical 2.5D stealth missions — 4 threat levels + a sector escalation ramp",
     "save_the_dog": "Draw shields to protect the dog",
     "shooting_game": "Neon space arcade shooter with retro blaster synth audio",
     "snake_game": "Neon grid snake with retro synth chimes",
